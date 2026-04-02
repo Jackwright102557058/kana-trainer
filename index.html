@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Hiragana Trainer v1.4</title>
+<title>Hiragana Trainer v1.5</title>
 <style>
     :root {
         --bg-1: #0d0d0d;
@@ -328,6 +328,7 @@
         background: #141414;
         border-top: 1px solid rgba(255,255,255,0.04);
         width: 100%;
+        min-height: 360px;
     }
 
     .drawer-content.open {
@@ -612,6 +613,10 @@
         .modal-grid {
             grid-template-columns: 1fr;
         }
+
+        .drawer-content {
+            min-height: 320px;
+        }
     }
 </style>
 </head>
@@ -679,8 +684,13 @@
             </div>
 
             <div>
-                <div class="section-title">Rows</div>
+                <div class="section-title">Hiragana Rows</div>
                 <div id="rowOptions" class="rows-grid"></div>
+            </div>
+
+            <div>
+                <div class="section-title">Katakana Rows</div>
+                <div id="katakanaRowOptions" class="rows-grid"></div>
             </div>
         </div>
     </div>
@@ -690,7 +700,7 @@
             <div>
                 <div class="section-title">Options</div>
                 <div id="optionButtons" class="button-grid"></div>
-                <div class="version-tag">v1.4</div>
+                <div class="version-tag">v1.5</div>
             </div>
 
             <div>
@@ -738,26 +748,46 @@
 </div>
 
 <script>
-const rows = {
-    a:  {"あ":"a","い":"i","う":"u","え":"e","お":"o"},
-    ka: {"か":"ka","き":"ki","く":"ku","け":"ke","こ":"ko"},
-    sa: {"さ":"sa","し":"shi","す":"su","せ":"se","そ":"so"},
-    ta: {"た":"ta","ち":"chi","つ":"tsu","て":"te","と":"to"},
-    na: {"な":"na","に":"ni","ぬ":"nu","ね":"ne","の":"no"},
-    ha: {"は":"ha","ひ":"hi","ふ":"fu","へ":"he","ほ":"ho"},
-    ma: {"ま":"ma","み":"mi","む":"mu","め":"me","も":"mo"},
-    ya: {"や":"ya","ゆ":"yu","よ":"yo"},
-    ra: {"ら":"ra","り":"ri","る":"ru","れ":"re","ろ":"ro"},
-    wa: {"わ":"wa","を":"wo","ん":"n"}
+const hiraganaRows = {
+    h_a:  {"あ":"a","い":"i","う":"u","え":"e","お":"o"},
+    h_ka: {"か":"ka","き":"ki","く":"ku","け":"ke","こ":"ko"},
+    h_sa: {"さ":"sa","し":"shi","す":"su","せ":"se","そ":"so"},
+    h_ta: {"た":"ta","ち":"chi","つ":"tsu","て":"te","と":"to"},
+    h_na: {"な":"na","に":"ni","ぬ":"nu","ね":"ne","の":"no"},
+    h_ha: {"は":"ha","ひ":"hi","ふ":"fu","へ":"he","ほ":"ho"},
+    h_ma: {"ま":"ma","み":"mi","む":"mu","め":"me","も":"mo"},
+    h_ya: {"や":"ya","ゆ":"yu","よ":"yo"},
+    h_ra: {"ら":"ra","り":"ri","る":"ru","れ":"re","ろ":"ro"},
+    h_wa: {"わ":"wa","を":"wo","ん":"n"}
+};
+
+const katakanaRows = {
+    k_a:  {"ア":"a","イ":"i","ウ":"u","エ":"e","オ":"o"},
+    k_ka: {"カ":"ka","キ":"ki","ク":"ku","ケ":"ke","コ":"ko"},
+    k_sa: {"サ":"sa","シ":"shi","ス":"su","セ":"se","ソ":"so"},
+    k_ta: {"タ":"ta","チ":"chi","ツ":"tsu","テ":"te","ト":"to"},
+    k_na: {"ナ":"na","ニ":"ni","ヌ":"nu","ネ":"ne","ノ":"no"},
+    k_ha: {"ハ":"ha","ヒ":"hi","フ":"fu","ヘ":"he","ホ":"ho"},
+    k_ma: {"マ":"ma","ミ":"mi","ム":"mu","メ":"me","モ":"mo"},
+    k_ya: {"ヤ":"ya","ユ":"yu","ヨ":"yo"},
+    k_ra: {"ラ":"ra","リ":"ri","ル":"ru","レ":"re","ロ":"ro"},
+    k_wa: {"ワ":"wa","ヲ":"wo","ン":"n"}
 };
 
 const dakutenRows = {
-    ka: {"が":"ga","ぎ":"gi","ぐ":"gu","げ":"ge","ご":"go"},
-    sa: {"ざ":"za","じ":"ji","ず":"zu","ぜ":"ze","ぞ":"zo"},
-    ta: {"だ":"da","ぢ":"ji","づ":"zu","で":"de","ど":"do"},
-    ha: {
+    h_ka: {"が":"ga","ぎ":"gi","ぐ":"gu","げ":"ge","ご":"go"},
+    h_sa: {"ざ":"za","じ":"ji","ず":"zu","ぜ":"ze","ぞ":"zo"},
+    h_ta: {"だ":"da","ぢ":"ji","づ":"zu","で":"de","ど":"do"},
+    h_ha: {
         "ば":"ba","び":"bi","ぶ":"bu","べ":"be","ぼ":"bo",
         "ぱ":"pa","ぴ":"pi","ぷ":"pu","ぺ":"pe","ぽ":"po"
+    },
+    k_ka: {"ガ":"ga","ギ":"gi","グ":"gu","ゲ":"ge","ゴ":"go"},
+    k_sa: {"ザ":"za","ジ":"ji","ズ":"zu","ゼ":"ze","ゾ":"zo"},
+    k_ta: {"ダ":"da","ヂ":"ji","ヅ":"zu","デ":"de","ド":"do"},
+    k_ha: {
+        "バ":"ba","ビ":"bi","ブ":"bu","ベ":"be","ボ":"bo",
+        "パ":"pa","ピ":"pi","プ":"pu","ペ":"pe","ポ":"po"
     }
 };
 
@@ -769,7 +799,8 @@ const DEFAULT_SETTINGS = {
     srs: true,
     mobileMode: false,
     endless: false,
-    rows: Object.keys(rows),
+    hiraganaRows: Object.keys(hiraganaRows),
+    katakanaRows: [],
     statsVisible: true,
     activeBottomTab: null
 };
@@ -799,20 +830,13 @@ function loadJSON(key, fallback) {
 
 function formatDuration(ms) {
     if (!Number.isFinite(ms) || ms <= 0) return "0 ms";
-
-    if (ms < 1000) {
-        return `${Math.round(ms)} ms`;
-    }
+    if (ms < 1000) return `${Math.round(ms)} ms`;
 
     const seconds = ms / 1000;
-    if (seconds < 60) {
-        return `${seconds.toFixed(1)} seconds`;
-    }
+    if (seconds < 60) return `${seconds.toFixed(1)} seconds`;
 
     const minutes = seconds / 60;
-    if (minutes < 60) {
-        return `${minutes.toFixed(1)} minutes`;
-    }
+    if (minutes < 60) return `${minutes.toFixed(1)} minutes`;
 
     const hours = minutes / 60;
     return `${hours.toFixed(1)} hours`;
@@ -888,10 +912,16 @@ function saveAll() {
 
 function rebuildCharMap() {
     charMap = {};
-    const selectedRows = settings.rows.filter(r => rows[r]);
 
-    for (const row of selectedRows) {
-        Object.assign(charMap, rows[row]);
+    for (const row of settings.hiraganaRows.filter(r => hiraganaRows[r])) {
+        Object.assign(charMap, hiraganaRows[row]);
+        if (settings.dakuten && dakutenRows[row]) {
+            Object.assign(charMap, dakutenRows[row]);
+        }
+    }
+
+    for (const row of settings.katakanaRows.filter(r => katakanaRows[r])) {
+        Object.assign(charMap, katakanaRows[row]);
         if (settings.dakuten && dakutenRows[row]) {
             Object.assign(charMap, dakutenRows[row]);
         }
@@ -1005,20 +1035,21 @@ function buildOptionButtons() {
     }
 }
 
-function buildRowButtons() {
-    const container = document.getElementById("rowOptions");
+function buildRows(containerId, sourceRows, selectedRowsKey, displayPrefix) {
+    const container = document.getElementById(containerId);
     container.innerHTML = "";
 
-    for (const row of Object.keys(rows)) {
+    for (const row of Object.keys(sourceRows)) {
+        const label = row.replace(displayPrefix, "");
         const div = document.createElement("div");
-        div.className = "toggle-btn" + (settings.rows.includes(row) ? " active" : "");
-        div.textContent = row;
+        div.className = "toggle-btn" + (settings[selectedRowsKey].includes(row) ? " active" : "");
+        div.textContent = label;
         div.onclick = () => {
-            if (settings.rows.includes(row)) {
-                if (settings.rows.length === 1) return;
-                settings.rows = settings.rows.filter(r => r !== row);
+            const arr = settings[selectedRowsKey];
+            if (arr.includes(row)) {
+                settings[selectedRowsKey] = arr.filter(r => r !== row);
             } else {
-                settings.rows = [...settings.rows, row];
+                settings[selectedRowsKey] = [...arr, row];
             }
             onSettingsChanged();
         };
@@ -1090,7 +1121,8 @@ function onSettingsChanged() {
     ensureDataObjects();
     buildModifierButtons();
     buildOptionButtons();
-    buildRowButtons();
+    buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
+    buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
     applyPanelStates();
     renderHeatmap();
     updateTopStats();
@@ -1107,17 +1139,13 @@ function getEligiblePool() {
 
     if (settings.onlyMistakes) {
         const mistakePool = pool.filter(ch => getStats(ch).wrong > getStats(ch).correct);
-        if (mistakePool.length > 0) {
-            pool = mistakePool;
-        }
+        if (mistakePool.length > 0) pool = mistakePool;
     }
 
     if (settings.srs) {
         const now = Date.now();
         const duePool = pool.filter(ch => getSrs(ch).due <= now);
-        if (duePool.length > 0) {
-            pool = duePool;
-        }
+        if (duePool.length > 0) pool = duePool;
     }
 
     return pool;
@@ -1143,7 +1171,6 @@ function weightedPick(pool) {
             const overdueMs = Math.max(0, now - sr.due);
             weight += Math.min(12, Math.floor(overdueMs / 5000));
             weight += Math.max(0, 4 - sr.level);
-
             if (sr.lastWrong && now - sr.lastWrong < 30000) {
                 weight += 5;
             }
@@ -1300,17 +1327,13 @@ function handleCorrect() {
     sessionStats.bestStreak = Math.max(sessionStats.bestStreak, streak);
     updateSessionChar(currentChar, true, timeTaken);
 
-    if (settings.endless) {
-        endlessRunTotal += 1;
-    }
+    if (settings.endless) endlessRunTotal += 1;
 
     updateTopStats();
     renderHeatmap();
     saveAll();
 
-    flashResult(true, () => {
-        nextCharacter();
-    });
+    flashResult(true, () => nextCharacter());
 }
 
 function handleWrong() {
@@ -1339,9 +1362,7 @@ function handleWrong() {
 
     if (settings.endless) {
         hintEl.textContent = `Answer: ${correctAnswer}`;
-        flashResult(false, () => {
-            nextCharacter();
-        });
+        flashResult(false, () => nextCharacter());
     } else {
         gameOverAnswerEl.textContent = `Correct answer: ${correctAnswer}`;
         flashResult(false, () => {
@@ -1360,11 +1381,8 @@ inputEl.addEventListener("input", () => {
     const valid = validRomajiSet();
     if (!valid.has(value)) return;
 
-    if (value === charMap[currentChar]) {
-        handleCorrect();
-    } else {
-        handleWrong();
-    }
+    if (value === charMap[currentChar]) handleCorrect();
+    else handleWrong();
 });
 
 retryBtn.addEventListener("click", () => {
@@ -1504,7 +1522,7 @@ sessionModalBackdrop.addEventListener("click", (e) => {
 
 function makeExportPayload() {
     return {
-        version: "1.4",
+        version: "1.5",
         exportedAt: new Date().toISOString(),
         settings,
         stats,
@@ -1595,7 +1613,8 @@ function applyImportedData(payload) {
     ensureDataObjects();
     buildModifierButtons();
     buildOptionButtons();
-    buildRowButtons();
+    buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
+    buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
     applyPanelStates();
     updateTopStats();
     renderHeatmap();
@@ -1606,7 +1625,6 @@ function applyImportedData(payload) {
 confirmImportBtn.addEventListener("click", () => {
     try {
         const raw = importTextarea.value.trim();
-
         if (!raw) {
             alert("Paste save data first, or choose a file.");
             return;
@@ -1652,13 +1670,8 @@ resetBtn.addEventListener("click", () => {
     showIdleState();
 });
 
-modifiersTabEl.addEventListener("click", () => {
-    setBottomTab("modifiers");
-});
-
-optionsTabEl.addEventListener("click", () => {
-    setBottomTab("options");
-});
+modifiersTabEl.addEventListener("click", () => setBottomTab("modifiers"));
+optionsTabEl.addEventListener("click", () => setBottomTab("options"));
 
 statsHeaderEl.addEventListener("click", () => {
     settings.statsVisible = !settings.statsVisible;
@@ -1669,14 +1682,14 @@ statsHeaderEl.addEventListener("click", () => {
 function init() {
     rebuildCharMap();
 
-    if (!Array.isArray(settings.rows) || settings.rows.length === 0) {
-        settings.rows = Object.keys(rows);
-    }
+    if (!Array.isArray(settings.hiraganaRows)) settings.hiraganaRows = Object.keys(hiraganaRows);
+    if (!Array.isArray(settings.katakanaRows)) settings.katakanaRows = [];
 
     ensureDataObjects();
     buildModifierButtons();
     buildOptionButtons();
-    buildRowButtons();
+    buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
+    buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
     applyPanelStates();
     updateTopStats();
     renderHeatmap();
