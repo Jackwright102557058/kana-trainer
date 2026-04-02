@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Hiragana Trainer v1.5</title>
+<title>Hiragana Trainer v1.6</title>
 <style>
     :root {
         --bg-1: #0d0d0d;
@@ -49,7 +49,7 @@
         border: 1px solid var(--border);
         border-radius: 20px;
         box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-        padding: 28px 28px 190px;
+        padding: 28px 28px 220px;
         text-align: center;
         position: relative;
     }
@@ -122,7 +122,7 @@
         margin-top: 8px;
     }
 
-    input[type="text"], textarea {
+    input[type="text"], input[type="number"], textarea {
         width: min(260px, 90%);
         background: #232323;
         color: var(--text);
@@ -134,14 +134,45 @@
         outline: none;
     }
 
-    input[type="text"]:focus, textarea:focus {
+    input[type="number"] {
+        font-size: 18px;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    textarea:focus {
         border-color: #6a6a6a;
         box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
     }
 
-    input[type="text"]:disabled {
+    input[type="text"]:disabled,
+    input[type="number"]:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+    }
+
+    .trial-config {
+        display: none;
+        margin-top: 14px;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .trial-box {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .trial-box label {
+        font-size: 13px;
+        color: var(--muted);
+    }
+
+    .trial-box input {
+        width: 120px;
     }
 
     .game-over {
@@ -216,16 +247,25 @@
 
     .side-panel {
         position: fixed;
-        right: 12px;
         top: 12px;
         width: 248px;
-        max-height: calc(100vh - 24px);
+        max-height: calc(100vh - 110px);
         background: var(--panel);
         border: 1px solid var(--border);
         border-radius: 14px;
         overflow: hidden;
         box-shadow: 0 12px 32px rgba(0,0,0,0.28);
-        z-index: 20;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .left-panel {
+        left: 12px;
+    }
+
+    .right-panel {
+        right: 12px;
     }
 
     .panel-header {
@@ -238,11 +278,14 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-shrink: 0;
     }
 
     .panel-content {
         padding: 12px;
         display: block;
+        overflow-y: auto;
+        min-height: 0;
     }
 
     .panel-content.hidden {
@@ -271,6 +314,33 @@
         outline: 2px solid rgba(255,255,255,0.15);
     }
 
+    .score-block {
+        background: #222;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .score-block h3 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .score-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-size: 14px;
+    }
+
+    .score-row:last-child {
+        border-bottom: none;
+    }
+
     .popup {
         position: fixed;
         display: none;
@@ -295,7 +365,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        z-index: 15;
+        z-index: 20;
         background: var(--panel-2);
         border-top: 1px solid var(--border);
     }
@@ -329,6 +399,8 @@
         border-top: 1px solid rgba(255,255,255,0.04);
         width: 100%;
         min-height: 360px;
+        max-height: 50vh;
+        overflow-y: auto;
     }
 
     .drawer-content.open {
@@ -363,6 +435,11 @@
         background: var(--green);
         border-color: #46a14c;
         color: white;
+    }
+
+    .toggle-btn.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
     }
 
     .rows-grid {
@@ -551,7 +628,8 @@
         grid-template-columns: repeat(2, 1fr);
     }
 
-    body.mobile-mode .side-panel {
+    body.mobile-mode .left-panel,
+    body.mobile-mode .right-panel {
         position: static;
         width: 100%;
         max-height: none;
@@ -564,16 +642,28 @@
         transform: translate(-50%, -50%);
     }
 
+    @media (max-width: 1180px) {
+        .left-panel, .right-panel {
+            width: 220px;
+        }
+    }
+
     @media (max-width: 920px) {
         body {
             align-items: flex-start;
             padding-top: 18px;
         }
 
-        .side-panel {
+        .left-panel {
+            left: 10px;
+        }
+
+        .right-panel {
             right: 10px;
-            top: 10px;
-            width: 220px;
+        }
+
+        .left-panel, .right-panel {
+            width: 200px;
         }
 
         .main {
@@ -596,7 +686,8 @@
             margin: 0 auto 12px;
         }
 
-        .side-panel {
+        .left-panel,
+        .right-panel {
             position: static;
             width: 100%;
             max-height: none;
@@ -616,6 +707,7 @@
 
         .drawer-content {
             min-height: 320px;
+            max-height: 55vh;
         }
     }
 </style>
@@ -631,6 +723,7 @@
             <div class="score-pill">High Score: <span id="highScore">0</span></div>
             <div class="score-pill" id="endlessTotalPill" style="display:none;">Total: <span id="endlessTotal">0</span></div>
             <div class="score-pill" id="endlessWrongPill" style="display:none;">Incorrect: <span id="endlessWrong">0</span></div>
+            <div class="score-pill" id="trialTimerPill" style="display:none;">Time Left: <span id="trialTimer">0</span></div>
         </div>
 
         <div class="hiragana-wrap">
@@ -640,6 +733,17 @@
 
         <div class="input-wrap">
             <input id="input" type="text" placeholder="Type romaji..." autocomplete="off" spellcheck="false" disabled />
+        </div>
+
+        <div class="trial-config" id="trialConfig">
+            <div class="trial-box">
+                <label for="trialTime">Time</label>
+                <input id="trialTime" type="number" min="0.1" step="0.1" value="1" />
+            </div>
+            <div class="trial-box">
+                <label for="trialTarget">Target</label>
+                <input id="trialTarget" type="number" min="1" step="1" value="10" />
+            </div>
         </div>
 
         <div class="start-wrap" id="startWrap">
@@ -657,7 +761,27 @@
         </div>
     </div>
 
-    <div class="side-panel">
+    <div class="side-panel left-panel">
+        <div class="panel-header" id="scoresHeader">
+            <span>Scores</span>
+            <span id="scoresChevron">▼</span>
+        </div>
+        <div class="panel-content" id="scoresContent">
+            <div class="score-block">
+                <h3>Endless Best</h3>
+                <div class="score-row"><span>Total</span><span id="bestEndlessTotal">0</span></div>
+                <div class="score-row"><span>Correct</span><span id="bestEndlessCorrect">0</span></div>
+                <div class="score-row"><span>Wrong</span><span id="bestEndlessWrong">0</span></div>
+            </div>
+
+            <div class="score-block">
+                <h3>Time Trial Top 3</h3>
+                <div id="timeTrialTop3"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="side-panel right-panel">
         <div class="panel-header" id="statsHeader">
             <span>Stats</span>
             <span id="statsChevron">▼</span>
@@ -700,7 +824,7 @@
             <div>
                 <div class="section-title">Options</div>
                 <div id="optionButtons" class="button-grid"></div>
-                <div class="version-tag">v1.5</div>
+                <div class="version-tag">v1.6</div>
             </div>
 
             <div>
@@ -717,7 +841,7 @@
             <div class="bottom-actions">
                 <button class="btn btn-danger" id="resetBtn" type="button">Reset All Data</button>
             </div>
-            <div class="muted-note">Resets stats, timing, SRS progress, session history, and high score.</div>
+            <div class="muted-note">Resets stats, timing, SRS progress, session history, and high score tables.</div>
         </div>
     </div>
 </div>
@@ -799,9 +923,11 @@ const DEFAULT_SETTINGS = {
     srs: true,
     mobileMode: false,
     endless: false,
+    timeTrial: false,
     hiraganaRows: Object.keys(hiraganaRows),
     katakanaRows: [],
     statsVisible: true,
+    scoresVisible: true,
     activeBottomTab: null
 };
 
@@ -842,10 +968,22 @@ function formatDuration(ms) {
     return `${hours.toFixed(1)} hours`;
 }
 
+function formatCountdown(ms) {
+    if (ms <= 0) return "0.0s";
+    const seconds = ms / 1000;
+    if (seconds < 60) return `${seconds.toFixed(1)}s`;
+    const minutes = seconds / 60;
+    return `${minutes.toFixed(1)}m`;
+}
+
 let settings = { ...DEFAULT_SETTINGS, ...loadJSON("settings", DEFAULT_SETTINGS) };
 let stats = loadJSON("charStats", {});
 let times = loadJSON("charTimes", {});
 let srs = loadJSON("charSrs", {});
+let scoreHistory = loadJSON("scoreHistory", {
+    endlessBest: { total: 0, correct: 0, wrong: 0 },
+    timeTrialTop3: []
+});
 let highScore = Number(localStorage.getItem("highScore") || "0");
 
 let charMap = {};
@@ -861,9 +999,18 @@ let sessionStats = createEmptySessionStats();
 let endlessRunTotal = 0;
 let endlessRunWrong = 0;
 
+let trialTimerId = null;
+let trialEndTime = null;
+let trialTarget = 0;
+
 const hiraganaEl = document.getElementById("hiragana");
 const hintEl = document.getElementById("hint");
 const inputEl = document.getElementById("input");
+const trialConfigEl = document.getElementById("trialConfig");
+const trialTimeEl = document.getElementById("trialTime");
+const trialTargetEl = document.getElementById("trialTarget");
+const trialTimerPill = document.getElementById("trialTimerPill");
+const trialTimerEl = document.getElementById("trialTimer");
 const gameOverEl = document.getElementById("gameOver");
 const gameOverAnswerEl = document.getElementById("gameOverAnswer");
 const streakEl = document.getElementById("streak");
@@ -881,6 +1028,9 @@ const optionsContentEl = document.getElementById("optionsContent");
 const statsHeaderEl = document.getElementById("statsHeader");
 const statsContentEl = document.getElementById("statsContent");
 const statsChevronEl = document.getElementById("statsChevron");
+const scoresHeaderEl = document.getElementById("scoresHeader");
+const scoresContentEl = document.getElementById("scoresContent");
+const scoresChevronEl = document.getElementById("scoresChevron");
 const retryBtn = document.getElementById("retryBtn");
 const resetBtn = document.getElementById("resetBtn");
 const startBtn = document.getElementById("startBtn");
@@ -901,12 +1051,17 @@ const sessionStatsGrid = document.getElementById("sessionStatsGrid");
 const sessionHardList = document.getElementById("sessionHardList");
 const sessionEasyList = document.getElementById("sessionEasyList");
 const closeSessionModalBtn = document.getElementById("closeSessionModalBtn");
+const bestEndlessTotalEl = document.getElementById("bestEndlessTotal");
+const bestEndlessCorrectEl = document.getElementById("bestEndlessCorrect");
+const bestEndlessWrongEl = document.getElementById("bestEndlessWrong");
+const timeTrialTop3El = document.getElementById("timeTrialTop3");
 
 function saveAll() {
     localStorage.setItem("settings", JSON.stringify(settings));
     localStorage.setItem("charStats", JSON.stringify(stats));
     localStorage.setItem("charTimes", JSON.stringify(times));
     localStorage.setItem("charSrs", JSON.stringify(srs));
+    localStorage.setItem("scoreHistory", JSON.stringify(scoreHistory));
     localStorage.setItem("highScore", String(highScore));
 }
 
@@ -915,16 +1070,12 @@ function rebuildCharMap() {
 
     for (const row of settings.hiraganaRows.filter(r => hiraganaRows[r])) {
         Object.assign(charMap, hiraganaRows[row]);
-        if (settings.dakuten && dakutenRows[row]) {
-            Object.assign(charMap, dakutenRows[row]);
-        }
+        if (settings.dakuten && dakutenRows[row]) Object.assign(charMap, dakutenRows[row]);
     }
 
     for (const row of settings.katakanaRows.filter(r => katakanaRows[r])) {
         Object.assign(charMap, katakanaRows[row]);
-        if (settings.dakuten && dakutenRows[row]) {
-            Object.assign(charMap, dakutenRows[row]);
-        }
+        if (settings.dakuten && dakutenRows[row]) Object.assign(charMap, dakutenRows[row]);
     }
 
     activeChars = Object.keys(charMap);
@@ -965,6 +1116,32 @@ function updateTopStats() {
     const showEndless = settings.endless && sessionStarted;
     endlessTotalPill.style.display = showEndless ? "inline-block" : "none";
     endlessWrongPill.style.display = showEndless ? "inline-block" : "none";
+
+    const showTrial = settings.timeTrial && sessionStarted;
+    trialTimerPill.style.display = showTrial ? "inline-block" : "none";
+}
+
+function renderScoreHistory() {
+    bestEndlessTotalEl.textContent = scoreHistory.endlessBest.total || 0;
+    bestEndlessCorrectEl.textContent = scoreHistory.endlessBest.correct || 0;
+    bestEndlessWrongEl.textContent = scoreHistory.endlessBest.wrong || 0;
+
+    const list = scoreHistory.timeTrialTop3 || [];
+    if (!list.length) {
+        timeTrialTop3El.innerHTML = `<div class="score-row"><span>No scores yet</span><span>—</span></div>`;
+        return;
+    }
+
+    timeTrialTop3El.innerHTML = list.map((entry, index) => `
+        <div class="score-row">
+            <span>#${index + 1}</span>
+            <span>${entry.time}m / T${entry.target} / S${entry.score}</span>
+        </div>
+    `).join("");
+}
+
+function updateTrialConfigVisibility() {
+    trialConfigEl.style.display = settings.timeTrial ? "flex" : "none";
 }
 
 function applyPanelStates() {
@@ -980,6 +1157,9 @@ function applyPanelStates() {
     statsContentEl.classList.toggle("hidden", !settings.statsVisible);
     statsChevronEl.textContent = settings.statsVisible ? "▼" : "▲";
 
+    scoresContentEl.classList.toggle("hidden", !settings.scoresVisible);
+    scoresChevronEl.textContent = settings.scoresVisible ? "▼" : "▲";
+
     document.body.classList.toggle("mobile-mode", !!settings.mobileMode);
 }
 
@@ -989,28 +1169,51 @@ function setBottomTab(tabName) {
     saveAll();
 }
 
+function isModeLocked() {
+    return sessionStarted;
+}
+
+function makeToggleButton(label, active, onClick, disabled = false) {
+    const div = document.createElement("div");
+    div.className = "toggle-btn" + (active ? " active" : "") + (disabled ? " disabled" : "");
+    div.textContent = label;
+    div.onclick = () => {
+        if (disabled) return;
+        onClick();
+    };
+    return div;
+}
+
 function buildModifierButtons() {
     const modes = [
         ["hint", "Hint Mode"],
         ["endless", "Endless Mode"],
         ["focusWeak", "Focus Weak"],
         ["onlyMistakes", "Only Mistakes"],
-        ["dakuten", "Dakuten"]
+        ["dakuten", "Dakuten"],
+        ["timeTrial", "Time Trial Mode"]
     ];
 
     const container = document.getElementById("modifierOptions");
     container.innerHTML = "";
+    const lockedModes = isModeLocked();
 
     for (const [key, label] of modes) {
-        const div = document.createElement("div");
-        div.className = "toggle-btn" + (settings[key] ? " active" : "");
-        div.textContent = label;
-        div.onclick = () => {
-            settings[key] = !settings[key];
+        const btn = makeToggleButton(label, settings[key], () => {
+            if (key === "timeTrial") {
+                settings.timeTrial = !settings.timeTrial;
+                if (settings.timeTrial) settings.endless = false;
+            } else if (key === "endless") {
+                settings.endless = !settings.endless;
+                if (settings.endless) settings.timeTrial = false;
+            } else {
+                settings[key] = !settings[key];
+            }
+            updateTrialConfigVisibility();
             updateTopStats();
             onSettingsChanged();
-        };
-        container.appendChild(div);
+        }, lockedModes);
+        container.appendChild(btn);
     }
 }
 
@@ -1022,29 +1225,25 @@ function buildOptionButtons() {
 
     const container = document.getElementById("optionButtons");
     container.innerHTML = "";
+    const lockedModes = isModeLocked();
 
     for (const [key, label] of modes) {
-        const div = document.createElement("div");
-        div.className = "toggle-btn" + (settings[key] ? " active" : "");
-        div.textContent = label;
-        div.onclick = () => {
+        const btn = makeToggleButton(label, settings[key], () => {
             settings[key] = !settings[key];
             onSettingsChanged();
-        };
-        container.appendChild(div);
+        }, lockedModes);
+        container.appendChild(btn);
     }
 }
 
 function buildRows(containerId, sourceRows, selectedRowsKey, displayPrefix) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
+    const lockedModes = isModeLocked();
 
     for (const row of Object.keys(sourceRows)) {
         const label = row.replace(displayPrefix, "");
-        const div = document.createElement("div");
-        div.className = "toggle-btn" + (settings[selectedRowsKey].includes(row) ? " active" : "");
-        div.textContent = label;
-        div.onclick = () => {
+        const btn = makeToggleButton(label, settings[selectedRowsKey].includes(row), () => {
             const arr = settings[selectedRowsKey];
             if (arr.includes(row)) {
                 settings[selectedRowsKey] = arr.filter(r => r !== row);
@@ -1052,15 +1251,14 @@ function buildRows(containerId, sourceRows, selectedRowsKey, displayPrefix) {
                 settings[selectedRowsKey] = [...arr, row];
             }
             onSettingsChanged();
-        };
-        container.appendChild(div);
+        }, lockedModes);
+        container.appendChild(btn);
     }
 }
 
 function heatmapColor(char) {
     const { correct, wrong } = getStats(char);
     const total = correct + wrong;
-
     if (total === 0) return "var(--neutral)";
     if (wrong > correct) return "var(--red)";
     if (correct > wrong) return "var(--green)";
@@ -1078,7 +1276,6 @@ function renderHeatmap() {
 
         cell.onclick = (e) => {
             e.stopPropagation();
-
             const st = getStats(ch);
             const tm = getAverageTime(ch);
             const sr = getSrs(ch);
@@ -1124,8 +1321,10 @@ function onSettingsChanged() {
     buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
     buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
     applyPanelStates();
+    updateTrialConfigVisibility();
     renderHeatmap();
     updateTopStats();
+    renderScoreHistory();
     saveAll();
 
     if (sessionStarted && !locked) {
@@ -1171,16 +1370,11 @@ function weightedPick(pool) {
             const overdueMs = Math.max(0, now - sr.due);
             weight += Math.min(12, Math.floor(overdueMs / 5000));
             weight += Math.max(0, 4 - sr.level);
-            if (sr.lastWrong && now - sr.lastWrong < 30000) {
-                weight += 5;
-            }
+            if (sr.lastWrong && now - sr.lastWrong < 30000) weight += 5;
         }
 
         weight = Math.max(1, weight);
-
-        for (let i = 0; i < weight; i++) {
-            weighted.push(ch);
-        }
+        for (let i = 0; i < weight; i++) weighted.push(ch);
     }
 
     return weighted[Math.floor(Math.random() * weighted.length)];
@@ -1207,6 +1401,7 @@ function scheduleHint() {
 
 function showIdleState() {
     clearHint();
+    stopTrialTimer();
     currentChar = "";
     hiraganaEl.textContent = "—";
     hiraganaEl.classList.remove("flash-correct", "flash-wrong");
@@ -1216,6 +1411,7 @@ function showIdleState() {
     sessionActionsEl.style.display = "none";
     gameOverEl.style.display = "none";
     gameOverAnswerEl.textContent = "";
+    trialTimerPill.style.display = "none";
 }
 
 function nextCharacter() {
@@ -1242,6 +1438,32 @@ function nextCharacter() {
     inputEl.focus();
 }
 
+function startTrialTimer(durationMinutes) {
+    stopTrialTimer();
+    trialEndTime = Date.now() + durationMinutes * 60 * 1000;
+    trialTimerPill.style.display = "inline-block";
+
+    const tick = () => {
+        const remaining = Math.max(0, trialEndTime - Date.now());
+        trialTimerEl.textContent = formatCountdown(remaining);
+
+        if (remaining <= 0) {
+            stopTrialTimer();
+            endSession(true);
+        }
+    };
+
+    tick();
+    trialTimerId = setInterval(tick, 100);
+}
+
+function stopTrialTimer() {
+    if (trialTimerId) {
+        clearInterval(trialTimerId);
+        trialTimerId = null;
+    }
+}
+
 function startSession() {
     sessionStarted = true;
     sessionStats = createEmptySessionStats();
@@ -1257,7 +1479,18 @@ function startSession() {
     startWrap.style.display = "none";
     sessionActionsEl.style.display = "flex";
     inputEl.disabled = false;
+
+    if (settings.timeTrial) {
+        const timeMinutes = Math.max(0.1, Number(trialTimeEl.value) || 1);
+        trialTarget = Math.max(1, Number(trialTargetEl.value) || 10);
+        startTrialTimer(timeMinutes);
+    } else {
+        trialTarget = 0;
+        trialTimerPill.style.display = "none";
+    }
+
     nextCharacter();
+    onSettingsChanged();
 }
 
 function updateAverageTime(char, timeTaken) {
@@ -1270,10 +1503,8 @@ function updateAverageTime(char, timeTaken) {
 function updateSrsCorrect(char) {
     const entry = srs[char] || { level: 0, due: 0, lastSeen: 0, lastWrong: 0 };
     entry.level = Math.min(entry.level + 1, 8);
-
     const intervals = [3000, 8000, 15000, 30000, 60000, 120000, 300000, 600000, 1200000];
     const delay = intervals[entry.level] ?? 1200000;
-
     entry.due = Date.now() + delay;
     entry.lastSeen = Date.now();
     srs[char] = entry;
@@ -1292,7 +1523,6 @@ function updateSessionChar(char, correct, timeTaken) {
     if (!sessionStats.perChar[char]) {
         sessionStats.perChar[char] = { correct: 0, wrong: 0, times: [] };
     }
-
     const entry = sessionStats.perChar[char];
     if (correct) entry.correct += 1;
     else entry.wrong += 1;
@@ -1311,6 +1541,10 @@ function flashResult(correct, onDone) {
     }, correct ? 260 : 420);
 }
 
+function currentFlowModeIsContinuous() {
+    return settings.endless || settings.timeTrial;
+}
+
 function handleCorrect() {
     const timeTaken = Date.now() - charStartTime;
 
@@ -1327,7 +1561,9 @@ function handleCorrect() {
     sessionStats.bestStreak = Math.max(sessionStats.bestStreak, streak);
     updateSessionChar(currentChar, true, timeTaken);
 
-    if (settings.endless) endlessRunTotal += 1;
+    if (currentFlowModeIsContinuous()) {
+        endlessRunTotal += 1;
+    }
 
     updateTopStats();
     renderHeatmap();
@@ -1350,7 +1586,7 @@ function handleWrong() {
     sessionStats.bestStreak = Math.max(sessionStats.bestStreak, streak);
     updateSessionChar(currentChar, false, timeTaken);
 
-    if (settings.endless) {
+    if (currentFlowModeIsContinuous()) {
         endlessRunTotal += 1;
         endlessRunWrong += 1;
     }
@@ -1360,7 +1596,7 @@ function handleWrong() {
     renderHeatmap();
     saveAll();
 
-    if (settings.endless) {
+    if (currentFlowModeIsContinuous()) {
         hintEl.textContent = `Answer: ${correctAnswer}`;
         flashResult(false, () => nextCharacter());
     } else {
@@ -1402,6 +1638,34 @@ startBtn.addEventListener("click", startSession);
 function average(arr) {
     if (!arr.length) return 0;
     return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function updateBestScores() {
+    if (settings.endless) {
+        const correct = Math.max(0, endlessRunTotal - endlessRunWrong);
+        if (correct > (scoreHistory.endlessBest.correct || 0)) {
+            scoreHistory.endlessBest = {
+                total: endlessRunTotal,
+                correct,
+                wrong: endlessRunWrong
+            };
+        }
+    }
+
+    if (settings.timeTrial) {
+        const entry = {
+            time: Number(trialTimeEl.value) || 1,
+            target: trialTarget || Math.max(1, Number(trialTargetEl.value) || 10),
+            score: sessionStats.correct
+        };
+
+        scoreHistory.timeTrialTop3.push(entry);
+        scoreHistory.timeTrialTop3.sort((a, b) => b.score - a.score);
+        scoreHistory.timeTrialTop3 = scoreHistory.timeTrialTop3.slice(0, 3);
+    }
+
+    renderScoreHistory();
+    saveAll();
 }
 
 function getSessionDifficultyLists() {
@@ -1454,7 +1718,7 @@ function renderSessionList(container, title, items) {
         `).join("");
 }
 
-function showSessionModal() {
+function showSessionModal(autoEnded = false) {
     sessionStats.endTime = Date.now();
 
     const total = sessionStats.answered;
@@ -1476,12 +1740,20 @@ function showSessionModal() {
         ["Session Time", formatDuration(durationMs)]
     ];
 
+    if (settings.timeTrial) {
+        cards.push(["Target", trialTarget]);
+        cards.push(["Final Score", sessionStats.correct]);
+    }
+
     sessionStatsGrid.innerHTML = cards.map(([label, value]) => `
         <div class="stat-card">
             <div class="label">${label}</div>
             <div class="value">${value}</div>
         </div>
     `).join("");
+
+    const titleEl = sessionModalBackdrop.querySelector("h2");
+    titleEl.textContent = autoEnded ? "Time Trial Complete" : "Session Stats";
 
     const { hardest, easiest } = getSessionDifficultyLists();
     renderSessionList(sessionHardList, "Hardest This Session", hardest);
@@ -1490,11 +1762,13 @@ function showSessionModal() {
     sessionModalBackdrop.classList.add("open");
 }
 
-function endSession() {
+function endSession(autoEnded = false) {
     if (!sessionStarted) return;
 
     sessionStarted = false;
     sessionStats.active = false;
+    stopTrialTimer();
+    updateBestScores();
 
     inputEl.disabled = true;
     gameOverEl.style.display = "none";
@@ -1504,11 +1778,12 @@ function endSession() {
     hiraganaEl.textContent = "—";
     currentChar = "";
 
-    showSessionModal();
+    showSessionModal(autoEnded);
     updateTopStats();
+    onSettingsChanged();
 }
 
-endSessionBtn.addEventListener("click", endSession);
+endSessionBtn.addEventListener("click", () => endSession(false));
 
 closeSessionModalBtn.addEventListener("click", () => {
     sessionModalBackdrop.classList.remove("open");
@@ -1522,12 +1797,13 @@ sessionModalBackdrop.addEventListener("click", (e) => {
 
 function makeExportPayload() {
     return {
-        version: "1.5",
+        version: "1.6",
         exportedAt: new Date().toISOString(),
         settings,
         stats,
         times,
         srs,
+        scoreHistory,
         highScore
     };
 }
@@ -1600,6 +1876,10 @@ function applyImportedData(payload) {
     stats = payload.stats || {};
     times = payload.times || {};
     srs = payload.srs || {};
+    scoreHistory = payload.scoreHistory || {
+        endlessBest: { total: 0, correct: 0, wrong: 0 },
+        timeTrialTop3: []
+    };
     highScore = Number(payload.highScore || 0);
     settings = { ...DEFAULT_SETTINGS, ...(payload.settings || settings) };
 
@@ -1608,6 +1888,7 @@ function applyImportedData(payload) {
     sessionStats = createEmptySessionStats();
     endlessRunTotal = 0;
     endlessRunWrong = 0;
+    stopTrialTimer();
 
     rebuildCharMap();
     ensureDataObjects();
@@ -1616,8 +1897,10 @@ function applyImportedData(payload) {
     buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
     buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
     applyPanelStates();
+    updateTrialConfigVisibility();
     updateTopStats();
     renderHeatmap();
+    renderScoreHistory();
     showIdleState();
     saveAll();
 }
@@ -1640,34 +1923,42 @@ confirmImportBtn.addEventListener("click", () => {
 });
 
 resetBtn.addEventListener("click", () => {
-    const confirmed = confirm("Reset all stats, timing, SRS progress, session history, and high score?");
+    const confirmed = confirm("Reset all stats, timing, SRS progress, session history, and high score tables?");
     if (!confirmed) return;
 
     stats = {};
     times = {};
     srs = {};
+    scoreHistory = {
+        endlessBest: { total: 0, correct: 0, wrong: 0 },
+        timeTrialTop3: []
+    };
     highScore = 0;
     streak = 0;
     sessionStarted = false;
     sessionStats = createEmptySessionStats();
     endlessRunTotal = 0;
     endlessRunWrong = 0;
+    stopTrialTimer();
 
     localStorage.removeItem("charStats");
     localStorage.removeItem("charTimes");
     localStorage.removeItem("charSrs");
+    localStorage.removeItem("scoreHistory");
     localStorage.removeItem("highScore");
 
     rebuildCharMap();
     ensureDataObjects();
     updateTopStats();
     renderHeatmap();
+    renderScoreHistory();
     saveAll();
 
     sessionModalBackdrop.classList.remove("open");
     importModalBackdrop.classList.remove("open");
     gameOverEl.style.display = "none";
     showIdleState();
+    onSettingsChanged();
 });
 
 modifiersTabEl.addEventListener("click", () => setBottomTab("modifiers"));
@@ -1678,6 +1969,43 @@ statsHeaderEl.addEventListener("click", () => {
     applyPanelStates();
     saveAll();
 });
+
+scoresHeaderEl.addEventListener("click", () => {
+    settings.scoresVisible = !settings.scoresVisible;
+    applyPanelStates();
+    saveAll();
+});
+
+function updateTrialConfigVisibility() {
+    trialConfigEl.style.display = settings.timeTrial ? "flex" : "none";
+}
+
+function stopTrialTimer() {
+    if (trialTimerId) {
+        clearInterval(trialTimerId);
+        trialTimerId = null;
+    }
+    trialTimerPill.style.display = "none";
+}
+
+function startTrialTimer(durationMinutes) {
+    stopTrialTimer();
+    trialEndTime = Date.now() + durationMinutes * 60 * 1000;
+    trialTimerPill.style.display = "inline-block";
+
+    const tick = () => {
+        const remaining = Math.max(0, trialEndTime - Date.now());
+        trialTimerEl.textContent = formatCountdown(remaining);
+
+        if (remaining <= 0) {
+            stopTrialTimer();
+            endSession(true);
+        }
+    };
+
+    tick();
+    trialTimerId = setInterval(tick, 100);
+}
 
 function init() {
     rebuildCharMap();
@@ -1691,8 +2019,10 @@ function init() {
     buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
     buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
     applyPanelStates();
+    updateTrialConfigVisibility();
     updateTopStats();
     renderHeatmap();
+    renderScoreHistory();
     showIdleState();
     saveAll();
 }
