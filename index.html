@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Kana Trainer v2.0</title>
+<title>Kana Trainer v1.9</title>
 <style>
     :root {
         --bg-1: #0d0d0d;
@@ -114,6 +114,23 @@
         color: var(--muted);
         font-size: 16px;
         letter-spacing: 1px;
+    }
+
+    .combo-tier-notice {
+        min-height: 22px;
+        margin-top: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #ffd76a;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 0.22s ease, transform 0.22s ease;
+        pointer-events: none;
+    }
+
+    .combo-tier-notice.show {
+        opacity: 1;
+        transform: translateY(0);
     }
 
     .input-wrap { margin-top: 8px; }
@@ -667,6 +684,7 @@
         <div class="hiragana-wrap">
             <div id="hiragana" class="hiragana">—</div>
             <div id="hint" class="hint"></div>
+            <div id="comboTierNotice" class="combo-tier-notice"></div>
         </div>
 
         <div class="input-wrap">
@@ -778,7 +796,7 @@
             <div>
                 <div class="section-title">Options</div>
                 <div id="optionButtons" class="button-grid"></div>
-                <div class="version-tag">v2.0</div>
+                <div class="version-tag">v2.1</div>
             </div>
 
             <div>
@@ -970,9 +988,12 @@ let endlessRunWrong = 0;
 let trialTimerId = null;
 let trialEndTime = null;
 let trialTarget = 0;
+let comboTierNoticeTimeout = null;
+let lastComboLength = 2;
 
 const hiraganaEl = document.getElementById("hiragana");
 const hintEl = document.getElementById("hint");
+const comboTierNoticeEl = document.getElementById("comboTierNotice");
 const inputEl = document.getElementById("input");
 const trialConfigEl = document.getElementById("trialConfig");
 const comboConfigEl = document.getElementById("comboConfig");
@@ -1069,19 +1090,7 @@ function getStats(char) { return stats[char] ?? { correct: 0, wrong: 0 }; }
 function getSrs(char) { return srs[char] ?? { level: 0, due: 0, lastSeen: 0, lastWrong: 0 }; }
 
 function validRomajiSet() {
-    const set = new Set(Object.values(charMap));
-
-    if (settings.comboKana) {
-        const values = Object.values(charMap);
-        for (const first of values) {
-            for (const second of values) {
-                set.add(`${first}${second}`);
-                set.add(`${first} ${second}`);
-            }
-        }
-    }
-
-    return set;
+    return new Set(Object.values(charMap));
 }
 
 function updateTopStats() {
@@ -1368,6 +1377,56 @@ function getRowKeyForChar(char) {
     return null;
 }
 
+function getComboLength() {
+    if (!settings.comboKana) return 1;
+    if (streak >= 25) return 4;
+    if (streak >= 10) return 3;
+    return 2;
+}
+
+function getComboTierLabel(length) {
+    return `${length} Kana Combo`;
+}
+
+function hideComboTierNotice() {
+    clearTimeout(comboTierNoticeTimeout);
+    comboTierNoticeEl.textContent = "";
+    comboTierNoticeEl.classList.remove("show");
+}
+
+function showComboTierNotice(length) {
+    if (!settings.comboKana || !sessionStarted || length <= 1) return;
+    clearTimeout(comboTierNoticeTimeout);
+    comboTierNoticeEl.textContent = `Tier up! ${getComboTierLabel(length)}`;
+    comboTierNoticeEl.classList.add("show");
+    comboTierNoticeTimeout = setTimeout(() => {
+        comboTierNoticeEl.classList.remove("show");
+    }, 1600);
+}
+
+function buildComboCharacters(pool, firstPick) {
+    const comboLength = getComboLength();
+    const chars = [firstPick];
+
+    if (settings.comboMode === "same_row") {
+        const firstRow = getRowKeyForChar(firstPick);
+        let sameRowPool = pool.filter(ch => getRowKeyForChar(ch) === firstRow);
+        if (sameRowPool.length === 0) sameRowPool = [firstPick];
+
+        while (chars.length < comboLength) {
+            const nextPick = sameRowPool[Math.floor(Math.random() * sameRowPool.length)] || firstPick;
+            chars.push(nextPick);
+        }
+        return chars;
+    }
+
+    while (chars.length < comboLength) {
+        chars.push(weightedPick(pool) || firstPick);
+    }
+
+    return chars;
+}
+
 function scheduleHint() {
     clearHint();
     if (!settings.hint || !currentChar || !sessionStarted) return;
@@ -1384,6 +1443,7 @@ function scheduleHint() {
 
 function showIdleState() {
     clearHint();
+    hideComboTierNotice();
     stopTrialTimer();
     currentChar = "";
     hiraganaEl.textContent = "—";
@@ -1411,30 +1471,8 @@ function nextCharacter() {
     const firstPick = weightedPick(pool) || activeChars[0] || "あ";
     let displayValue = firstPick;
 
-    if (settings.comboKana && activeChars.length > 1) {
-        let secondPick = weightedPick(pool) || activeChars[1] || firstPick;
-
-        if (settings.comboMode === "same_row") {
-            const firstRow = getRowKeyForChar(firstPick);
-            const sameRowPool = pool.filter(ch => ch !== firstPick && getRowKeyForChar(ch) === firstRow);
-            if (sameRowPool.length > 0) {
-                secondPick = sameRowPool[Math.floor(Math.random() * sameRowPool.length)];
-            } else {
-                let safety = 0;
-                while (secondPick === firstPick && safety < 10 && activeChars.length > 1) {
-                    secondPick = weightedPick(pool) || activeChars[1] || firstPick;
-                    safety += 1;
-                }
-            }
-        } else {
-            let safety = 0;
-            while (secondPick === firstPick && safety < 10 && activeChars.length > 1) {
-                secondPick = weightedPick(pool) || activeChars[1] || firstPick;
-                safety += 1;
-            }
-        }
-
-        displayValue = `${firstPick}${secondPick}`;
+    if (settings.comboKana && activeChars.length > 0) {
+        displayValue = buildComboCharacters(pool, firstPick).join("");
     }
 
     currentChar = displayValue;
@@ -1483,6 +1521,8 @@ function startSession() {
     streak = 0;
     endlessRunTotal = 0;
     endlessRunWrong = 0;
+    lastComboLength = getComboLength();
+    hideComboTierNotice();
     updateTopStats();
 
     gameOverEl.style.display = "none";
@@ -1559,6 +1599,11 @@ function getAnswerForCurrentChar() {
     return currentChar.split("").map(ch => charMap[ch] || "").join("");
 }
 
+function getDisplayAnswerForCurrentChar() {
+    const parts = currentChar.split("").map(ch => charMap[ch] || "");
+    return settings.comboKana ? parts.join(" + ") : parts.join("");
+}
+
 function updateComboKanaBestScore() {
     if (!settings.comboKana) return;
     scoreHistory = normalizeScoreHistory(scoreHistory);
@@ -1580,6 +1625,10 @@ function handleCorrect() {
     highScore = Math.max(highScore, streak);
     updateComboKanaBestScore();
 
+    const nextComboLength = getComboLength();
+    if (settings.comboKana && nextComboLength > lastComboLength) showComboTierNotice(nextComboLength);
+    lastComboLength = nextComboLength;
+
     sessionStats.answered += 1;
     sessionStats.correct += 1;
     sessionStats.timings.push(timeTaken);
@@ -1598,7 +1647,7 @@ function handleCorrect() {
 
 function handleWrong() {
     const timeTaken = Date.now() - charStartTime;
-    const correctAnswer = getAnswerForCurrentChar();
+    const correctAnswer = getDisplayAnswerForCurrentChar();
 
     for (const ch of currentChar.split("")) {
         if (!stats[ch]) stats[ch] = { correct: 0, wrong: 0 };
@@ -1619,6 +1668,8 @@ function handleWrong() {
     }
 
     streak = 0;
+    lastComboLength = getComboLength();
+    hideComboTierNotice();
     updateTopStats();
     renderHeatmap();
     saveAll();
@@ -1667,6 +1718,8 @@ inputEl.addEventListener("input", () => {
 
 retryBtn.addEventListener("click", () => {
     streak = 0;
+    lastComboLength = getComboLength();
+    hideComboTierNotice();
     updateTopStats();
     gameOverEl.style.display = "none";
     gameOverAnswerEl.textContent = "";
@@ -1829,6 +1882,7 @@ function showSessionModal(autoEnded = false) {
 }
 
 function endSession(autoEnded = false) {
+    hideComboTierNotice();
     if (!sessionStarted) return;
 
     sessionStarted = false;
@@ -1863,7 +1917,7 @@ sessionModalBackdrop.addEventListener("click", (e) => {
 
 function makeExportPayload() {
     return {
-        version: "2.0",
+        version: "2.1",
         exportedAt: new Date().toISOString(),
         settings,
         stats,
