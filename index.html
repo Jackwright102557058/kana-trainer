@@ -460,6 +460,50 @@
         cursor: not-allowed;
     }
 
+
+    .nav-btn {
+        display: block;
+        width: 100%;
+        text-decoration: none;
+        background: #1f2f47;
+        border: 1px solid #36527c;
+        border-radius: 10px;
+        padding: 11px 12px;
+        text-align: center;
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .nav-btn:hover {
+        background: #294061;
+    }
+
+    .nav-btn-small {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: auto;
+        padding: 8px 12px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    .beta-badge {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 999px;
+        border: 1px solid #7a6230;
+        background: #3a3016;
+        color: #f3d27a;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        line-height: 1.2;
+    }
+
     .rows-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
@@ -844,6 +888,12 @@
             <div>
                 <div class="section-title">Options</div>
                 <div id="optionButtons" class="button-grid"></div>
+                <div style="margin-top: 14px;">
+                    <div class="section-title" style="margin-bottom: 8px; font-size: 14px;">Experimental Feature</div>
+                    <div class="button-grid" style="justify-items: center;">
+                        <a class="nav-btn nav-btn-small" href="reverse.html">Open Reverse Mode <span class="beta-badge">Beta</span></a>
+                    </div>
+                </div>
                 <div class="version-tag">v2.2</div>
             </div>
 

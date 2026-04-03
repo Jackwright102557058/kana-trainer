@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kana Trainer Reverse Mode</title>
+<style>
+    :root {
+        --bg-1: #0d0d0d;
+        --panel: #171717;
+        --border: #3a3a3a;
+        --text: #f3f3f3;
+        --muted: #9a9a9a;
+        --accent: #36527c;
+        --accent-2: #1f2f47;
+        --card-bg-top: #1c1c1c;
+        --card-bg-bottom: #151515;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top, #242424 0%, var(--bg-1) 55%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+    }
+    .main {
+        width: min(560px, calc(100vw - 32px));
+        background: linear-gradient(180deg, var(--card-bg-top), var(--card-bg-bottom));
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        padding: 30px 28px;
+        text-align: center;
+    }
+    .badge {
+        display: inline-block;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: var(--accent-2);
+        border: 1px solid var(--accent);
+        margin-bottom: 14px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+    h1 {
+        margin: 0 0 10px;
+        font-size: 30px;
+    }
+    .subline {
+        color: #d2d2d2;
+        font-size: 16px;
+        margin-bottom: 22px;
+    }
+    .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        text-align: left;
+        margin-bottom: 16px;
+    }
+    .card h2 {
+        margin: 0 0 10px;
+        font-size: 18px;
+        text-align: center;
+    }
+    .card p, .card li {
+        color: #ddd;
+        line-height: 1.5;
+        font-size: 15px;
+    }
+    ul {
+        margin: 10px 0 0;
+        padding-left: 20px;
+    }
+    .actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+    .btn {
+        appearance: none;
+        display: inline-block;
+        text-decoration: none;
+        border: 1px solid var(--border);
+        background: #252525;
+        color: var(--text);
+        border-radius: 10px;
+        padding: 11px 16px;
+        font-size: 15px;
+        font-weight: 700;
+    }
+    .btn:hover { background: #2d2d2d; }
+    .btn-primary {
+        background: var(--accent-2);
+        border-color: var(--accent);
+    }
+    .btn-primary:hover { background: #294061; }
+    .version-tag {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 13px;
+    }
+</style>
+</head>
+<body>
+    <div class="main">
+        <div class="badge">Experimental Feature</div>
+        <h1>Reverse Mode</h1>
+        <div class="subline">Framework page for the future romaji to kana trainer</div>
+
+        <div class="card">
+            <h2>Planned Direction</h2>
+            <p>This page is the starting point for the reverse mode branch of the app. The goal is to eventually build a separate experience focused on romaji to kana drills without changing the main trainer page.</p>
+            <ul>
+                <li>Separate layout for reverse input flow</li>
+                <li>Independent UI and score presentation</li>
+                <li>Room for reverse-specific stats and practice modes later on</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Status</h2>
+            <p>The navigation framework is now in place. This page can be expanded next into the full reverse mode experience at the end of the v2.x roadmap.</p>
+        </div>
+
+        <div class="actions">
+            <a class="btn" href="index_v2.2_fix5.html">Back to Standard Trainer</a>
+            <a class="btn btn-primary" href="index_v2.2_fix5.html">Return to Main App</a>
+        </div>
+
+        <div class="version-tag">Reverse Mode Framework</div>
+    </div>
+</body>
+</html>
