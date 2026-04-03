@@ -1,0 +1,2487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kana Trainer v2.2</title>
+<style>
+    :root {
+        --bg-1: #0d0d0d;
+        --panel: #171717;
+        --panel-2: #111111;
+        --border: #3a3a3a;
+        --text: #f3f3f3;
+        --muted: #8e8e8e;
+        --green: #2e7d32;
+        --red: #b23b3b;
+        --yellow: #9a8c25;
+        --neutral: #555;
+        --card-bg-top: #1c1c1c;
+        --card-bg-bottom: #151515;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top, #242424 0%, var(--bg-1) 55%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+    }
+
+    .app-shell {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .main {
+        width: min(460px, calc(100vw - 32px));
+        background: linear-gradient(180deg, var(--card-bg-top), var(--card-bg-bottom));
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        padding: 28px 28px 240px;
+        text-align: center;
+        position: relative;
+    }
+
+    h1 {
+        margin: 0 0 10px;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .subline {
+        color: #cccccc;
+        font-size: 15px;
+        margin-bottom: 20px;
+    }
+
+    .scoreline {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+        font-size: 15px;
+    }
+
+    .score-pill {
+        background: #222;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 8px 14px;
+    }
+
+    .hiragana-wrap {
+        min-height: 190px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .hiragana {
+        font-size: 144px;
+        line-height: 1;
+        transition: color 0.2s ease, transform 0.2s ease, text-shadow 0.2s ease;
+        text-shadow: 0 0 18px rgba(255,255,255,0.08);
+    }
+
+    .flash-correct {
+        color: #72ffad;
+        text-shadow: 0 0 24px rgba(114,255,173,0.45);
+        transform: scale(1.05);
+    }
+
+    .flash-wrong {
+        color: #ff6a6a;
+        text-shadow: 0 0 24px rgba(255,106,106,0.35);
+        transform: scale(1.03);
+    }
+
+    .hint {
+        margin-top: 10px;
+        min-height: 22px;
+        color: var(--muted);
+        font-size: 16px;
+        letter-spacing: 1px;
+    }
+
+    .combo-tier-notice {
+        min-height: 22px;
+        margin-top: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #ffd76a;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 0.22s ease, transform 0.22s ease;
+        pointer-events: none;
+    }
+
+    .combo-tier-notice.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .daily-badge {
+        display: none;
+        margin: 0 auto 12px;
+        width: fit-content;
+        background: #2f2510;
+        border: 1px solid #8e6b22;
+        color: #ffe39a;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+    }
+
+    body.daily-challenge-active .daily-badge {
+        display: inline-block;
+    }
+
+    body.daily-challenge-active .main {
+        border-color: #8e6b22;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(255, 215, 122, 0.12);
+    }
+
+    body.daily-challenge-active {
+        background: radial-gradient(circle at top, #3a2f10 0%, var(--bg-1) 58%);
+    }
+
+    .input-wrap { margin-top: 8px; }
+
+    input[type="text"], input[type="number"], textarea {
+        width: min(260px, 90%);
+        background: #232323;
+        color: var(--text);
+        border: 1px solid #4a4a4a;
+        border-radius: 12px;
+        font-size: 24px;
+        text-align: center;
+        padding: 12px 14px;
+        outline: none;
+    }
+
+    input[type="number"] { font-size: 18px; }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    textarea:focus {
+        border-color: #6a6a6a;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+    }
+
+    input[type="text"]:disabled,
+    input[type="number"]:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .trial-config {
+        display: none;
+        margin-top: 14px;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .trial-box {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .trial-box label {
+        font-size: 13px;
+        color: var(--muted);
+    }
+
+    .trial-box input { width: 120px; }
+
+    .game-over {
+        margin-top: 16px;
+        display: none;
+    }
+
+    .game-over-title {
+        color: #ff8a8a;
+        margin-bottom: 10px;
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .game-over-answer {
+        color: #ddd;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: #252525;
+        color: var(--text);
+        border-radius: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    .btn:hover { background: #2d2d2d; }
+
+    .btn-danger {
+        background: #472323;
+        border-color: #6c3030;
+    }
+
+    .btn-danger:hover { background: #5b2c2c; }
+
+    .btn-start {
+        background: #224a29;
+        border-color: #3e7f48;
+        font-weight: 700;
+    }
+
+    .btn-start:hover { background: #2a5e34; }
+
+    .btn-secondary {
+        background: #1f2f47;
+        border-color: #36527c;
+    }
+
+    .btn-secondary:hover { background: #294061; }
+
+    .start-wrap,
+    .session-actions {
+        margin-top: 14px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .side-panel {
+        position: fixed;
+        top: 12px;
+        width: 248px;
+        max-height: calc(100vh - 110px);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.28);
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .left-panel { left: 12px; }
+    .right-panel { right: 12px; }
+
+    .panel-header {
+        background: var(--panel-2);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 12px;
+        cursor: pointer;
+        user-select: none;
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .panel-content {
+        padding: 12px;
+        display: block;
+        overflow-y: auto;
+        min-height: 0;
+    }
+
+    .panel-content.hidden { display: none; }
+
+    .heatmap {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+    }
+
+    .cell {
+        aspect-ratio: 1 / 1;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 22px;
+        cursor: pointer;
+        user-select: none;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .cell:hover { outline: 2px solid rgba(255,255,255,0.15); }
+
+    .score-block {
+        background: #222;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .score-block h3 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .score-subtitle {
+        margin: 10px 0 6px;
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .score-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-size: 14px;
+    }
+
+    .score-row:last-child { border-bottom: none; }
+
+    .popup {
+        position: fixed;
+        display: none;
+        z-index: 50;
+        background: #202020;
+        border: 1px solid #555;
+        border-radius: 12px;
+        padding: 10px 12px;
+        min-width: 160px;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+        font-size: 14px;
+        line-height: 1.45;
+    }
+
+    .popup-title {
+        font-size: 22px;
+        margin-bottom: 6px;
+    }
+
+    .bottom-shell {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 20;
+        background: var(--panel-2);
+        border-top: 1px solid var(--border);
+    }
+
+    .tab-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .tab-button {
+        text-align: center;
+        padding: 8px 12px;
+        cursor: pointer;
+        user-select: none;
+        font-weight: 700;
+        border-right: 1px solid var(--border);
+    }
+
+    .tab-button:last-child { border-right: none; }
+    .tab-button.active { background: #171717; }
+
+    .drawer-content {
+        display: none;
+        padding: 14px 16px 16px;
+        background: #141414;
+        border-top: 1px solid rgba(255,255,255,0.04);
+        width: 100%;
+        min-height: 360px;
+        max-height: 50vh;
+        overflow-y: auto;
+    }
+
+    .drawer-content.open { display: block; }
+
+    .section-title {
+        margin: 0 0 10px;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .button-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 10px;
+    }
+
+    .toggle-btn {
+        background: #242424;
+        border: 1px solid #444;
+        border-radius: 10px;
+        padding: 11px 12px;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .toggle-btn.active {
+        background: var(--green);
+        border-color: #46a14c;
+        color: white;
+    }
+
+    .toggle-btn.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+
+    .nav-btn {
+        display: block;
+        width: 100%;
+        text-decoration: none;
+        background: #1f2f47;
+        border: 1px solid #36527c;
+        border-radius: 10px;
+        padding: 11px 12px;
+        text-align: center;
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .nav-btn:hover {
+        background: #294061;
+    }
+
+    .nav-btn-small {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: auto;
+        padding: 8px 12px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    .beta-badge {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 999px;
+        border: 1px solid #7a6230;
+        background: #3a3016;
+        color: #f3d27a;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        line-height: 1.2;
+    }
+
+    .rows-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+        gap: 10px;
+    }
+
+    .options-stack {
+        display: grid;
+        gap: 18px;
+        width: min(900px, 100%);
+        margin: 0 auto;
+    }
+
+    .bottom-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .muted-note {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .file-input { display: none; }
+
+    .version-tag {
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+        width: min(520px, 100%);
+        max-height: min(85vh, 760px);
+        overflow-y: auto;
+        background: #181818;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        padding: 22px;
+    }
+
+    .modal h2 {
+        margin-top: 0;
+        margin-bottom: 14px;
+    }
+
+    .modal-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .stat-card {
+        background: #222;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+    .stat-card .label {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .stat-card .value {
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .session-list {
+        background: #222;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 10px;
+        text-align: left;
+    }
+
+    .session-list h3 {
+        margin: 0 0 10px;
+        font-size: 16px;
+    }
+
+    .session-list-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .session-list-item:last-child { border-bottom: none; }
+
+    .modal-actions {
+        position: sticky;
+        bottom: 0;
+        background: #181818;
+        padding-top: 12px;
+        margin-top: 16px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .import-modal textarea {
+        width: 100%;
+        min-height: 180px;
+        font-size: 13px;
+        text-align: left;
+        resize: vertical;
+        line-height: 1.4;
+    }
+
+    body.mobile-mode {
+        align-items: flex-start;
+        padding: 14px;
+    }
+
+    body.mobile-mode .app-shell {
+        display: block;
+        max-width: 100%;
+    }
+
+    body.mobile-mode .main {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto 12px;
+        padding: 22px 18px 240px;
+    }
+
+    body.mobile-mode .hiragana { font-size: 108px; }
+    body.mobile-mode .score-pill { padding: 10px 12px; }
+
+    body.mobile-mode input[type="text"] {
+        width: 100%;
+        max-width: 100%;
+        font-size: 22px;
+    }
+
+    body.mobile-mode .toggle-btn {
+        padding: 14px 12px;
+        font-size: 16px;
+    }
+
+    body.mobile-mode .rows-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    body.mobile-mode .button-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    body.mobile-mode .left-panel,
+    body.mobile-mode .right-panel {
+        position: static;
+        width: 100%;
+        max-height: none;
+        margin: 0 auto 12px;
+    }
+
+    body.mobile-mode .popup {
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%);
+    }
+
+    @media (max-width: 1180px) {
+        .left-panel, .right-panel { width: 220px; }
+    }
+
+    @media (max-width: 920px) {
+        body {
+            align-items: flex-start;
+            padding-top: 18px;
+        }
+
+        .left-panel { left: 10px; }
+        .right-panel { right: 10px; }
+        .left-panel, .right-panel { width: 200px; }
+        .main { padding-bottom: 220px; }
+    }
+
+    @media (max-width: 760px) {
+        body {
+            display: block;
+            padding: 12px;
+        }
+
+        .app-shell { display: block; }
+
+        .main {
+            width: 100%;
+            margin: 0 auto 12px;
+        }
+
+        .left-panel,
+        .right-panel {
+            position: static;
+            width: 100%;
+            max-height: none;
+            margin-top: 12px;
+        }
+
+        .modal {
+            width: 100%;
+            max-height: 88vh;
+            padding: 18px;
+            border-radius: 14px;
+        }
+
+        .modal-grid { grid-template-columns: 1fr; }
+
+        .drawer-content {
+            min-height: 320px;
+            max-height: 55vh;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="app-shell">
+    <div class="main">
+        <h1>Kana Trainer</h1>
+        <div class="subline">Enter the matching romaji</div>
+        <div id="dailyBadge" class="daily-badge">Daily Challenge · First try sets today's official score</div>
+
+        <div class="scoreline">
+            <div class="score-pill">Streak: <span id="streak">0</span></div>
+            <div class="score-pill">High Score: <span id="highScore">0</span></div>
+            <div class="score-pill" id="endlessTotalPill" style="display:none;">Total: <span id="endlessTotal">0</span></div>
+            <div class="score-pill" id="endlessWrongPill" style="display:none;">Incorrect: <span id="endlessWrong">0</span></div>
+            <div class="score-pill" id="trialTimerPill" style="display:none;">Time Left: <span id="trialTimer">0</span></div>
+            <div class="score-pill" id="dailyProgressPill" style="display:none;">Question: <span id="dailyProgress">0</span>/20</div>
+            <div class="score-pill" id="dailyCorrectPill" style="display:none;">Correct: <span id="dailyCorrect">0</span></div>
+            <div class="score-pill" id="dailyWrongPill" style="display:none;">Wrong: <span id="dailyWrong">0</span></div>
+            <div class="score-pill" id="dailyOfficialPill" style="display:none;">Official: <span id="dailyOfficial">—</span></div>
+        </div>
+
+        <div class="hiragana-wrap">
+            <div id="hiragana" class="hiragana">—</div>
+            <div id="hint" class="hint"></div>
+            <div id="comboTierNotice" class="combo-tier-notice"></div>
+        </div>
+
+        <div class="input-wrap">
+            <input id="input" type="text" placeholder="Type romaji..." autocomplete="off" spellcheck="false" disabled />
+        </div>
+
+        <div class="trial-config" id="trialConfig">
+            <div class="trial-box">
+                <label for="trialTime">Time (mins)</label>
+                <input id="trialTime" type="number" min="0.1" step="0.1" value="0.5" />
+            </div>
+            <div class="trial-box">
+                <label for="trialTarget">Target</label>
+                <input id="trialTarget" type="number" min="1" step="1" value="20" />
+            </div>
+        </div>
+
+        <div class="trial-config" id="comboConfig">
+            <div class="trial-box">
+                <label>Kana Combos</label>
+                <div class="bottom-actions">
+                    <button class="btn" id="comboSameRowBtn" type="button">Same Row</button>
+                    <button class="btn" id="comboRandomBtn" type="button">Random</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="start-wrap" id="startWrap">
+            <button class="btn btn-start" id="startBtn" type="button">Start</button>
+        </div>
+
+        <div class="session-actions" id="sessionActions" style="display:none;">
+            <button class="btn btn-secondary" id="endSessionBtn" type="button">End Session</button>
+        </div>
+
+        <div id="gameOver" class="game-over">
+            <div class="game-over-title">Wrong</div>
+            <div id="gameOverAnswer" class="game-over-answer"></div>
+            <button class="btn" id="retryBtn" type="button">Try Again</button>
+        </div>
+    </div>
+
+    <div class="side-panel left-panel">
+        <div class="panel-header" id="scoresHeader">
+            <span>Scores</span>
+            <span id="scoresChevron">▼</span>
+        </div>
+        <div class="panel-content" id="scoresContent">
+            <div class="score-block">
+                <h3>Endless Best</h3>
+                <div class="score-row"><span>Total</span><span id="bestEndlessTotal">0</span></div>
+                <div class="score-row"><span>Correct</span><span id="bestEndlessCorrect">0</span></div>
+                <div class="score-row"><span>Wrong</span><span id="bestEndlessWrong">0</span></div>
+            </div>
+
+            <div class="score-block">
+                <h3>Combo Kana Best</h3>
+                <div class="score-row"><span>Same Row</span><span id="comboSameRowBest">0</span></div>
+                <div class="score-row"><span>Random</span><span id="comboRandomBest">0</span></div>
+            </div>
+
+            <div class="score-block">
+                <h3>Daily Challenge</h3>
+                <div class="score-row"><span>Today</span><span id="dailyTodayScore">—</span></div>
+                <div class="score-row"><span>Attempts</span><span id="dailyTodayAttempts">0</span></div>
+                <div class="score-subtitle">Previous Days</div>
+                <div id="dailyHistoryList"></div>
+            </div>
+
+            <div class="score-block">
+                <h3>Time Trial Top 3</h3>
+                <div id="timeTrialTop3"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="side-panel right-panel">
+        <div class="panel-header" id="statsHeader">
+            <span>Stats</span>
+            <span id="statsChevron">▼</span>
+        </div>
+        <div class="panel-content" id="statsContent">
+            <div id="heatmap" class="heatmap"></div>
+        </div>
+    </div>
+</div>
+
+<div id="popup" class="popup"></div>
+
+<div class="bottom-shell">
+    <div class="tab-row">
+        <div class="tab-button" id="modifiersTab">Modifiers ▼</div>
+        <div class="tab-button" id="optionsTab">Options ▼</div>
+    </div>
+
+    <div class="drawer-content" id="modifiersContent">
+        <div class="options-stack">
+            <div>
+                <div class="section-title">Modes</div>
+                <div id="modifierOptions" class="button-grid"></div>
+            </div>
+
+            <div>
+                <div class="section-title">Hiragana Rows</div>
+                <div id="rowOptions" class="rows-grid"></div>
+            </div>
+
+            <div>
+                <div class="section-title">Katakana Rows</div>
+                <div id="katakanaRowOptions" class="rows-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="drawer-content" id="optionsContent">
+        <div class="options-stack">
+            <div>
+                <div class="section-title">Options</div>
+                <div id="optionButtons" class="button-grid"></div>
+                <div style="margin-top: 14px;">
+                    <div class="section-title" style="margin-bottom: 8px; font-size: 14px;">Experimental Feature</div>
+                    <div class="button-grid" style="justify-items: center;">
+                        <a class="nav-btn nav-btn-small" href="reverse.html">Open Reverse Mode <span class="beta-badge">Beta</span></a>
+                        <a class="nav-btn nav-btn-small" href="index.html">Open Home</a>
+                    </div>
+                </div>
+                <div class="version-tag">v2.2</div>
+            </div>
+
+            <div>
+                <div class="section-title">Save Data</div>
+                <div class="bottom-actions">
+                    <button class="btn" id="exportBtn" type="button">Export Data</button>
+                    <button class="btn" id="copySaveBtn" type="button">Copy Save Data</button>
+                    <button class="btn" id="importBtn" type="button">Import Data</button>
+                </div>
+                <input class="file-input" id="importFile" type="file" accept=".json,application/json" />
+                <div class="muted-note">Export a backup file, copy save JSON to clipboard, or import saved data later.</div>
+            </div>
+
+            <div class="bottom-actions">
+                <button class="btn btn-danger" id="resetBtn" type="button">Reset All Data</button>
+            </div>
+            <div class="muted-note">Resets stats, timing, SRS progress, session history, and high score tables.</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="sessionModalBackdrop">
+    <div class="modal">
+        <h2>Session Stats</h2>
+        <div class="modal-grid" id="sessionStatsGrid"></div>
+        <div class="session-list" id="sessionHardList" style="display:none;"></div>
+        <div class="session-list" id="sessionEasyList" style="display:none;"></div>
+        <div class="modal-actions">
+            <button class="btn" id="closeSessionModalBtn" type="button">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="importModalBackdrop">
+    <div class="modal import-modal">
+        <h2>Import Save Data</h2>
+        <p style="color:#ccc; margin-top:0;">Paste exported JSON below, or use the file picker.</p>
+        <textarea id="importTextarea" placeholder="Paste save JSON here..."></textarea>
+        <div class="modal-actions">
+            <button class="btn" id="importFileBtn" type="button">Choose File</button>
+            <button class="btn btn-secondary" id="confirmImportBtn" type="button">Import</button>
+            <button class="btn" id="closeImportModalBtn" type="button">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const hiraganaRows = {
+    h_a:  {"あ":"a","い":"i","う":"u","え":"e","お":"o"},
+    h_ka: {"か":"ka","き":"ki","く":"ku","け":"ke","こ":"ko"},
+    h_sa: {"さ":"sa","し":"shi","す":"su","せ":"se","そ":"so"},
+    h_ta: {"た":"ta","ち":"chi","つ":"tsu","て":"te","と":"to"},
+    h_na: {"な":"na","に":"ni","ぬ":"nu","ね":"ne","の":"no"},
+    h_ha: {"は":"ha","ひ":"hi","ふ":"fu","へ":"he","ほ":"ho"},
+    h_ma: {"ま":"ma","み":"mi","む":"mu","め":"me","も":"mo"},
+    h_ya: {"や":"ya","ゆ":"yu","よ":"yo"},
+    h_ra: {"ら":"ra","り":"ri","る":"ru","れ":"re","ろ":"ro"},
+    h_wa: {"わ":"wa","を":"wo","ん":"n"}
+};
+
+const katakanaRows = {
+    k_a:  {"ア":"a","イ":"i","ウ":"u","エ":"e","オ":"o"},
+    k_ka: {"カ":"ka","キ":"ki","ク":"ku","ケ":"ke","コ":"ko"},
+    k_sa: {"サ":"sa","シ":"shi","ス":"su","セ":"se","ソ":"so"},
+    k_ta: {"タ":"ta","チ":"chi","ツ":"tsu","テ":"te","ト":"to"},
+    k_na: {"ナ":"na","ニ":"ni","ヌ":"nu","ネ":"ne","ノ":"no"},
+    k_ha: {"ハ":"ha","ヒ":"hi","フ":"fu","ヘ":"he","ホ":"ho"},
+    k_ma: {"マ":"ma","ミ":"mi","ム":"mu","メ":"me","モ":"mo"},
+    k_ya: {"ヤ":"ya","ユ":"yu","ヨ":"yo"},
+    k_ra: {"ラ":"ra","リ":"ri","ル":"ru","レ":"re","ロ":"ro"},
+    k_wa: {"ワ":"wa","ヲ":"wo","ン":"n"}
+};
+
+const dakutenRows = {
+    h_ka: {"が":"ga","ぎ":"gi","ぐ":"gu","げ":"ge","ご":"go"},
+    h_sa: {"ざ":"za","じ":"ji","ず":"zu","ぜ":"ze","ぞ":"zo"},
+    h_ta: {"だ":"da","ぢ":"ji","づ":"zu","で":"de","ど":"do"},
+    h_ha: {
+        "ば":"ba","び":"bi","ぶ":"bu","べ":"be","ぼ":"bo",
+        "ぱ":"pa","ぴ":"pi","ぷ":"pu","ぺ":"pe","ぽ":"po"
+    },
+    k_ka: {"ガ":"ga","ギ":"gi","グ":"gu","ゲ":"ge","ゴ":"go"},
+    k_sa: {"ザ":"za","ジ":"ji","ズ":"zu","ゼ":"ze","ゾ":"zo"},
+    k_ta: {"ダ":"da","ヂ":"ji","ヅ":"zu","デ":"de","ド":"do"},
+    k_ha: {
+        "バ":"ba","ビ":"bi","ブ":"bu","ベ":"be","ボ":"bo",
+        "パ":"pa","ピ":"pi","プ":"pu","ペ":"pe","ポ":"po"
+    }
+};
+
+const DAILY_CHALLENGE_CHAR_MAP = {
+    ...Object.assign({}, ...Object.values(hiraganaRows)),
+    ...Object.assign({}, ...Object.values(katakanaRows)),
+    ...Object.assign({}, ...Object.values(dakutenRows))
+};
+
+const DEFAULT_SETTINGS = {
+    focusWeak: false,
+    dakuten: false,
+    hint: false,
+    srs: true,
+    mobileMode: false,
+    endless: false,
+    timeTrial: false,
+    dailyChallenge: false,
+    comboKana: false,
+    comboMode: "random",
+    hiraganaRows: Object.keys(hiraganaRows),
+    katakanaRows: [],
+    statsVisible: true,
+    scoresVisible: true,
+    activeBottomTab: null
+};
+
+function createEmptySessionStats() {
+    return {
+        active: false,
+        startTime: null,
+        endTime: null,
+        answered: 0,
+        correct: 0,
+        wrong: 0,
+        bestStreak: 0,
+        timings: [],
+        perChar: {}
+    };
+}
+
+function loadJSON(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function formatDuration(ms) {
+    if (!Number.isFinite(ms) || ms <= 0) return "0 ms";
+    if (ms < 1000) return `${Math.round(ms)} ms`;
+    const seconds = ms / 1000;
+    if (seconds < 60) return `${seconds.toFixed(1)} seconds`;
+    const minutes = seconds / 60;
+    if (minutes < 60) return `${minutes.toFixed(1)} minutes`;
+    const hours = minutes / 60;
+    return `${hours.toFixed(1)} hours`;
+}
+
+function formatCountdown(ms) {
+    if (ms <= 0) return "0.0s";
+    const seconds = ms / 1000;
+    if (seconds < 60) return `${seconds.toFixed(1)}s`;
+    const minutes = seconds / 60;
+    return `${minutes.toFixed(1)}m`;
+}
+
+let settings = { ...DEFAULT_SETTINGS, ...loadJSON("settings", DEFAULT_SETTINGS) };
+let stats = loadJSON("charStats", {});
+let times = loadJSON("charTimes", {});
+let srs = loadJSON("charSrs", {});
+
+function createDefaultScoreHistory() {
+    return {
+        endlessBest: { total: 0, correct: 0, wrong: 0 },
+        comboKanaBest: { same_row: 0, random: 0 },
+        timeTrialTop3: []
+    };
+}
+
+function normalizeScoreHistory(data) {
+    const defaults = createDefaultScoreHistory();
+    return {
+        ...defaults,
+        ...(data || {}),
+        endlessBest: { ...defaults.endlessBest, ...((data || {}).endlessBest || {}) },
+        comboKanaBest: { ...defaults.comboKanaBest, ...((data || {}).comboKanaBest || {}) },
+        timeTrialTop3: Array.isArray((data || {}).timeTrialTop3) ? data.timeTrialTop3 : []
+    };
+}
+
+let scoreHistory = normalizeScoreHistory(loadJSON("scoreHistory", createDefaultScoreHistory()));
+let dailyChallengeHistory = loadJSON("dailyChallengeHistory", {});
+let highScore = Number(localStorage.getItem("highScore") || "0");
+
+let charMap = {};
+let activeChars = [];
+let currentChar = "";
+let streak = 0;
+let hintTimeout = null;
+let charStartTime = 0;
+let locked = false;
+let sessionStarted = false;
+let sessionStats = createEmptySessionStats();
+
+let endlessRunTotal = 0;
+let endlessRunWrong = 0;
+
+let trialTimerId = null;
+let trialEndTime = null;
+let trialTarget = 0;
+let comboTierNoticeTimeout = null;
+let lastComboLength = 2;
+let dailySequence = [];
+let dailyIndex = 0;
+let dailyCorrect = 0;
+let dailyWrong = 0;
+let dailyStartTime = 0;
+
+const titleEl = document.querySelector("h1");
+const sublineEl = document.querySelector(".subline");
+const dailyBadgeEl = document.getElementById("dailyBadge");
+const hiraganaEl = document.getElementById("hiragana");
+const hintEl = document.getElementById("hint");
+const comboTierNoticeEl = document.getElementById("comboTierNotice");
+const inputEl = document.getElementById("input");
+const trialConfigEl = document.getElementById("trialConfig");
+const comboConfigEl = document.getElementById("comboConfig");
+const comboSameRowBtn = document.getElementById("comboSameRowBtn");
+const comboRandomBtn = document.getElementById("comboRandomBtn");
+const trialTimeEl = document.getElementById("trialTime");
+const trialTargetEl = document.getElementById("trialTarget");
+const trialTimerPill = document.getElementById("trialTimerPill");
+const trialTimerEl = document.getElementById("trialTimer");
+const dailyProgressPill = document.getElementById("dailyProgressPill");
+const dailyCorrectPill = document.getElementById("dailyCorrectPill");
+const dailyWrongPill = document.getElementById("dailyWrongPill");
+const dailyOfficialPill = document.getElementById("dailyOfficialPill");
+const dailyProgressEl = document.getElementById("dailyProgress");
+const dailyCorrectEl = document.getElementById("dailyCorrect");
+const dailyWrongEl = document.getElementById("dailyWrong");
+const dailyOfficialEl = document.getElementById("dailyOfficial");
+const gameOverEl = document.getElementById("gameOver");
+const gameOverTitleEl = gameOverEl.querySelector(".game-over-title");
+const gameOverAnswerEl = document.getElementById("gameOverAnswer");
+const streakEl = document.getElementById("streak");
+const highScoreEl = document.getElementById("highScore");
+const endlessTotalEl = document.getElementById("endlessTotal");
+const endlessWrongEl = document.getElementById("endlessWrong");
+const endlessTotalPill = document.getElementById("endlessTotalPill");
+const endlessWrongPill = document.getElementById("endlessWrongPill");
+const heatmapEl = document.getElementById("heatmap");
+const popupEl = document.getElementById("popup");
+const modifiersTabEl = document.getElementById("modifiersTab");
+const optionsTabEl = document.getElementById("optionsTab");
+const modifiersContentEl = document.getElementById("modifiersContent");
+const optionsContentEl = document.getElementById("optionsContent");
+const statsHeaderEl = document.getElementById("statsHeader");
+const statsContentEl = document.getElementById("statsContent");
+const statsChevronEl = document.getElementById("statsChevron");
+const scoresHeaderEl = document.getElementById("scoresHeader");
+const scoresContentEl = document.getElementById("scoresContent");
+const scoresChevronEl = document.getElementById("scoresChevron");
+const retryBtn = document.getElementById("retryBtn");
+const resetBtn = document.getElementById("resetBtn");
+const startBtn = document.getElementById("startBtn");
+const startWrap = document.getElementById("startWrap");
+const sessionActionsEl = document.getElementById("sessionActions");
+const endSessionBtn = document.getElementById("endSessionBtn");
+const exportBtn = document.getElementById("exportBtn");
+const copySaveBtn = document.getElementById("copySaveBtn");
+const importBtn = document.getElementById("importBtn");
+const importFile = document.getElementById("importFile");
+const importModalBackdrop = document.getElementById("importModalBackdrop");
+const importTextarea = document.getElementById("importTextarea");
+const importFileBtn = document.getElementById("importFileBtn");
+const confirmImportBtn = document.getElementById("confirmImportBtn");
+const closeImportModalBtn = document.getElementById("closeImportModalBtn");
+const sessionModalBackdrop = document.getElementById("sessionModalBackdrop");
+const sessionStatsGrid = document.getElementById("sessionStatsGrid");
+const sessionHardList = document.getElementById("sessionHardList");
+const sessionEasyList = document.getElementById("sessionEasyList");
+const closeSessionModalBtn = document.getElementById("closeSessionModalBtn");
+const bestEndlessTotalEl = document.getElementById("bestEndlessTotal");
+const bestEndlessCorrectEl = document.getElementById("bestEndlessCorrect");
+const bestEndlessWrongEl = document.getElementById("bestEndlessWrong");
+const comboSameRowBestEl = document.getElementById("comboSameRowBest");
+const comboRandomBestEl = document.getElementById("comboRandomBest");
+const dailyTodayScoreEl = document.getElementById("dailyTodayScore");
+const dailyTodayAttemptsEl = document.getElementById("dailyTodayAttempts");
+const dailyHistoryListEl = document.getElementById("dailyHistoryList");
+const timeTrialTop3El = document.getElementById("timeTrialTop3");
+
+function saveAll() {
+    localStorage.setItem("settings", JSON.stringify(settings));
+    localStorage.setItem("charStats", JSON.stringify(stats));
+    localStorage.setItem("charTimes", JSON.stringify(times));
+    localStorage.setItem("charSrs", JSON.stringify(srs));
+    localStorage.setItem("scoreHistory", JSON.stringify(scoreHistory));
+    localStorage.setItem("dailyChallengeHistory", JSON.stringify(dailyChallengeHistory));
+    localStorage.setItem("highScore", String(highScore));
+}
+
+function rebuildCharMap() {
+    charMap = {};
+
+    for (const row of settings.hiraganaRows.filter(r => hiraganaRows[r])) {
+        Object.assign(charMap, hiraganaRows[row]);
+        if (settings.dakuten && dakutenRows[row]) Object.assign(charMap, dakutenRows[row]);
+    }
+
+    for (const row of settings.katakanaRows.filter(r => katakanaRows[r])) {
+        Object.assign(charMap, katakanaRows[row]);
+        if (settings.dakuten && dakutenRows[row]) Object.assign(charMap, dakutenRows[row]);
+    }
+
+    activeChars = Object.keys(charMap);
+}
+
+function ensureDataObjects() {
+    rebuildCharMap();
+
+    for (const ch of activeChars) {
+        if (!stats[ch]) stats[ch] = { correct: 0, wrong: 0 };
+        if (!times[ch]) times[ch] = { avg: 1200, count: 0 };
+        if (!srs[ch]) srs[ch] = { level: 0, due: 0, lastSeen: 0, lastWrong: 0 };
+    }
+}
+
+function getAverageTime(char) { return times[char]?.avg ?? 1200; }
+function getStats(char) { return stats[char] ?? { correct: 0, wrong: 0 }; }
+function getSrs(char) { return srs[char] ?? { level: 0, due: 0, lastSeen: 0, lastWrong: 0 }; }
+
+function getTodayKey() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function getDailyChallengePoolMap() {
+    return DAILY_CHALLENGE_CHAR_MAP;
+}
+
+function hashStringSeed(input) {
+    let hash = 2166136261;
+    for (let i = 0; i < input.length; i++) {
+        hash ^= input.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+}
+
+function createSeededRng(seedString) {
+    let seed = hashStringSeed(seedString) || 1;
+    return () => {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        return seed / 4294967296;
+    };
+}
+
+function buildDailySequence(dateKey = getTodayKey()) {
+    const pool = Object.keys(getDailyChallengePoolMap());
+    const rng = createSeededRng(`daily:${dateKey}`);
+    const sequence = [];
+
+    for (let i = 0; i < 20; i++) {
+        sequence.push(pool[Math.floor(rng() * pool.length)]);
+    }
+
+    return sequence;
+}
+
+function getTodayDailyRecord() {
+    return dailyChallengeHistory[getTodayKey()] || null;
+}
+
+function isDailyChallengeSession() {
+    return !!settings.dailyChallenge;
+}
+
+function getAnswerMapForCurrentMode() {
+    return isDailyChallengeSession() ? DAILY_CHALLENGE_CHAR_MAP : charMap;
+}
+
+
+function applyDailyChallengeTheme() {
+    const active = isDailyChallengeSession();
+    document.body.classList.toggle("daily-challenge-active", active);
+    if (dailyBadgeEl) dailyBadgeEl.style.display = active ? "inline-block" : "none";
+    titleEl.textContent = active ? "Daily Challenge" : "Kana Trainer";
+    sublineEl.textContent = active
+        ? "20 questions · All hiragana, katakana, and dakuten"
+        : "Enter the matching romaji";
+}
+
+function updateDailyChallengePills() {
+    const active = isDailyChallengeSession() && sessionStarted;
+    dailyProgressPill.style.display = active ? "inline-block" : "none";
+    dailyCorrectPill.style.display = active ? "inline-block" : "none";
+    dailyWrongPill.style.display = active ? "inline-block" : "none";
+
+    if (active) {
+        dailyProgressEl.textContent = Math.min(dailyIndex + 1, 20);
+        dailyCorrectEl.textContent = dailyCorrect;
+        dailyWrongEl.textContent = dailyWrong;
+    }
+
+    const todayRecord = getTodayDailyRecord();
+    dailyOfficialPill.style.display = (active || todayRecord) ? "inline-block" : "none";
+    dailyOfficialEl.textContent = todayRecord ? `${todayRecord.officialScore}/${todayRecord.total}` : "—";
+}
+
+function formatDailyHistoryTime(ms) {
+    if (!Number.isFinite(ms) || ms <= 0) return "—";
+    return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function renderDailyChallengeHistory() {
+    const entries = Object.entries(dailyChallengeHistory || {})
+        .filter(([dateKey, record]) => dateKey !== getTodayKey() && record && Number.isFinite(record.officialScore))
+        .sort((a, b) => b[0].localeCompare(a[0]))
+        .slice(0, 7);
+
+    if (!entries.length) {
+        dailyHistoryListEl.innerHTML = `<div class="score-row"><span>No history yet</span><span>—</span></div>`;
+        return;
+    }
+
+    dailyHistoryListEl.innerHTML = entries.map(([dateKey, record]) => `
+        <div class="score-row">
+            <span>${dateKey}</span>
+            <span>${record.officialScore}/${record.total} · ${formatDailyHistoryTime(record.timeMs)}</span>
+        </div>
+    `).join("");
+}
+
+function renderDailyChallengeSummary() {
+    const todayRecord = getTodayDailyRecord();
+    dailyTodayScoreEl.textContent = todayRecord ? `${todayRecord.officialScore}/${todayRecord.total}` : "—";
+    dailyTodayAttemptsEl.textContent = todayRecord ? (todayRecord.attempts || 1) : "0";
+    renderDailyChallengeHistory();
+}
+
+function updateComboKanaBestScore() {
+    if (!settings.comboKana) return;
+    scoreHistory = normalizeScoreHistory(scoreHistory);
+    const comboKey = settings.comboMode === "same_row" ? "same_row" : "random";
+    scoreHistory.comboKanaBest[comboKey] = Math.max(scoreHistory.comboKanaBest[comboKey] || 0, streak);
+}
+
+function endDailyChallenge() {
+    const dateKey = getTodayKey();
+    const total = dailySequence.length || 20;
+    const timeMs = Math.max(0, Date.now() - dailyStartTime);
+    const existing = dailyChallengeHistory[dateKey];
+
+    sessionStarted = false;
+    sessionStats.active = false;
+    inputEl.disabled = true;
+    sessionActionsEl.style.display = "none";
+    startWrap.style.display = "flex";
+    clearHint();
+    hideComboTierNotice();
+    currentChar = "";
+    hiraganaEl.textContent = "—";
+
+    if (!existing) {
+        dailyChallengeHistory[dateKey] = {
+            sequence: [...dailySequence],
+            officialScore: dailyCorrect,
+            total,
+            timeMs,
+            attempts: 1
+        };
+        gameOverTitleEl.textContent = "Daily Challenge Complete";
+        gameOverAnswerEl.textContent = `Official score recorded: ${dailyCorrect}/${total}`;
+    } else {
+        existing.attempts = (existing.attempts || 1) + 1;
+        if (!existing.sequence) existing.sequence = [...dailySequence];
+        gameOverTitleEl.textContent = "Practice Replay Complete";
+        gameOverAnswerEl.textContent = `Practice replay complete. ${dailyCorrect}/${total} vs Official score ${existing.officialScore}/${existing.total}`;
+    }
+
+    gameOverEl.style.display = "block";
+    buildModifierButtons();
+    buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
+    buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
+    updateTrialConfigVisibility();
+    updateTopStats();
+    renderScoreHistory();
+    applyDailyChallengeTheme();
+    saveAll();
+}
+
+function validRomajiSet() {
+    const sourceMap = getAnswerMapForCurrentMode();
+    return new Set(Object.values(sourceMap));
+}
+
+function updateTopStats() {
+    streakEl.textContent = streak;
+    highScoreEl.textContent = highScore;
+    endlessTotalEl.textContent = endlessRunTotal;
+    endlessWrongEl.textContent = endlessRunWrong;
+
+    const showContinuous = (settings.endless || settings.timeTrial) && sessionStarted && !isDailyChallengeSession();
+    endlessTotalPill.style.display = showContinuous ? "inline-block" : "none";
+    endlessWrongPill.style.display = showContinuous ? "inline-block" : "none";
+
+    const showTrial = settings.timeTrial && sessionStarted && !isDailyChallengeSession();
+    trialTimerPill.style.display = showTrial ? "inline-block" : "none";
+
+    updateDailyChallengePills();
+    applyDailyChallengeTheme();
+}
+
+function renderScoreHistory() {
+    scoreHistory = normalizeScoreHistory(scoreHistory);
+    bestEndlessTotalEl.textContent = scoreHistory.endlessBest.total || 0;
+    bestEndlessCorrectEl.textContent = scoreHistory.endlessBest.correct || 0;
+    bestEndlessWrongEl.textContent = scoreHistory.endlessBest.wrong || 0;
+    comboSameRowBestEl.textContent = scoreHistory.comboKanaBest.same_row || 0;
+    comboRandomBestEl.textContent = scoreHistory.comboKanaBest.random || 0;
+    renderDailyChallengeSummary();
+
+    const list = scoreHistory.timeTrialTop3 || [];
+    if (!list.length) {
+        timeTrialTop3El.innerHTML = `<div class="score-row"><span>No scores yet</span><span>—</span></div>`;
+        return;
+    }
+
+    timeTrialTop3El.innerHTML = list.map((entry, index) => `
+        <div class="score-row">
+            <span>#${index + 1}</span>
+            <span>${entry.time}m / T${entry.target} / S${entry.score}</span>
+        </div>
+    `).join("");
+}
+
+function updateTrialConfigVisibility() {
+    trialConfigEl.style.display = settings.timeTrial && !settings.dailyChallenge ? "flex" : "none";
+    comboConfigEl.style.display = settings.comboKana && !settings.dailyChallenge ? "flex" : "none";
+    comboSameRowBtn.classList.toggle("btn-secondary", settings.comboMode === "same_row");
+    comboRandomBtn.classList.toggle("btn-secondary", settings.comboMode === "random");
+    comboSameRowBtn.disabled = sessionStarted;
+    comboRandomBtn.disabled = sessionStarted;
+}
+
+function applyPanelStates() {
+    modifiersContentEl.classList.toggle("open", settings.activeBottomTab === "modifiers");
+    optionsContentEl.classList.toggle("open", settings.activeBottomTab === "options");
+
+    modifiersTabEl.classList.toggle("active", settings.activeBottomTab === "modifiers");
+    optionsTabEl.classList.toggle("active", settings.activeBottomTab === "options");
+
+    modifiersTabEl.textContent = settings.activeBottomTab === "modifiers" ? "Modifiers ▲" : "Modifiers ▼";
+    optionsTabEl.textContent = settings.activeBottomTab === "options" ? "Options ▲" : "Options ▼";
+
+    statsContentEl.classList.toggle("hidden", !settings.statsVisible);
+    statsChevronEl.textContent = settings.statsVisible ? "▼" : "▲";
+
+    scoresContentEl.classList.toggle("hidden", !settings.scoresVisible);
+    scoresChevronEl.textContent = settings.scoresVisible ? "▼" : "▲";
+
+    document.body.classList.toggle("mobile-mode", !!settings.mobileMode);
+}
+
+function setBottomTab(tabName) {
+    settings.activeBottomTab = settings.activeBottomTab === tabName ? null : tabName;
+    applyPanelStates();
+    saveAll();
+}
+
+function isModeLocked() { return sessionStarted; }
+
+function makeToggleButton(label, active, onClick, disabled = false) {
+    const div = document.createElement("div");
+    div.className = "toggle-btn" + (active ? " active" : "") + (disabled ? " disabled" : "");
+    div.textContent = label;
+    div.onclick = () => {
+        if (disabled) return;
+        onClick();
+    };
+    return div;
+}
+
+function buildModifierButtons() {
+    const modes = [
+        ["hint", "Hint Mode"],
+        ["endless", "Endless Mode"],
+        ["timeTrial", "Time Trial Mode"],
+        ["dailyChallenge", "Daily Challenge"],
+        ["comboKana", "Combo Kana Mode"],
+        ["focusWeak", "Focus Weak"],
+        ["dakuten", "Dakuten"]
+    ];
+
+    const container = document.getElementById("modifierOptions");
+    container.innerHTML = "";
+    const lockedModes = isModeLocked();
+
+    for (const [key, label] of modes) {
+        const btn = makeToggleButton(label, settings[key], () => {
+            if (key === "timeTrial") {
+                settings.timeTrial = !settings.timeTrial;
+                if (settings.timeTrial) {
+                    settings.endless = false;
+                    settings.dailyChallenge = false;
+                }
+            } else if (key === "endless") {
+                settings.endless = !settings.endless;
+                if (settings.endless) {
+                    settings.timeTrial = false;
+                    settings.dailyChallenge = false;
+                }
+            } else if (key === "dailyChallenge") {
+                settings.dailyChallenge = !settings.dailyChallenge;
+                if (settings.dailyChallenge) {
+                    settings.timeTrial = false;
+                    settings.endless = false;
+                    settings.comboKana = false;
+                    settings.hint = false;
+                }
+            } else if (key === "comboKana") {
+                settings.comboKana = !settings.comboKana;
+                if (settings.comboKana) settings.dailyChallenge = false;
+            } else {
+                settings[key] = !settings[key];
+            }
+            updateTrialConfigVisibility();
+            updateTopStats();
+            onSettingsChanged();
+        }, lockedModes);
+        container.appendChild(btn);
+    }
+}
+
+function buildOptionButtons() {
+    const modes = [
+        ["srs", "SRS Mode"],
+        ["mobileMode", "Mobile/iPad"]
+    ];
+
+    const container = document.getElementById("optionButtons");
+    container.innerHTML = "";
+    const lockedModes = isModeLocked();
+
+    for (const [key, label] of modes) {
+        const btn = makeToggleButton(label, settings[key], () => {
+            settings[key] = !settings[key];
+            onSettingsChanged();
+        }, lockedModes);
+        container.appendChild(btn);
+    }
+}
+
+function buildRows(containerId, sourceRows, selectedRowsKey, displayPrefix) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    const lockedModes = isModeLocked();
+
+    for (const row of Object.keys(sourceRows)) {
+        const label = row.replace(displayPrefix, "");
+        const btn = makeToggleButton(label, settings[selectedRowsKey].includes(row), () => {
+            const arr = settings[selectedRowsKey];
+            if (arr.includes(row)) {
+                settings[selectedRowsKey] = arr.filter(r => r !== row);
+            } else {
+                settings[selectedRowsKey] = [...arr, row];
+            }
+            onSettingsChanged();
+        }, lockedModes);
+        container.appendChild(btn);
+    }
+}
+
+function heatmapColor(char) {
+    const { correct, wrong } = getStats(char);
+    const total = correct + wrong;
+    if (total === 0) return "var(--neutral)";
+    if (wrong > correct) return "var(--red)";
+    if (correct > wrong) return "var(--green)";
+    return "var(--yellow)";
+}
+
+function renderHeatmap() {
+    heatmapEl.innerHTML = "";
+
+    for (const ch of activeChars) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.textContent = ch;
+        cell.style.background = heatmapColor(ch);
+
+        cell.onclick = (e) => {
+            e.stopPropagation();
+            const st = getStats(ch);
+            const tm = getAverageTime(ch);
+            const sr = getSrs(ch);
+
+            popupEl.innerHTML = `
+                <div class="popup-title">${ch}</div>
+                <div>Right: ${st.correct}</div>
+                <div>Wrong: ${st.wrong}</div>
+                <div>Avg time: ${formatDuration(tm)}</div>
+                <div>SRS level: ${sr.level}</div>
+            `;
+
+            popupEl.style.display = "block";
+
+            if (settings.mobileMode) {
+                popupEl.style.left = "50%";
+                popupEl.style.top = "50%";
+                popupEl.style.transform = "translate(-50%, -50%)";
+            } else {
+                popupEl.style.transform = "none";
+                const x = Math.min(window.innerWidth - 180, e.clientX + 10);
+                const y = Math.min(window.innerHeight - 120, e.clientY + 10);
+                popupEl.style.left = x + "px";
+                popupEl.style.top = y + "px";
+            }
+        };
+
+        heatmapEl.appendChild(cell);
+    }
+}
+
+function closePopup() { popupEl.style.display = "none"; }
+document.addEventListener("click", closePopup);
+
+function onSettingsChanged() {
+    rebuildCharMap();
+    ensureDataObjects();
+    buildModifierButtons();
+    buildOptionButtons();
+    buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
+    buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
+    applyPanelStates();
+    updateTrialConfigVisibility();
+    renderHeatmap();
+    updateTopStats();
+    renderScoreHistory();
+    saveAll();
+
+    if (sessionStarted && !locked) nextCharacter();
+}
+
+function getEligiblePool() {
+    let pool = [...activeChars];
+    if (pool.length === 0) return [];
+
+    if (settings.srs) {
+        const now = Date.now();
+        const duePool = pool.filter(ch => getSrs(ch).due <= now);
+        if (duePool.length > 0) pool = duePool;
+    }
+
+    return pool;
+}
+
+function weightedPick(pool) {
+    if (pool.length === 0) return null;
+    if (pool.length === 1) return pool[0];
+
+    const now = Date.now();
+    const weighted = [];
+
+    for (const ch of pool) {
+        const st = getStats(ch);
+        const sr = getSrs(ch);
+        let weight = 1;
+
+        if (settings.focusWeak) {
+            weight += Math.max(0, st.wrong * 2 - st.correct);
+        }
+
+        if (settings.srs) {
+            const overdueMs = Math.max(0, now - sr.due);
+            weight += Math.min(12, Math.floor(overdueMs / 5000));
+            weight += Math.max(0, 4 - sr.level);
+            if (sr.lastWrong && now - sr.lastWrong < 30000) weight += 5;
+        }
+
+        weight = Math.max(1, weight);
+        for (let i = 0; i < weight; i++) weighted.push(ch);
+    }
+
+    return weighted[Math.floor(Math.random() * weighted.length)];
+}
+
+function clearHint() {
+    clearTimeout(hintTimeout);
+    hintEl.textContent = "";
+}
+
+function getRowKeyForChar(char) {
+    for (const [rowKey, mapping] of Object.entries(hiraganaRows)) {
+        if (char in mapping) return rowKey.replace(/^h_/, "");
+    }
+    for (const [rowKey, mapping] of Object.entries(katakanaRows)) {
+        if (char in mapping) return rowKey.replace(/^k_/, "");
+    }
+    return null;
+}
+
+function getComboLength() {
+    if (!settings.comboKana) return 1;
+    if (streak >= 25) return 4;
+    if (streak >= 10) return 3;
+    return 2;
+}
+
+function getComboTierLabel(length) {
+    return `${length} Kana Combo`;
+}
+
+function hideComboTierNotice() {
+    clearTimeout(comboTierNoticeTimeout);
+    comboTierNoticeEl.textContent = "";
+    comboTierNoticeEl.classList.remove("show");
+}
+
+function showComboTierNotice(length) {
+    if (!settings.comboKana || !sessionStarted || length <= 1) return;
+    clearTimeout(comboTierNoticeTimeout);
+    comboTierNoticeEl.textContent = `Tier up! ${getComboTierLabel(length)}`;
+    comboTierNoticeEl.classList.add("show");
+    comboTierNoticeTimeout = setTimeout(() => {
+        comboTierNoticeEl.classList.remove("show");
+    }, 1600);
+}
+
+function buildComboCharacters(pool, firstPick) {
+    const comboLength = getComboLength();
+    const chars = [firstPick];
+
+    if (settings.comboMode === "same_row") {
+        const firstRow = getRowKeyForChar(firstPick);
+        let sameRowPool = pool.filter(ch => getRowKeyForChar(ch) === firstRow);
+        if (sameRowPool.length === 0) sameRowPool = [firstPick];
+
+        while (chars.length < comboLength) {
+            const nextPick = sameRowPool[Math.floor(Math.random() * sameRowPool.length)] || firstPick;
+            chars.push(nextPick);
+        }
+        return chars;
+    }
+
+    while (chars.length < comboLength) {
+        chars.push(weightedPick(pool) || firstPick);
+    }
+
+    return chars;
+}
+
+function scheduleHint() {
+    clearHint();
+    if (!settings.hint || !currentChar || !sessionStarted) return;
+
+    const avg = currentChar.split("").reduce((sum, ch) => sum + getAverageTime(ch), 0) / Math.max(1, currentChar.length);
+    const delay = Math.max(600, Math.round(avg * 1.2));
+
+    hintTimeout = setTimeout(() => {
+        const answer = getAnswerForCurrentChar();
+        if (!answer || locked || !sessionStarted) return;
+        hintEl.textContent = answer[0] + "_".repeat(Math.max(0, answer.length - 1));
+    }, delay);
+}
+
+function showIdleState() {
+    clearHint();
+    hideComboTierNotice();
+    stopTrialTimer();
+    currentChar = "";
+    hiraganaEl.textContent = "—";
+    hiraganaEl.classList.remove("flash-correct", "flash-wrong");
+    inputEl.value = "";
+    inputEl.disabled = true;
+    startWrap.style.display = "flex";
+    sessionActionsEl.style.display = "none";
+    gameOverEl.style.display = "none";
+    gameOverTitleEl.textContent = "Wrong";
+    gameOverAnswerEl.textContent = "";
+    trialTimerPill.style.display = "none";
+    updateDailyChallengePills();
+    applyDailyChallengeTheme();
+}
+
+function nextCharacter() {
+    if (!sessionStarted) return;
+
+    clearHint();
+    closePopup();
+    inputEl.value = "";
+
+    if (isDailyChallengeSession()) {
+        if (dailyIndex >= dailySequence.length) {
+            endDailyChallenge();
+            return;
+        }
+
+        currentChar = dailySequence[dailyIndex] || "あ";
+        hiraganaEl.textContent = currentChar;
+        hiraganaEl.classList.remove("flash-correct", "flash-wrong");
+        charStartTime = Date.now();
+        gameOverTitleEl.textContent = "Wrong";
+        gameOverAnswerEl.textContent = "";
+        hideComboTierNotice();
+        inputEl.disabled = false;
+        inputEl.focus();
+        updateTopStats();
+        return;
+    }
+
+    rebuildCharMap();
+    ensureDataObjects();
+
+    const pool = getEligiblePool();
+    const firstPick = weightedPick(pool) || activeChars[0] || "あ";
+    let displayValue = firstPick;
+
+    if (settings.comboKana && activeChars.length > 0) {
+        displayValue = buildComboCharacters(pool, firstPick).join("");
+    }
+
+    currentChar = displayValue;
+    hiraganaEl.textContent = currentChar;
+    hiraganaEl.classList.remove("flash-correct", "flash-wrong");
+    charStartTime = Date.now();
+    gameOverTitleEl.textContent = "Wrong";
+    gameOverAnswerEl.textContent = "";
+
+    scheduleHint();
+    inputEl.disabled = false;
+    inputEl.focus();
+}
+
+function startTrialTimer(durationMinutes) {
+    stopTrialTimer();
+    trialEndTime = Date.now() + durationMinutes * 60 * 1000;
+    trialTimerPill.style.display = "inline-block";
+
+    const tick = () => {
+        const remaining = Math.max(0, trialEndTime - Date.now());
+        trialTimerEl.textContent = formatCountdown(remaining);
+        if (remaining <= 0) {
+            stopTrialTimer();
+            endSession(true);
+        }
+    };
+
+    tick();
+    trialTimerId = setInterval(tick, 100);
+}
+
+function stopTrialTimer() {
+    if (trialTimerId) {
+        clearInterval(trialTimerId);
+        trialTimerId = null;
+    }
+    trialTimerPill.style.display = "none";
+}
+
+function startSession() {
+    sessionStarted = true;
+    sessionStats = createEmptySessionStats();
+    sessionStats.active = true;
+    sessionStats.startTime = Date.now();
+
+    streak = 0;
+    endlessRunTotal = 0;
+    endlessRunWrong = 0;
+    lastComboLength = getComboLength();
+    hideComboTierNotice();
+
+    if (isDailyChallengeSession()) {
+        dailySequence = buildDailySequence();
+        dailyIndex = 0;
+        dailyCorrect = 0;
+        dailyWrong = 0;
+        dailyStartTime = Date.now();
+    }
+
+    updateTopStats();
+
+    gameOverEl.style.display = "none";
+    gameOverTitleEl.textContent = "Wrong";
+    startWrap.style.display = "none";
+    sessionActionsEl.style.display = "flex";
+    inputEl.disabled = false;
+
+    if (settings.timeTrial && !isDailyChallengeSession()) {
+        const timeMinutes = Math.max(0.1, Number(trialTimeEl.value) || 0.5);
+        trialTarget = Math.max(1, Number(trialTargetEl.value) || 20);
+        startTrialTimer(timeMinutes);
+    } else {
+        trialTarget = 0;
+        trialTimerPill.style.display = "none";
+    }
+
+    onSettingsChanged();
+}
+
+function updateAverageTime(char, timeTaken) {
+    const entry = times[char] || { avg: 1200, count: 0 };
+    entry.avg = Math.round((entry.avg * entry.count + timeTaken) / (entry.count + 1));
+    entry.count += 1;
+    times[char] = entry;
+}
+
+function updateSrsCorrect(char) {
+    const entry = srs[char] || { level: 0, due: 0, lastSeen: 0, lastWrong: 0 };
+    entry.level = Math.min(entry.level + 1, 8);
+    const intervals = [3000, 8000, 15000, 30000, 60000, 120000, 300000, 600000, 1200000];
+    const delay = intervals[entry.level] ?? 1200000;
+    entry.due = Date.now() + delay;
+    entry.lastSeen = Date.now();
+    srs[char] = entry;
+}
+
+function updateSrsWrong(char) {
+    const entry = srs[char] || { level: 0, due: 0, lastSeen: 0, lastWrong: 0 };
+    entry.level = 0;
+    entry.due = Date.now() + 2000;
+    entry.lastSeen = Date.now();
+    entry.lastWrong = Date.now();
+    srs[char] = entry;
+}
+
+function updateSessionChar(char, correct, timeTaken) {
+    if (!sessionStats.perChar[char]) {
+        sessionStats.perChar[char] = { correct: 0, wrong: 0, times: [] };
+    }
+    const entry = sessionStats.perChar[char];
+    if (correct) entry.correct += 1;
+    else entry.wrong += 1;
+    entry.times.push(timeTaken);
+}
+
+function flashResult(correct, onDone) {
+    locked = true;
+    hiraganaEl.classList.remove("flash-correct", "flash-wrong");
+    hiraganaEl.classList.add(correct ? "flash-correct" : "flash-wrong");
+
+    setTimeout(() => {
+        hiraganaEl.classList.remove("flash-correct", "flash-wrong");
+        locked = false;
+        if (onDone) onDone();
+    }, correct ? 260 : 420);
+}
+
+function currentFlowModeIsContinuous() {
+    return settings.endless || settings.timeTrial;
+}
+
+function getAnswerForCurrentChar() {
+    const sourceMap = getAnswerMapForCurrentMode();
+    return currentChar.split("").map(ch => sourceMap[ch] || "").join("");
+}
+
+function getDisplayAnswerForCurrentChar() {
+    const sourceMap = getAnswerMapForCurrentMode();
+    const parts = currentChar.split("").map(ch => sourceMap[ch] || "");
+    return settings.comboKana ? parts.join(" + ") : parts.join("");
+}
+
+function handleCorrect() {
+    const timeTaken = Date.now() - charStartTime;
+
+    for (const ch of currentChar.split("")) {
+        if (!stats[ch]) stats[ch] = { correct: 0, wrong: 0 };
+        stats[ch].correct += 1;
+        updateAverageTime(ch, timeTaken / Math.max(1, currentChar.length));
+        updateSrsCorrect(ch);
+    }
+
+    streak += 1;
+    highScore = Math.max(highScore, streak);
+    updateComboKanaBestScore();
+
+    const nextComboLength = getComboLength();
+    if (settings.comboKana && nextComboLength > lastComboLength) showComboTierNotice(nextComboLength);
+    lastComboLength = nextComboLength;
+
+    sessionStats.answered += 1;
+    sessionStats.correct += 1;
+    sessionStats.timings.push(timeTaken);
+    sessionStats.bestStreak = Math.max(sessionStats.bestStreak, streak);
+    updateSessionChar(currentChar, true, timeTaken);
+
+    if (isDailyChallengeSession()) {
+        dailyCorrect += 1;
+        dailyIndex += 1;
+    } else if (currentFlowModeIsContinuous()) endlessRunTotal += 1;
+
+    updateTopStats();
+    renderHeatmap();
+    renderScoreHistory();
+    saveAll();
+
+    flashResult(true, () => nextCharacter());
+}
+
+function handleWrong() {
+    const timeTaken = Date.now() - charStartTime;
+    const correctAnswer = getDisplayAnswerForCurrentChar();
+
+    for (const ch of currentChar.split("")) {
+        if (!stats[ch]) stats[ch] = { correct: 0, wrong: 0 };
+        stats[ch].wrong += 1;
+        updateAverageTime(ch, timeTaken / Math.max(1, currentChar.length));
+        updateSrsWrong(ch);
+    }
+
+    sessionStats.answered += 1;
+    sessionStats.wrong += 1;
+    sessionStats.timings.push(timeTaken);
+    sessionStats.bestStreak = Math.max(sessionStats.bestStreak, streak);
+    updateSessionChar(currentChar, false, timeTaken);
+
+    if (isDailyChallengeSession()) {
+        dailyWrong += 1;
+        dailyIndex += 1;
+    } else if (currentFlowModeIsContinuous()) {
+        endlessRunTotal += 1;
+        endlessRunWrong += 1;
+    }
+
+    streak = 0;
+    lastComboLength = getComboLength();
+    hideComboTierNotice();
+    updateTopStats();
+    renderHeatmap();
+    saveAll();
+
+    if (isDailyChallengeSession()) {
+        hintEl.textContent = `Answer: ${correctAnswer}`;
+        flashResult(false, () => nextCharacter());
+    } else if (currentFlowModeIsContinuous()) {
+        hintEl.textContent = `Answer: ${correctAnswer}`;
+        flashResult(false, () => nextCharacter());
+    } else {
+        gameOverAnswerEl.textContent = `Correct answer: ${correctAnswer}`;
+        flashResult(false, () => {
+            gameOverEl.style.display = "block";
+            inputEl.disabled = true;
+        });
+    }
+}
+
+inputEl.addEventListener("input", () => {
+    if (!sessionStarted || locked || gameOverEl.style.display === "block") return;
+
+    const value = inputEl.value.trim().toLowerCase();
+    if (!value) return;
+
+    const expected = getAnswerForCurrentChar();
+    const compactValue = value.replace(/\s+/g, "");
+    const valid = validRomajiSet();
+
+    if (compactValue === expected) {
+        handleCorrect();
+        return;
+    }
+
+    if (expected.startsWith(compactValue) && compactValue.length < expected.length) return;
+
+    if (settings.comboKana || isDailyChallengeSession() || valid.has(value) || compactValue.length >= expected.length) {
+        handleWrong();
+    }
+});
+
+retryBtn.addEventListener("click", () => {
+    gameOverEl.style.display = "none";
+    gameOverAnswerEl.textContent = "";
+    startSession();
+});
+
+startBtn.addEventListener("click", startSession);
+
+comboSameRowBtn.addEventListener("click", () => {
+    if (sessionStarted) return;
+    settings.comboMode = "same_row";
+    updateTrialConfigVisibility();
+    saveAll();
+});
+
+comboRandomBtn.addEventListener("click", () => {
+    if (sessionStarted) return;
+    settings.comboMode = "random";
+    updateTrialConfigVisibility();
+    saveAll();
+});
+
+function average(arr) {
+    if (!arr.length) return 0;
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function updateBestScores() {
+    scoreHistory = normalizeScoreHistory(scoreHistory);
+
+    if (settings.comboKana) {
+        updateComboKanaBestScore();
+    }
+
+    if (settings.endless) {
+        const correct = Math.max(0, endlessRunTotal - endlessRunWrong);
+        if (correct > (scoreHistory.endlessBest.correct || 0)) {
+            scoreHistory.endlessBest = {
+                total: endlessRunTotal,
+                correct,
+                wrong: endlessRunWrong
+            };
+        }
+    }
+
+    if (settings.timeTrial) {
+        const timeVal = Number(trialTimeEl.value) || 0.5;
+        const entry = {
+            time: timeVal,
+            target: trialTarget || Math.max(1, Number(trialTargetEl.value) || 20),
+            score: sessionStats.correct,
+            ratio: sessionStats.correct / Math.max(0.1, timeVal),
+            overTarget: sessionStats.correct - (trialTarget || Math.max(1, Number(trialTargetEl.value) || 20))
+        };
+
+        scoreHistory.timeTrialTop3.push(entry);
+        scoreHistory.timeTrialTop3.sort((a, b) => {
+            if (b.overTarget !== a.overTarget) return b.overTarget - a.overTarget;
+            if (b.ratio !== a.ratio) return b.ratio - a.ratio;
+            return b.score - a.score;
+        });
+        scoreHistory.timeTrialTop3 = scoreHistory.timeTrialTop3.slice(0, 3);
+    }
+
+    renderScoreHistory();
+    saveAll();
+}
+
+function getSessionDifficultyLists() {
+    const entries = Object.entries(sessionStats.perChar).map(([char, data]) => {
+        const attempts = data.correct + data.wrong;
+        const accuracy = attempts ? (data.correct / attempts) : 0;
+        return {
+            char,
+            correct: data.correct,
+            wrong: data.wrong,
+            attempts,
+            accuracy,
+            avgTime: average(data.times)
+        };
+    });
+
+    const hardest = [...entries]
+        .sort((a, b) => {
+            if (a.accuracy !== b.accuracy) return a.accuracy - b.accuracy;
+            return b.wrong - a.wrong;
+        })
+        .slice(0, 5);
+
+    const easiest = [...entries]
+        .sort((a, b) => {
+            if (a.accuracy !== b.accuracy) return b.accuracy - a.accuracy;
+            return a.avgTime - b.avgTime;
+        })
+        .slice(0, 5);
+
+    return { hardest, easiest };
+}
+
+function renderSessionList(container, title, items) {
+    if (!items.length) {
+        container.style.display = "none";
+        container.innerHTML = "";
+        return;
+    }
+
+    container.style.display = "block";
+    container.innerHTML =
+        `<h3>${title}</h3>` +
+        items.map(item => `
+            <div class="session-list-item">
+                <span>${item.char}</span>
+                <span>${item.correct}✓ / ${item.wrong}✗</span>
+            </div>
+        `).join("");
+}
+
+function showSessionModal(autoEnded = false) {
+    sessionStats.endTime = Date.now();
+
+    const total = sessionStats.answered;
+    const accuracy = total ? ((sessionStats.correct / total) * 100) : 0;
+    const avgTime = sessionStats.timings.length ? average(sessionStats.timings) : 0;
+    const fastest = sessionStats.timings.length ? Math.min(...sessionStats.timings) : 0;
+    const slowest = sessionStats.timings.length ? Math.max(...sessionStats.timings) : 0;
+    const durationMs = sessionStats.startTime ? (sessionStats.endTime - sessionStats.startTime) : 0;
+
+    const cards = [
+        ["Answered", total],
+        ["Right", sessionStats.correct],
+        ["Wrong", sessionStats.wrong],
+        ["Accuracy", `${accuracy.toFixed(1)}%`],
+        ["Best Streak", sessionStats.bestStreak],
+        ["Avg Time", formatDuration(avgTime)],
+        ["Fastest", formatDuration(fastest)],
+        ["Slowest", formatDuration(slowest)],
+        ["Session Time", formatDuration(durationMs)]
+    ];
+
+    if (settings.timeTrial) {
+        cards.push(["Target", trialTarget]);
+        cards.push(["Final Score", sessionStats.correct]);
+    }
+
+    sessionStatsGrid.innerHTML = cards.map(([label, value]) => `
+        <div class="stat-card">
+            <div class="label">${label}</div>
+            <div class="value">${value}</div>
+        </div>
+    `).join("");
+
+    const titleEl = sessionModalBackdrop.querySelector("h2");
+    titleEl.textContent = autoEnded ? "Time Trial Complete" : "Session Stats";
+
+    const { hardest, easiest } = getSessionDifficultyLists();
+    renderSessionList(sessionHardList, "Hardest This Session", hardest);
+    renderSessionList(sessionEasyList, "Strongest This Session", easiest);
+
+    sessionModalBackdrop.classList.add("open");
+}
+
+function endSession(autoEnded = false) {
+    hideComboTierNotice();
+    if (!sessionStarted) return;
+
+    if (isDailyChallengeSession()) {
+        sessionStarted = false;
+        sessionStats.active = false;
+        stopTrialTimer();
+        inputEl.disabled = true;
+        gameOverEl.style.display = "none";
+        sessionActionsEl.style.display = "none";
+        startWrap.style.display = "flex";
+        clearHint();
+        hiraganaEl.textContent = "—";
+        currentChar = "";
+        updateTopStats();
+        onSettingsChanged();
+        return;
+    }
+
+    sessionStarted = false;
+    sessionStats.active = false;
+    stopTrialTimer();
+    updateBestScores();
+
+    inputEl.disabled = true;
+    gameOverEl.style.display = "none";
+    sessionActionsEl.style.display = "none";
+    startWrap.style.display = "flex";
+    clearHint();
+    hiraganaEl.textContent = "—";
+    currentChar = "";
+
+    showSessionModal(autoEnded);
+    updateTopStats();
+    onSettingsChanged();
+}
+
+endSessionBtn.addEventListener("click", () => endSession(false));
+
+closeSessionModalBtn.addEventListener("click", () => {
+    sessionModalBackdrop.classList.remove("open");
+});
+
+sessionModalBackdrop.addEventListener("click", (e) => {
+    if (e.target === sessionModalBackdrop) {
+        sessionModalBackdrop.classList.remove("open");
+    }
+});
+
+function makeExportPayload() {
+    return {
+        version: "2.2",
+        exportedAt: new Date().toISOString(),
+        settings,
+        stats,
+        times,
+        srs,
+        scoreHistory,
+        dailyChallengeHistory,
+        highScore
+    };
+}
+
+function exportData() {
+    const payload = makeExportPayload();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "kana-trainer-save.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+}
+
+async function copySaveData() {
+    const payload = JSON.stringify(makeExportPayload(), null, 2);
+
+    try {
+        await navigator.clipboard.writeText(payload);
+        alert("Save data copied to clipboard.");
+    } catch {
+        importTextarea.value = payload;
+        importModalBackdrop.classList.add("open");
+        alert("Clipboard copy was not available. Your save data has been placed in the import box so you can copy it manually.");
+    }
+}
+
+exportBtn.addEventListener("click", exportData);
+copySaveBtn.addEventListener("click", copySaveData);
+
+function openImportModal() {
+    importTextarea.value = "";
+    importModalBackdrop.classList.add("open");
+}
+
+function closeImportModal() {
+    importModalBackdrop.classList.remove("open");
+}
+
+importBtn.addEventListener("click", openImportModal);
+closeImportModalBtn.addEventListener("click", closeImportModal);
+
+importModalBackdrop.addEventListener("click", (e) => {
+    if (e.target === importModalBackdrop) closeImportModal();
+});
+
+importFileBtn.addEventListener("click", () => {
+    importFile.click();
+});
+
+importFile.addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const text = await file.text();
+    importTextarea.value = text;
+    importFile.value = "";
+});
+
+function applyImportedData(payload) {
+    if (!payload || typeof payload !== "object") {
+        throw new Error("Invalid save data.");
+    }
+
+    stats = payload.stats || {};
+    times = payload.times || {};
+    srs = payload.srs || {};
+    scoreHistory = normalizeScoreHistory(payload.scoreHistory || createDefaultScoreHistory());
+    dailyChallengeHistory = payload.dailyChallengeHistory || {};
+    highScore = Number(payload.highScore || 0);
+    settings = { ...DEFAULT_SETTINGS, ...(payload.settings || settings) };
+
+    streak = 0;
+    sessionStarted = false;
+    sessionStats = createEmptySessionStats();
+    endlessRunTotal = 0;
+    endlessRunWrong = 0;
+    dailySequence = [];
+    dailyIndex = 0;
+    dailyCorrect = 0;
+    dailyWrong = 0;
+    dailyStartTime = 0;
+    stopTrialTimer();
+
+    rebuildCharMap();
+    ensureDataObjects();
+    buildModifierButtons();
+    buildOptionButtons();
+    buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
+    buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
+    applyPanelStates();
+    updateTrialConfigVisibility();
+    updateTopStats();
+    renderHeatmap();
+    renderScoreHistory();
+    showIdleState();
+    saveAll();
+}
+
+confirmImportBtn.addEventListener("click", () => {
+    try {
+        const raw = importTextarea.value.trim();
+        if (!raw) {
+            alert("Paste save data first, or choose a file.");
+            return;
+        }
+
+        const payload = JSON.parse(raw);
+        applyImportedData(payload);
+        closeImportModal();
+        alert("Save data imported.");
+    } catch {
+        alert("Import failed. Make sure the JSON is valid.");
+    }
+});
+
+resetBtn.addEventListener("click", () => {
+    const confirmed = confirm("Reset all stats, timing, SRS progress, session history, and high score tables?");
+    if (!confirmed) return;
+
+    stats = {};
+    times = {};
+    srs = {};
+    scoreHistory = createDefaultScoreHistory();
+    dailyChallengeHistory = {};
+    highScore = 0;
+    streak = 0;
+    sessionStarted = false;
+    sessionStats = createEmptySessionStats();
+    endlessRunTotal = 0;
+    endlessRunWrong = 0;
+    dailySequence = [];
+    dailyIndex = 0;
+    dailyCorrect = 0;
+    dailyWrong = 0;
+    dailyStartTime = 0;
+    stopTrialTimer();
+
+    localStorage.removeItem("charStats");
+    localStorage.removeItem("charTimes");
+    localStorage.removeItem("charSrs");
+    localStorage.removeItem("scoreHistory");
+    localStorage.removeItem("dailyChallengeHistory");
+    localStorage.removeItem("highScore");
+
+    rebuildCharMap();
+    ensureDataObjects();
+    updateTopStats();
+    renderHeatmap();
+    renderScoreHistory();
+    saveAll();
+
+    sessionModalBackdrop.classList.remove("open");
+    importModalBackdrop.classList.remove("open");
+    gameOverEl.style.display = "none";
+    showIdleState();
+    onSettingsChanged();
+});
+
+modifiersTabEl.addEventListener("click", () => setBottomTab("modifiers"));
+optionsTabEl.addEventListener("click", () => setBottomTab("options"));
+
+statsHeaderEl.addEventListener("click", () => {
+    settings.statsVisible = !settings.statsVisible;
+    applyPanelStates();
+    saveAll();
+});
+
+scoresHeaderEl.addEventListener("click", () => {
+    settings.scoresVisible = !settings.scoresVisible;
+    applyPanelStates();
+    saveAll();
+});
+
+function init() {
+    rebuildCharMap();
+
+    if (!Array.isArray(settings.hiraganaRows)) settings.hiraganaRows = Object.keys(hiraganaRows);
+    if (!Array.isArray(settings.katakanaRows)) settings.katakanaRows = [];
+    if (!["same_row", "random"].includes(settings.comboMode)) settings.comboMode = "random";
+    scoreHistory = normalizeScoreHistory(scoreHistory);
+
+    ensureDataObjects();
+    buildModifierButtons();
+    buildOptionButtons();
+    buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
+    buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
+    applyPanelStates();
+    updateTrialConfigVisibility();
+    updateTopStats();
+    renderHeatmap();
+    renderScoreHistory();
+    showIdleState();
+    saveAll();
+}
+
+init();
+</script>
+</body>
+</html>
