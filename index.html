@@ -128,7 +128,6 @@
     }
     .span-4 { grid-column: span 4; }
     .span-6 { grid-column: span 6; }
-    .span-8 { grid-column: span 8; }
     .span-12 { grid-column: span 12; }
     .card h2 {
         margin: 0 0 12px;
@@ -185,17 +184,8 @@
         color: var(--muted);
         margin-top: 10px;
     }
-    .pill {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 999px;
-        background: #262626;
-        border: 1px solid var(--border);
-        font-size: 12px;
-        color: #ddd;
-    }
     @media (max-width: 900px) {
-        .span-4, .span-6, .span-8 { grid-column: span 12; }
+        .span-4, .span-6 { grid-column: span 12; }
     }
     @media (max-width: 640px) {
         body { padding: 14px; }
@@ -213,53 +203,72 @@
             <div>
                 <div class="hero-badges">
                     <div class="badge gold">Home Dashboard</div>
-                    <div class="badge blue">Shared Progress Overview</div>
+                    <div class="badge blue">Reading + Writing Overview</div>
                 </div>
                 <h1>Kana Trainer</h1>
-                <div class="subline">Use this page as the hub for the standard trainer, reverse mode, and long-term progress. It shows your current main app stats, daily challenge progress, and a place for reverse mode data as that page grows.</div>
+                <div class="subline">Use this page as the hub for Reading Practice and Writing Practice. It shows both modes side by side, including each app's records, daily challenge data, and long-term progress.</div>
                 <div class="actions">
-                    <a class="btn btn-primary" href="default.html">Open Standard Trainer</a>
-                    <a class="btn btn-secondary" href="reverse.html">Open Reverse Mode</a>
+                    <a class="btn btn-primary" href="default.html">Open Reading Practice</a>
+                    <a class="btn btn-secondary" href="reverse.html">Open Writing Practice <span class="badge">Beta</span></a>
                 </div>
+                <div class="tiny">v2.3</div>
             </div>
         </div>
     </div>
 
     <div class="grid">
-        <div class="card span-4">
-            <h2>Standard Trainer Snapshot</h2>
-            <div class="stats-grid" id="standardStats"></div>
-            <div class="tiny">Pulled from the main trainer save data.</div>
-        </div>
-
-        <div class="card span-4">
-            <h2>Daily Challenge Today</h2>
-            <div class="stats-grid" id="dailyToday"></div>
-            <div class="tiny">First completed run remains the official score for the day.</div>
-        </div>
-
-        <div class="card span-4">
-            <h2>Reverse Mode</h2>
-            <div class="list" id="reverseSummary"></div>
-            <div class="tiny">This card is ready for reverse mode stats once that page starts saving its own progress.</div>
+        <div class="card span-6">
+            <h2>Reading Practice Snapshot</h2>
+            <div class="stats-grid" id="readingStats"></div>
         </div>
 
         <div class="card span-6">
-            <h2>Main App Records</h2>
-            <div class="list" id="recordList"></div>
+            <h2>Writing Practice Snapshot</h2>
+            <div class="stats-grid" id="writingStats"></div>
         </div>
 
         <div class="card span-6">
-            <h2>Overall Learning Stats</h2>
-            <div class="list" id="learningList"></div>
+            <h2>Reading Daily Challenge</h2>
+            <div class="stats-grid" id="readingDailyToday"></div>
         </div>
 
-        <div class="card span-12">
-            <h2>Daily Challenge History</h2>
+        <div class="card span-6">
+            <h2>Writing Daily Challenge</h2>
+            <div class="stats-grid" id="writingDailyToday"></div>
+        </div>
+
+        <div class="card span-6">
+            <h2>Reading Practice Records</h2>
+            <div class="list" id="readingRecordList"></div>
+        </div>
+
+        <div class="card span-6">
+            <h2>Writing Practice Records</h2>
+            <div class="list" id="writingRecordList"></div>
+        </div>
+
+        <div class="card span-6">
+            <h2>Reading Learning Stats</h2>
+            <div class="list" id="readingLearningList"></div>
+        </div>
+
+        <div class="card span-6">
+            <h2>Writing Learning Stats</h2>
+            <div class="list" id="writingLearningList"></div>
+        </div>
+
+        <div class="card span-6">
+            <h2>Reading Daily Challenge History</h2>
             <div class="history-wrap">
-                <div class="history" id="dailyHistory"></div>
+                <div class="history" id="readingDailyHistory"></div>
             </div>
-            <div class="tiny">The homepage shows your full saved history so a future dedicated history page can build on the same data.</div>
+        </div>
+
+        <div class="card span-6">
+            <h2>Writing Daily Challenge History</h2>
+            <div class="history-wrap">
+                <div class="history" id="writingDailyHistory"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -288,94 +297,147 @@ function row(label, value, extra='') {
     return `<div class="row"><div><strong>${label}</strong>${extra ? `<div class="muted">${extra}</div>` : ''}</div><div>${value}</div></div>`;
 }
 
-const charStats = loadJSON('charStats', {});
-const scoreHistory = loadJSON('scoreHistory', {
+function normalizeScoreHistory(data) {
+    return {
+        endlessBest: { total: 0, correct: 0, wrong: 0, ...((data || {}).endlessBest || {}) },
+        comboKanaBest: { same_row: 0, random: 0, ...((data || {}).comboKanaBest || {}) },
+        timeTrialTop3: Array.isArray((data || {}).timeTrialTop3) ? data.timeTrialTop3 : []
+    };
+}
+
+function buildModeSummary({ stats, scoreHistory, dailyHistory, highScore }) {
+    const entries = Object.entries(stats || {});
+    let totalCorrect = 0;
+    let totalWrong = 0;
+    let practicedChars = 0;
+    let toughest = null;
+    let strongest = null;
+
+    for (const [ch, stat] of entries) {
+        const c = Number(stat.correct || 0);
+        const w = Number(stat.wrong || 0);
+        const attempts = c + w;
+        totalCorrect += c;
+        totalWrong += w;
+        if (attempts > 0) practicedChars += 1;
+        const accuracy = attempts ? c / attempts : 0;
+        if (attempts > 0) {
+            if (!toughest || accuracy < toughest.accuracy || (accuracy === toughest.accuracy && attempts > toughest.attempts)) toughest = { ch, accuracy, attempts };
+            if (!strongest || accuracy > strongest.accuracy || (accuracy === strongest.accuracy && attempts > strongest.attempts)) strongest = { ch, accuracy, attempts };
+        }
+    }
+
+    const totalAttempts = totalCorrect + totalWrong;
+    const accuracyPct = totalAttempts ? `${Math.round((totalCorrect / totalAttempts) * 100)}%` : '—';
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const today = (dailyHistory || {})[todayKey];
+    const topTimeTrial = Array.isArray(scoreHistory.timeTrialTop3) && scoreHistory.timeTrialTop3.length ? scoreHistory.timeTrialTop3[0] : null;
+
+    return {
+        totalCorrect,
+        totalWrong,
+        totalAttempts,
+        practicedChars,
+        accuracyPct,
+        toughest,
+        strongest,
+        today,
+        topTimeTrial,
+        highScore: Number(highScore || 0),
+        scoreHistory,
+        dailyHistory: dailyHistory || {}
+    };
+}
+
+function renderStats(targetId, summary) {
+    document.getElementById(targetId).innerHTML = [
+        statCard('High Score', summary.highScore || 0),
+        statCard('Accuracy', summary.accuracyPct),
+        statCard('Chars Practiced', summary.practicedChars),
+        statCard('Total Attempts', summary.totalAttempts || 0)
+    ].join('');
+}
+
+function renderDailyToday(targetId, summary) {
+    const today = summary.today;
+    document.getElementById(targetId).innerHTML = [
+        statCard('Official Score', today ? `${today.officialScore || 0}/${today.total || 20}` : '—'),
+        statCard('Attempts Today', today ? (today.attempts || 1) : 0),
+        statCard('Official Time', today ? formatMs(today.timeMs) : '—'),
+        statCard('Completed', today ? 'Yes' : 'No')
+    ].join('');
+}
+
+function renderRecords(targetId, summary) {
+    const scoreHistory = summary.scoreHistory;
+    const topTimeTrial = summary.topTimeTrial;
+    document.getElementById(targetId).innerHTML = [
+        row('Endless Best', `${scoreHistory.endlessBest?.correct || 0} correct`, `Total ${scoreHistory.endlessBest?.total || 0} · Wrong ${scoreHistory.endlessBest?.wrong || 0}`),
+        row('Combo Best — Same Row', scoreHistory.comboKanaBest?.same_row || 0),
+        row('Combo Best — Random', scoreHistory.comboKanaBest?.random || 0),
+        row('Top Time Trial', topTimeTrial ? `${topTimeTrial.score} score` : '—', topTimeTrial ? `${topTimeTrial.time}m target ${topTimeTrial.target}` : 'No score yet')
+    ].join('');
+}
+
+function renderLearning(targetId, summary) {
+    document.getElementById(targetId).innerHTML = [
+        row('Total Correct', summary.totalCorrect || 0),
+        row('Total Wrong', summary.totalWrong || 0),
+        row('Toughest Kana', summary.toughest ? `${summary.toughest.ch}` : '—', summary.toughest ? `${Math.round(summary.toughest.accuracy * 100)}% across ${summary.toughest.attempts} attempts` : 'No attempts yet'),
+        row('Strongest Kana', summary.strongest ? `${summary.strongest.ch}` : '—', summary.strongest ? `${Math.round(summary.strongest.accuracy * 100)}% across ${summary.strongest.attempts} attempts` : 'No attempts yet')
+    ].join('');
+}
+
+function renderDailyHistory(targetId, dailyHistory) {
+    const rows = Object.entries(dailyHistory || {})
+        .sort((a, b) => b[0].localeCompare(a[0]))
+        .map(([date, entry]) => row(date, `${entry.officialScore || 0}/${entry.total || 20}`, `Time ${formatMs(entry.timeMs)} · Attempts ${entry.attempts || 1}`));
+
+    document.getElementById(targetId).innerHTML = rows.length ? rows.join('') : row('No history yet', '—');
+}
+
+const readingStats = loadJSON('charStats', {});
+const readingScoreHistory = normalizeScoreHistory(loadJSON('scoreHistory', {
     endlessBest: { total: 0, correct: 0, wrong: 0 },
     comboKanaBest: { same_row: 0, random: 0 },
     timeTrialTop3: []
+}));
+const readingDailyHistory = loadJSON('dailyChallengeHistory', {});
+const readingHighScore = Number(localStorage.getItem('highScore') || '0');
+
+const writingStats = loadJSON('reverseCharStats', {});
+const writingScoreHistory = normalizeScoreHistory(loadJSON('reverseScoreHistory', {
+    endlessBest: { total: 0, correct: 0, wrong: 0 },
+    comboKanaBest: { same_row: 0, random: 0 },
+    timeTrialTop3: []
+}));
+const writingDailyHistory = loadJSON('reverseDailyChallengeHistory', {});
+const writingHighScore = Number(localStorage.getItem('reverseHighScore') || '0');
+
+const readingSummary = buildModeSummary({
+    stats: readingStats,
+    scoreHistory: readingScoreHistory,
+    dailyHistory: readingDailyHistory,
+    highScore: readingHighScore
 });
-const dailyHistory = loadJSON('dailyChallengeHistory', {});
-const highScore = Number(localStorage.getItem('highScore') || '0');
-const reverseStats = loadJSON('reverseStats', null);
-const reverseScoreHistory = loadJSON('reverseScoreHistory', null);
 
-const allEntries = Object.entries(charStats);
-let totalCorrect = 0;
-let totalWrong = 0;
-let practicedChars = 0;
-let toughest = null;
-let strongest = null;
-for (const [ch, stat] of allEntries) {
-    const c = Number(stat.correct || 0);
-    const w = Number(stat.wrong || 0);
-    const attempts = c + w;
-    totalCorrect += c;
-    totalWrong += w;
-    if (attempts > 0) practicedChars += 1;
-    const accuracy = attempts ? c / attempts : 0;
-    if (attempts > 0) {
-        if (!toughest || accuracy < toughest.accuracy || (accuracy === toughest.accuracy && attempts > toughest.attempts)) toughest = { ch, accuracy, attempts };
-        if (!strongest || accuracy > strongest.accuracy || (accuracy === strongest.accuracy && attempts > strongest.attempts)) strongest = { ch, accuracy, attempts };
-    }
-}
-const totalAttempts = totalCorrect + totalWrong;
-const accuracyPct = totalAttempts ? `${Math.round((totalCorrect / totalAttempts) * 100)}%` : '—';
+const writingSummary = buildModeSummary({
+    stats: writingStats,
+    scoreHistory: writingScoreHistory,
+    dailyHistory: writingDailyHistory,
+    highScore: writingHighScore
+});
 
-const standardStatsEl = document.getElementById('standardStats');
-standardStatsEl.innerHTML = [
-    statCard('High Score', highScore || 0),
-    statCard('Accuracy', accuracyPct),
-    statCard('Chars Practiced', practicedChars),
-    statCard('Total Attempts', totalAttempts || 0)
-].join('');
-
-const todayKey = new Date().toISOString().slice(0, 10);
-const today = dailyHistory[todayKey];
-const dailyTodayEl = document.getElementById('dailyToday');
-dailyTodayEl.innerHTML = [
-    statCard('Official Score', today ? `${today.officialScore || 0}/${today.total || 20}` : '—'),
-    statCard('Attempts Today', today ? (today.attempts || 1) : 0),
-    statCard('Official Time', today ? formatMs(today.timeMs) : '—'),
-    statCard('Completed', today ? 'Yes' : 'No')
-].join('');
-
-const reverseSummaryEl = document.getElementById('reverseSummary');
-if (reverseStats || reverseScoreHistory) {
-    reverseSummaryEl.innerHTML = [
-        row('Status', 'Active', 'Reverse save data detected'),
-        row('High Score', reverseScoreHistory?.highScore ?? '—'),
-        row('Total Attempts', reverseStats?.totalAttempts ?? '—')
-    ].join('');
-} else {
-    reverseSummaryEl.innerHTML = [
-        row('Status', '<span class="pill">Beta</span>', 'Framework page is live'),
-        row('Stats', 'No saved reverse data yet'),
-        row('Next Step', 'Build full reverse gameplay')
-    ].join('');
-}
-
-const recordListEl = document.getElementById('recordList');
-const topTimeTrial = Array.isArray(scoreHistory.timeTrialTop3) && scoreHistory.timeTrialTop3.length ? scoreHistory.timeTrialTop3[0] : null;
-recordListEl.innerHTML = [
-    row('Endless Best', `${scoreHistory.endlessBest?.correct || 0} correct`, `Total ${scoreHistory.endlessBest?.total || 0} · Wrong ${scoreHistory.endlessBest?.wrong || 0}`),
-    row('Combo Best — Same Row', scoreHistory.comboKanaBest?.same_row || 0),
-    row('Combo Best — Random', scoreHistory.comboKanaBest?.random || 0),
-    row('Top Time Trial', topTimeTrial ? `${topTimeTrial.score} score` : '—', topTimeTrial ? `${topTimeTrial.time}m target ${topTimeTrial.target}` : 'No score yet')
-].join('');
-
-const learningListEl = document.getElementById('learningList');
-learningListEl.innerHTML = [
-    row('Total Correct', totalCorrect || 0),
-    row('Total Wrong', totalWrong || 0),
-    row('Toughest Kana', toughest ? `${toughest.ch}` : '—', toughest ? `${Math.round(toughest.accuracy * 100)}% across ${toughest.attempts} attempts` : 'No attempts yet'),
-    row('Strongest Kana', strongest ? `${strongest.ch}` : '—', strongest ? `${Math.round(strongest.accuracy * 100)}% across ${strongest.attempts} attempts` : 'No attempts yet')
-].join('');
-
-const dailyHistoryEl = document.getElementById('dailyHistory');
-const historyRows = Object.entries(dailyHistory)
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .map(([date, entry]) => row(date, `${entry.officialScore || 0}/${entry.total || 20}`, `Time ${formatMs(entry.timeMs)} · Attempts ${entry.attempts || 1}`));
-dailyHistoryEl.innerHTML = historyRows.length ? historyRows.join('') : row('No history yet', '—', 'Complete a daily challenge to start building the archive.');
+renderStats('readingStats', readingSummary);
+renderStats('writingStats', writingSummary);
+renderDailyToday('readingDailyToday', readingSummary);
+renderDailyToday('writingDailyToday', writingSummary);
+renderRecords('readingRecordList', readingSummary);
+renderRecords('writingRecordList', writingSummary);
+renderLearning('readingLearningList', readingSummary);
+renderLearning('writingLearningList', writingSummary);
+renderDailyHistory('readingDailyHistory', readingSummary.dailyHistory);
+renderDailyHistory('writingDailyHistory', writingSummary.dailyHistory);
 </script>
 </body>
 </html>

@@ -749,9 +749,9 @@
 <body>
 <div class="app-shell">
     <div class="main">
-        <h1>Kana Trainer</h1>
+        <h1>Reading Practice</h1>
         <div class="subline">Enter the matching romaji</div>
-        <div id="dailyBadge" class="daily-badge">Daily Challenge · First try sets today's official score</div>
+        <div id="dailyBadge" class="daily-badge">Reading Daily Challenge · First try sets today's official score</div>
 
         <div class="scoreline">
             <div class="score-pill">Streak: <span id="streak">0</span></div>
@@ -831,7 +831,7 @@
             </div>
 
             <div class="score-block">
-                <h3>Daily Challenge</h3>
+                <h3>Reading Daily Challenge</h3>
                 <div class="score-row"><span>Today</span><span id="dailyTodayScore">—</span></div>
                 <div class="score-row"><span>Attempts</span><span id="dailyTodayAttempts">0</span></div>
                 <div class="score-subtitle">Previous Days</div>
@@ -891,11 +891,11 @@
                 <div style="margin-top: 14px;">
                     <div class="section-title" style="margin-bottom: 8px; font-size: 14px;">Experimental Feature</div>
                     <div class="button-grid" style="justify-items: center;">
-                        <a class="nav-btn nav-btn-small" href="reverse.html">Open Reverse Mode <span class="beta-badge">Beta</span></a>
+                        <a class="nav-btn nav-btn-small" href="reverse.html">Open Writing Practice <span class="beta-badge">Beta</span></a>
                         <a class="nav-btn nav-btn-small" href="index.html">Open Home</a>
                     </div>
                 </div>
-                <div class="version-tag">v2.2</div>
+                <div class="version-tag">Reading Practice v1.0</div>
             </div>
 
             <div>
@@ -1276,7 +1276,7 @@ function applyDailyChallengeTheme() {
     const active = isDailyChallengeSession();
     document.body.classList.toggle("daily-challenge-active", active);
     if (dailyBadgeEl) dailyBadgeEl.style.display = active ? "inline-block" : "none";
-    titleEl.textContent = active ? "Daily Challenge" : "Kana Trainer";
+    titleEl.textContent = active ? "Reading Daily Challenge" : "Reading Practice";
     sublineEl.textContent = active
         ? "20 questions · All hiragana, katakana, and dakuten"
         : "Enter the matching romaji";
@@ -1361,7 +1361,7 @@ function endDailyChallenge() {
             timeMs,
             attempts: 1
         };
-        gameOverTitleEl.textContent = "Daily Challenge Complete";
+        gameOverTitleEl.textContent = "Reading Daily Challenge Complete";
         gameOverAnswerEl.textContent = `Official score recorded: ${dailyCorrect}/${total}`;
     } else {
         existing.attempts = (existing.attempts || 1) + 1;
