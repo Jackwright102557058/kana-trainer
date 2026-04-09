@@ -2357,6 +2357,10 @@ function flashResult(correct, onDone) {
     }, correct ? 260 : 420);
 }
 
+function isFinalTestQuestionCompleted() {
+    return isTestModeSession() && testIndex >= testSequence.length;
+}
+
 function advanceTestModeAfterAnswer() {
     if (testIndex >= testSequence.length) {
         endTestMode();
@@ -2461,13 +2465,15 @@ function handleWrong() {
     renderHeatmap();
     saveAll();
 
-    if (isDailyChallengeSession() || isTestModeSession() || currentFlowModeIsContinuous()) {
+    if (isDailyChallengeSession()) {
         hintEl.textContent = `Answer: ${correctAnswer}`;
-        if (isFinalTestQuestionCompleted()) {
-            flashResult(false, () => endTestMode());
-        } else {
-            flashResult(false, () => nextCharacter());
-        }
+        flashResult(false, () => nextCharacter());
+    } else if (isTestModeSession()) {
+        hintEl.textContent = `Answer: ${correctAnswer}`;
+        flashResult(false, () => advanceTestModeAfterAnswer());
+    } else if (currentFlowModeIsContinuous()) {
+        hintEl.textContent = `Answer: ${correctAnswer}`;
+        flashResult(false, () => nextCharacter());
     } else {
         gameOverAnswerEl.textContent = `Correct answer: ${correctAnswer}`;
         flashResult(false, () => {
@@ -2586,7 +2592,8 @@ function startSession() {
 
     gameOverEl.style.display = "none";
     gameOverTitleEl.textContent = "Wrong";
-    setRetryButtonVisible(true);
+    locked = false;
+    setRetryButtonVisible(false);
     startWrap.style.display = "none";
     sessionActionsEl.style.display = "flex";
     inputEl.disabled = false;
@@ -2681,6 +2688,7 @@ function endTestMode() {
 
     sessionStarted = false;
     sessionStats.active = false;
+    locked = false;
     stopTrialTimer();
     inputEl.disabled = true;
     gameOverEl.style.display = "none";

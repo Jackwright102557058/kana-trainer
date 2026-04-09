@@ -1228,6 +1228,10 @@ const scoresContentEl = document.getElementById("scoresContent");
 const scoresChevronEl = document.getElementById("scoresChevron");
 const retryBtn = document.getElementById("retryBtn");
 const resetBtn = document.getElementById("resetBtn");
+
+function setRetryButtonVisible(visible) {
+    retryBtn.style.display = visible ? "inline-block" : "none";
+}
 const startBtn = document.getElementById("startBtn");
 const startWrap = document.getElementById("startWrap");
 const sessionActionsEl = document.getElementById("sessionActions");
@@ -2047,6 +2051,8 @@ function startSession() {
 
     gameOverEl.style.display = "none";
     gameOverTitleEl.textContent = "Wrong";
+    locked = false;
+    setRetryButtonVisible(false);
     startWrap.style.display = "none";
     sessionActionsEl.style.display = "flex";
     inputEl.disabled = false;
@@ -2109,6 +2115,10 @@ function flashResult(correct, onDone) {
         locked = false;
         if (onDone) onDone();
     }, correct ? 260 : 420);
+}
+
+function isFinalTestQuestionCompleted() {
+    return isTestModeSession() && testIndex >= testSequence.length;
 }
 
 function advanceTestModeAfterAnswer() {
@@ -2359,6 +2369,7 @@ function endTestMode() {
 
     sessionStarted = false;
     sessionStats.active = false;
+    locked = false;
     stopTrialTimer();
     inputEl.disabled = true;
     gameOverEl.style.display = "none";
