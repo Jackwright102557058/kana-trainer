@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kana Trainer Test Results</title>
+<style>
+    :root {
+        --bg-1: #0b0b0b;
+        --bg-2: #141414;
+        --panel: rgba(24,24,24,0.94);
+        --panel-strong: rgba(18,18,18,0.98);
+        --border: rgba(255,255,255,0.08);
+        --text: #f3f3f3;
+        --muted: #9a9a9a;
+        --gold: #cba34a;
+        --gold-soft: rgba(203,163,74,0.15);
+        --green: #67d78b;
+        --green-soft: rgba(103,215,139,0.16);
+        --blue: #66a8ff;
+        --blue-soft: rgba(102,168,255,0.16);
+        --red: #ff7b7b;
+        --red-soft: rgba(255,123,123,0.16);
+        --shadow: 0 20px 60px rgba(0,0,0,0.42);
+        --radius-xl: 26px;
+        --radius-lg: 20px;
+        --radius-md: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        color: var(--text);
+        background:
+            radial-gradient(circle at top left, rgba(102,168,255,0.08), transparent 24%),
+            radial-gradient(circle at top right, rgba(103,215,139,0.08), transparent 24%),
+            radial-gradient(circle at bottom center, rgba(203,163,74,0.06), transparent 28%),
+            linear-gradient(180deg, #161616 0%, #0a0a0a 100%);
+        padding: 22px;
+    }
+
+    .shell {
+        width: min(1320px, 100%);
+        margin: 0 auto;
+    }
+
+    .glass {
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        background: linear-gradient(180deg, rgba(28,28,28,0.94), rgba(15,15,15,0.96));
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+    }
+
+    .hero {
+        border-radius: var(--radius-xl);
+        padding: 28px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        position: relative;
+        background:
+            radial-gradient(circle at top left, rgba(203,163,74,0.12), transparent 28%),
+            linear-gradient(180deg, rgba(29,29,29,0.97), rgba(14,14,14,0.98));
+    }
+
+    .hero::before,
+    .hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+        filter: blur(8px);
+        opacity: 0.8;
+    }
+
+    .hero::before {
+        width: 200px;
+        height: 200px;
+        top: -70px;
+        right: -50px;
+        background: radial-gradient(circle, rgba(203,163,74,0.20), transparent 68%);
+    }
+
+    .hero::after {
+        width: 180px;
+        height: 180px;
+        bottom: -70px;
+        left: -40px;
+        background: radial-gradient(circle, rgba(255,255,255,0.07), transparent 70%);
+    }
+
+    .hero-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    .hero-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: var(--gold-soft);
+        border: 1px solid rgba(203,163,74,0.30);
+        color: #ffe2a6;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+    }
+
+    h1 {
+        margin: 0 0 10px;
+        font-size: 44px;
+        line-height: 0.98;
+        letter-spacing: -0.03em;
+    }
+
+    .hero-copy {
+        color: #d7d7d7;
+        font-size: 16px;
+        line-height: 1.65;
+        max-width: 760px;
+        margin-bottom: 18px;
+    }
+
+    .hero-outline {
+        display: grid;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .hero-side {
+        display: grid;
+        gap: 14px;
+    }
+
+    .mini-panel {
+        border-radius: var(--radius-lg);
+        padding: 18px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .mini-label {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 10px;
+    }
+
+    .duo-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .duo-chip {
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .duo-chip .name {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 7px;
+    }
+
+    .duo-chip .value {
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        color: #d9d9d9;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .back-link:hover { color: white; }
+
+    .stage {
+        display: grid;
+        gap: 18px;
+    }
+
+    .card {
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        min-width: 0;
+    }
+
+    .card-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .card-title {
+        margin: 0 0 6px;
+        font-size: 24px;
+    }
+
+    .card-sub {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .accent {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        margin-top: 8px;
+        flex: 0 0 auto;
+        background: var(--gold);
+        box-shadow: 0 0 16px rgba(203,163,74,0.45);
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .summary-left {
+        display: grid;
+        gap: 14px;
+    }
+
+    .mega-score {
+        border-radius: 22px;
+        padding: 18px;
+        background:
+            radial-gradient(circle at top right, rgba(203,163,74,0.18), transparent 42%),
+            linear-gradient(180deg, rgba(42,33,13,0.96), rgba(18,18,18,0.96));
+        border: 1px solid rgba(203,163,74,0.25);
+    }
+
+    .mega-kicker {
+        color: #f1d18a;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 12px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .mega-value {
+        font-size: 70px;
+        font-weight: 900;
+        line-height: 0.92;
+        letter-spacing: -0.04em;
+    }
+
+    .mega-sub {
+        color: #e4d7b7;
+        font-size: 14px;
+        line-height: 1.55;
+        max-width: 42ch;
+    }
+
+    .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .metric {
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.045);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .metric .label {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 7px;
+    }
+
+    .metric .value {
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .breakdown-grid {
+        display: grid;
+        gap: 10px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        padding: 14px 15px;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.075);
+    }
+
+    .summary-main {
+        min-width: 0;
+    }
+
+    .summary-label {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .summary-extra {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .summary-value {
+        white-space: nowrap;
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .results-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .tests-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    .test-tile {
+        width: 100%;
+        text-align: left;
+        padding: 16px;
+        border-radius: 18px;
+        color: var(--text);
+        cursor: pointer;
+        transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .test-tile:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 26px rgba(0,0,0,0.22);
+    }
+
+    .test-tile.reading {
+        background: linear-gradient(180deg, rgba(20,35,24,0.96), rgba(16,18,16,0.96));
+        border: 1px solid rgba(103,215,139,0.18);
+    }
+
+    .test-tile.writing {
+        background: linear-gradient(180deg, rgba(19,28,43,0.96), rgba(16,18,22,0.96));
+        border: 1px solid rgba(102,168,255,0.18);
+    }
+
+    .test-tile.average {
+        background: linear-gradient(180deg, rgba(49,38,16,0.96), rgba(19,18,16,0.96));
+        border: 1px solid rgba(203,163,74,0.22);
+    }
+
+    .test-tile.active.reading {
+        border-color: rgba(103,215,139,0.42);
+        box-shadow: inset 0 0 0 1px rgba(103,215,139,0.16);
+    }
+
+    .test-tile.active.writing {
+        border-color: rgba(102,168,255,0.42);
+        box-shadow: inset 0 0 0 1px rgba(102,168,255,0.16);
+    }
+
+    .test-tile.active.average {
+        border-color: rgba(203,163,74,0.40);
+        box-shadow: inset 0 0 0 1px rgba(203,163,74,0.14);
+    }
+
+    .test-tile-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .test-title {
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+    .test-sub {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .test-score {
+        font-size: 28px;
+        font-weight: 900;
+        line-height: 1;
+        color: #fff;
+    }
+
+    .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .tag.reading { background: var(--green-soft); color: #bdf3cf; }
+    .tag.writing { background: var(--blue-soft); color: #d8e8ff; }
+    .tag.gold { background: var(--gold-soft); color: #ffe2a6; }
+
+    .detail-panel {
+        border-radius: 20px;
+        padding: 18px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        min-height: 100%;
+    }
+
+    .detail-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .detail-title {
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    .detail-sub {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .detail-metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .heatmap-wrap {
+        display: grid;
+        gap: 12px;
+    }
+
+    .heatmap-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #dfdfdf;
+    }
+
+    .heatmap {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .cell {
+        min-height: 82px;
+        border-radius: 12px;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        justify-items: center;
+        align-items: center;
+        padding: 8px 6px;
+        font-weight: 700;
+        border: 1px solid rgba(255,255,255,0.08);
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        transition: transform 0.14s ease, border-color 0.14s ease;
+    }
+
+    .cell:hover,
+    .cell.active {
+        transform: translateY(-1px);
+        border-color: rgba(203,163,74,0.42);
+        box-shadow: 0 0 0 1px rgba(203,163,74,0.14);
+    }
+
+    .cell-char {
+        font-size: 25px;
+        line-height: 1;
+    }
+
+    .cell-time {
+        font-size: 11px;
+        color: rgba(255,255,255,0.82);
+        line-height: 1;
+    }
+
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 14px;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 6px;
+    }
+
+    .legend-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .legend-box {
+        width: 12px;
+        height: 12px;
+        border-radius: 4px;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .kana-detail {
+        margin-top: 14px;
+        border-radius: 16px;
+        padding: 14px;
+        background: rgba(255,255,255,0.035);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .kana-detail.empty {
+        color: var(--muted);
+        text-align: center;
+        min-height: 96px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .kana-grid {
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: 14px;
+        align-items: start;
+    }
+
+    .kana-big {
+        border-radius: 16px;
+        padding: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        text-align: center;
+    }
+
+    .kana-big .char {
+        font-size: 44px;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .kana-big .romaji {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .kana-time-only {
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+        display: grid;
+        gap: 6px;
+    }
+
+    .kana-time-only .label {
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    .kana-time-only .value {
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    @media (max-width: 1080px) {
+        .hero-grid,
+        .summary-grid,
+        .results-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        body { padding: 12px; }
+        .hero, .card { padding: 18px; }
+        h1 { font-size: 36px; }
+        .meta-grid,
+        .detail-metrics,
+        .duo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .kana-grid { grid-template-columns: 1fr; }
+        .kana-big { max-width: 110px; }
+    }
+
+    .mega-score.reading {
+        background:
+            radial-gradient(circle at top right, rgba(103,215,139,0.18), transparent 42%),
+            linear-gradient(180deg, rgba(20,35,24,0.96), rgba(18,18,18,0.96));
+        border-color: rgba(103,215,139,0.25);
+    }
+
+    .mega-score.writing {
+        background:
+            radial-gradient(circle at top right, rgba(102,168,255,0.20), transparent 42%),
+            linear-gradient(180deg, rgba(18,28,42,0.96), rgba(18,18,18,0.96));
+        border-color: rgba(102,168,255,0.25);
+    }
+
+    .mega-score.average {
+        background:
+            radial-gradient(circle at top right, rgba(203,163,74,0.18), transparent 42%),
+            linear-gradient(180deg, rgba(42,33,13,0.96), rgba(18,18,18,0.96));
+        border-color: rgba(203,163,74,0.25);
+    }
+
+    .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.66);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        z-index: 100;
+    }
+
+    .modal-backdrop.open {
+        display: flex;
+    }
+
+    .modal {
+        width: min(460px, 100%);
+        border-radius: 20px;
+        padding: 20px;
+        background: linear-gradient(180deg, rgba(30,30,30,0.98), rgba(16,16,16,0.98));
+        border: 1px solid rgba(255,255,255,0.10);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        position: relative;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.04);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .modal-close:hover {
+        background: rgba(255,255,255,0.08);
+    }
+
+    .modal-title {
+        font-size: 24px;
+        font-weight: 800;
+        margin: 0 0 6px;
+    }
+
+    .modal-sub {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 16px;
+    }
+
+    .modal-grid {
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: 14px;
+        align-items: start;
+    }
+
+    .modal-kana {
+        border-radius: 16px;
+        padding: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        text-align: center;
+    }
+
+    .modal-kana .char {
+        font-size: 44px;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .modal-kana .romaji {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .modal-stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .modal-stat {
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .modal-stat .label {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .modal-stat .value {
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+
+    
+    .row-performance {
+        display: grid;
+        gap: 14px;
+    }
+
+    .row-performance-section {
+        display: grid;
+        gap: 8px;
+    }
+
+    .row-performance-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: #e7e7e7;
+    }
+
+    .row-doughnut-strip {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        padding: 4px 2px 6px;
+    }
+
+    .row-doughnut-card {
+        min-width: 0;
+        text-align: center;
+        padding: 8px 6px;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.035);
+        border: 1px solid rgba(255,255,255,0.07);
+        cursor: pointer;
+        transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+        position: relative;
+    }
+
+    .row-doughnut-card:hover,
+    .row-doughnut-card.active {
+        transform: translateY(-1px);
+        border-color: rgba(203,163,74,0.34);
+        box-shadow: 0 0 0 1px rgba(203,163,74,0.12);
+    }
+
+    .row-doughnut-card.best {
+        border-color: rgba(103,215,139,0.75);
+        box-shadow: inset 0 0 0 2px rgba(103,215,139,0.22), 0 0 18px rgba(103,215,139,0.18);
+        background: linear-gradient(180deg, rgba(103,215,139,0.08), rgba(255,255,255,0.035));
+    }
+
+    .row-doughnut-card.worst {
+        border-color: rgba(255,123,123,0.75);
+        box-shadow: inset 0 0 0 2px rgba(255,123,123,0.22), 0 0 18px rgba(255,123,123,0.18);
+        background: linear-gradient(180deg, rgba(255,123,123,0.08), rgba(255,255,255,0.035));
+    }
+
+    .row-doughnut-label {
+        font-size: 12px;
+        margin-top: 8px;
+        color: #ddd;
+        line-height: 1.25;
+        min-height: 12px;
+        white-space: normal;
+    }
+
+    .row-doughnut-value {
+        font-size: 12px;
+        color: #aaa;
+        font-weight: 700;
+    }
+
+    .row-tooltip {
+        margin-top: 6px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #ddd;
+        font-size: 12px;
+        line-height: 1.45;
+        min-height: 56px;
+    }
+
+
+    .row-performance-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: #e7e7e7;
+    }
+
+    .row-grid {
+        display: grid;
+        gap: 10px;
+    }
+
+    .row-bar {
+        display: grid;
+        grid-template-columns: 58px 1fr 52px;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .row-name {
+        font-size: 13px;
+        font-weight: 800;
+        color: #f1f1f1;
+        letter-spacing: 0.04em;
+    }
+
+    .row-track {
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.07);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .row-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, rgba(255,255,255,0.18), var(--gold));
+        min-width: 6px;
+    }
+
+    .row-value {
+        font-size: 12px;
+        color: var(--muted);
+        text-align: right;
+        font-weight: 700;
+    }
+
+
+    .mega-inline-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .mega-inline-card {
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.045);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .mega-inline-card .label {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 7px;
+    }
+
+    .mega-inline-card .value {
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .row-performance {
+        display: grid;
+        gap: 14px;
+        position: relative;
+    }
+
+    .row-performance-section {
+        display: grid;
+        gap: 8px;
+    }
+
+    .row-doughnut-strip {
+        display: grid;
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+        gap: 10px;
+        padding: 4px 2px 6px;
+    }
+
+    .row-doughnut-card {
+        min-width: 0;
+        text-align: center;
+        padding: 7px 5px;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.035);
+        border: 1px solid rgba(255,255,255,0.07);
+        cursor: pointer;
+        transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+        position: relative;
+    }
+
+    .row-doughnut-card:hover,
+    .row-doughnut-card.active {
+        transform: translateY(-1px);
+        border-color: rgba(203,163,74,0.34);
+        box-shadow: 0 0 0 1px rgba(203,163,74,0.12);
+    }
+
+    .row-doughnut-card.best {
+        border-color: rgba(103,215,139,0.75);
+        box-shadow: inset 0 0 0 2px rgba(103,215,139,0.22), 0 0 18px rgba(103,215,139,0.18);
+        background: linear-gradient(180deg, rgba(103,215,139,0.08), rgba(255,255,255,0.035));
+    }
+
+    .row-doughnut-card.worst {
+        border-color: rgba(255,123,123,0.75);
+        box-shadow: inset 0 0 0 2px rgba(255,123,123,0.22), 0 0 18px rgba(255,123,123,0.18);
+        background: linear-gradient(180deg, rgba(255,123,123,0.08), rgba(255,255,255,0.035));
+    }
+
+    .row-doughnut-label {
+        font-size: 18px;
+        margin-top: 6px;
+        color: #f3f3f3;
+        line-height: 1.1;
+        min-height: 22px;
+        white-space: normal;
+        font-weight: 800;
+    }
+
+    .row-doughnut-value {
+        display: none;
+    }
+
+    .row-tooltip-overlay {
+        position: absolute;
+        inset: 36px 0 0 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .row-tooltip-overlay.show {
+        display: flex;
+    }
+
+    .row-tooltip-card {
+        min-width: 220px;
+        max-width: 300px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(18,18,18,0.96);
+        border: 1px solid rgba(255,255,255,0.10);
+        box-shadow: 0 18px 40px rgba(0,0,0,0.38);
+        text-align: center;
+    }
+
+    .row-tooltip-card .title {
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    .row-tooltip-card .sub {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+    }
+
+
+    .row-flag {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        line-height: 1.2;
+    }
+
+    .row-flag.best {
+        background: rgba(103,215,139,0.18);
+        color: #bdf3cf;
+        border: 1px solid rgba(103,215,139,0.34);
+    }
+
+    .row-flag.worst {
+        background: rgba(255,123,123,0.18);
+        color: #ffb3b3;
+        border: 1px solid rgba(255,123,123,0.34);
+    }
+
+
+    
+    .hero-title-block {
+        display: grid;
+        gap: 12px;
+        align-content: start;
+    }
+
+    .hero-short-copy {
+        color: #d7d7d7;
+        font-size: 15px;
+        line-height: 1.55;
+        max-width: 720px;
+        margin: 0;
+    }
+
+    .hero-grid.compact-title {
+        grid-template-columns: 1.45fr 0.55fr;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .hero-side.compact {
+        display: block;
+    }
+
+    .mini-panel.quick-preview {
+        padding: 18px;
+    }
+
+    @media (max-width: 1080px) {
+        .hero-grid.compact-title {
+            grid-template-columns: 1fr;
+        }
+    }
+
+
+
+    .hero-title {
+        font-size: 42px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        color: #f5f5f5;
+        margin: 0;
+        text-shadow: 0 2px 18px rgba(203,163,74,0.15);
+    }
+
+    .hero-title-block {
+        gap: 10px;
+    }
+
+</style>
+</head>
+<body>
+<div class="shell">
+    <section class="hero glass">
+        <div class="hero-grid compact-title">
+            <div class="hero-title-block">
+                                <h1 class="hero-title">Test Results</h1>
+                <p class="hero-short-copy">
+                    Review saved Reading and Writing test runs, compare them with your overall averages, and quickly spot weak rows and slower sections.
+                </p>
+                <a class="back-link" href="index.html">← Back to Home</a>
+            </div>
+
+            <div class="hero-side compact">
+                <div class="mini-panel quick-preview">
+                    <div class="mini-label">Quick preview</div>
+                    <div class="duo-grid">
+                        <div class="duo-chip">
+                            <div class="name">Stored results</div>
+                            <div class="value" id="heroStoredTests">0</div>
+                        </div>
+                        <div class="duo-chip">
+                            <div class="name">Best score</div>
+                            <div class="value" id="heroBestScore">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="stage">
+        <section class="card glass">
+            <div class="card-head">
+                <div>
+                    <h2 class="card-title">Overall snapshot</h2>
+                    <div class="card-sub">A large headline score plus a quick breakdown of the currently selected result.</div>
+                </div>
+                <div class="accent"></div>
+            </div>
+
+            <div class="summary-grid">
+                <div class="summary-left">
+                    <div class="mega-score average" id="overallScoreCard">
+                        <div class="mega-kicker" id="overallKicker">Selected result score</div>
+                        <div style="font-size:18px; font-weight:800; margin-bottom:10px; color:#f0f0f0;" id="overallSelectedName">No result selected</div>
+                        <div class="mega-value" id="overallScore">0%</div>
+                        <div class="mega-sub" id="overallSub">Pick a result to see the full breakdown.</div>
+
+                        <div class="meta-grid">
+                            <div class="metric">
+                                <div class="label">Type</div>
+                                <div class="value" id="overallMode">—</div>
+                            </div>
+                            <div class="metric">
+                                <div class="label">Correct</div>
+                                <div class="value" id="overallCorrect">0</div>
+                            </div>
+                            <div class="metric">
+                                <div class="label">Wrong</div>
+                                <div class="value" id="overallWrong">0</div>
+                            </div>
+                            <div class="metric">
+                                <div class="label">Time</div>
+                                <div class="value" id="overallTime">—</div>
+                            </div>
+                        </div>
+
+                        <div class="mega-inline-summary" id="snapshotBreakdown"></div>
+                    </div>
+                    <div id="rowPerformanceMount"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="results-layout">
+            <div class="card glass">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">Stored tests</h2>
+                        <div class="card-sub">Includes pinned overall averages for Reading and Writing at the top, then individual saved test runs below.</div>
+                    </div>
+                    <div class="accent"></div>
+                </div>
+                <div style="color:#cfcfcf; font-size:13px; margin-bottom:10px;">: <strong></strong> and <strong></strong>.</div>
+                <div class="tests-grid" id="testsGrid"></div>
+            </div>
+
+            <div class="card glass">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">Selected result details</h2>
+                        <div class="card-sub">Click a result on the left, then inspect the full kana set from the heatmap on the right.</div>
+                    </div>
+                    <div class="accent"></div>
+                </div>
+
+                <div class="detail-panel">
+                    <div class="detail-head">
+                        <div>
+                            <div class="detail-title" id="detailTitle">No result selected</div>
+                            <div class="detail-sub" id="detailSub">Select a result from the left to inspect it.</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-metrics" id="detailMetrics"></div>
+
+                    <div class="heatmap-wrap">
+                        <div class="heatmap-title">Full kana result heatmap</div>
+                        <div class="heatmap" id="testHeatmap"></div>
+                        <div class="legend">
+                            <div class="legend-chip"><span class="legend-box" style="background: rgba(103,215,139,0.34);"></span> Correct</div>
+                            <div class="legend-chip"><span class="legend-box" style="background: rgba(255,123,123,0.28);"></span> Wrong</div>
+                            <div class="legend-chip"><span class="legend-box" style="background: rgba(255,255,255,0.06);"></span> Not included</div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+
+<div class="modal-backdrop" id="kanaModalBackdrop">
+    <div class="modal">
+        <button class="modal-close" id="kanaModalClose" type="button">×</button>
+        <h3 class="modal-title" id="kanaModalTitle">Kana result</h3>
+        <div class="modal-sub" id="kanaModalSub">Kana test details</div>
+        <div class="modal-grid">
+            <div class="modal-kana">
+                <div class="char" id="kanaModalChar">—</div>
+                <div class="romaji" id="kanaModalRomaji">—</div>
+            </div>
+            <div class="modal-stats" id="kanaModalStats"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+const HIRAGANA_ROWS = {
+    h_a:  {"あ":"a","い":"i","う":"u","え":"e","お":"o"},
+    h_ka: {"か":"ka","き":"ki","く":"ku","け":"ke","こ":"ko"},
+    h_sa: {"さ":"sa","し":"shi","す":"su","せ":"se","そ":"so"},
+    h_ta: {"た":"ta","ち":"chi","つ":"tsu","て":"te","と":"to"},
+    h_na: {"な":"na","に":"ni","ぬ":"nu","ね":"ne","の":"no"},
+    h_ha: {"は":"ha","ひ":"hi","ふ":"fu","へ":"he","ほ":"ho"},
+    h_ma: {"ま":"ma","み":"mi","む":"mu","め":"me","も":"mo"},
+    h_ya: {"や":"ya","ゆ":"yu","よ":"yo"},
+    h_ra: {"ら":"ra","り":"ri","る":"ru","れ":"re","ろ":"ro"},
+    h_wa: {"わ":"wa","を":"wo","ん":"n"}
+};
+
+const KATAKANA_ROWS = {
+    k_a:  {"ア":"a","イ":"i","ウ":"u","エ":"e","オ":"o"},
+    k_ka: {"カ":"ka","キ":"ki","ク":"ku","ケ":"ke","コ":"ko"},
+    k_sa: {"サ":"sa","シ":"shi","ス":"su","セ":"se","ソ":"so"},
+    k_ta: {"タ":"ta","チ":"chi","ツ":"tsu","テ":"te","ト":"to"},
+    k_na: {"ナ":"na","ニ":"ni","ヌ":"nu","ネ":"ne","ノ":"no"},
+    k_ha: {"ハ":"ha","ヒ":"hi","フ":"fu","ヘ":"he","ホ":"ho"},
+    k_ma: {"マ":"ma","ミ":"mi","ム":"mu","メ":"me","モ":"mo"},
+    k_ya: {"ヤ":"ya","ユ":"yu","ヨ":"yo"},
+    k_ra: {"ラ":"ra","リ":"ri","ル":"ru","レ":"re","ロ":"ro"},
+    k_wa: {"ワ":"wa","ヲ":"wo","ン":"n"}
+};
+
+const DAKUTEN_ROWS = {
+    h_ka: {"が":"ga","ぎ":"gi","ぐ":"gu","げ":"ge","ご":"go"},
+    h_sa: {"ざ":"za","じ":"ji","ず":"zu","ぜ":"ze","ぞ":"zo"},
+    h_ta: {"だ":"da","ぢ":"ji","づ":"zu","で":"de","ど":"do"},
+    h_ha: {
+        "ば":"ba","び":"bi","ぶ":"bu","べ":"be","ぼ":"bo",
+        "ぱ":"pa","ぴ":"pi","ぷ":"pu","ぺ":"pe","ぽ":"po"
+    },
+    k_ka: {"ガ":"ga","ギ":"gi","グ":"gu","ゲ":"ge","ゴ":"go"},
+    k_sa: {"ザ":"za","ジ":"ji","ズ":"zu","ゼ":"ze","ゾ":"zo"},
+    k_ta: {"ダ":"da","ヂ":"ji","ヅ":"zu","デ":"de","ド":"do"},
+    k_ha: {
+        "バ":"ba","ビ":"bi","ブ":"bu","ベ":"be","ボ":"bo",
+        "パ":"pa","ピ":"pi","プ":"pu","ペ":"pe","ポ":"po"
+    }
+};
+
+
+const ROW_GROUPS = [
+    { script: "hiragana", key: "あ", chars: [...Object.keys(HIRAGANA_ROWS.h_a)] },
+    { script: "hiragana", key: "か", chars: [...Object.keys(HIRAGANA_ROWS.h_ka), ...Object.keys(DAKUTEN_ROWS.h_ka)] },
+    { script: "hiragana", key: "さ", chars: [...Object.keys(HIRAGANA_ROWS.h_sa), ...Object.keys(DAKUTEN_ROWS.h_sa)] },
+    { script: "hiragana", key: "た", chars: [...Object.keys(HIRAGANA_ROWS.h_ta), ...Object.keys(DAKUTEN_ROWS.h_ta)] },
+    { script: "hiragana", key: "な", chars: [...Object.keys(HIRAGANA_ROWS.h_na)] },
+    { script: "hiragana", key: "は", chars: [...Object.keys(HIRAGANA_ROWS.h_ha), ...Object.keys(DAKUTEN_ROWS.h_ha)] },
+    { script: "hiragana", key: "ま", chars: [...Object.keys(HIRAGANA_ROWS.h_ma)] },
+    { script: "hiragana", key: "や", chars: [...Object.keys(HIRAGANA_ROWS.h_ya)] },
+    { script: "hiragana", key: "ら", chars: [...Object.keys(HIRAGANA_ROWS.h_ra)] },
+    { script: "hiragana", key: "わ", chars: [...Object.keys(HIRAGANA_ROWS.h_wa)] },
+
+    { script: "katakana", key: "ア", chars: [...Object.keys(KATAKANA_ROWS.k_a)] },
+    { script: "katakana", key: "カ", chars: [...Object.keys(KATAKANA_ROWS.k_ka), ...Object.keys(DAKUTEN_ROWS.k_ka)] },
+    { script: "katakana", key: "サ", chars: [...Object.keys(KATAKANA_ROWS.k_sa), ...Object.keys(DAKUTEN_ROWS.k_sa)] },
+    { script: "katakana", key: "タ", chars: [...Object.keys(KATAKANA_ROWS.k_ta), ...Object.keys(DAKUTEN_ROWS.k_ta)] },
+    { script: "katakana", key: "ナ", chars: [...Object.keys(KATAKANA_ROWS.k_na)] },
+    { script: "katakana", key: "ハ", chars: [...Object.keys(KATAKANA_ROWS.k_ha), ...Object.keys(DAKUTEN_ROWS.k_ha)] },
+    { script: "katakana", key: "マ", chars: [...Object.keys(KATAKANA_ROWS.k_ma)] },
+    { script: "katakana", key: "ヤ", chars: [...Object.keys(KATAKANA_ROWS.k_ya)] },
+    { script: "katakana", key: "ラ", chars: [...Object.keys(KATAKANA_ROWS.k_ra)] },
+    { script: "katakana", key: "ワ", chars: [...Object.keys(KATAKANA_ROWS.k_wa)] }
+];
+
+function computeRowPerformance(result) {
+    const rows = ROW_GROUPS.map(row => {
+        const items = row.chars
+            .filter(ch => result.kana[ch])
+            .map(ch => ({ ch, ...result.kana[ch] }));
+
+        const correct = items.reduce((sum, item) => sum + (item.correct || 0), 0);
+        const wrong = items.reduce((sum, item) => sum + (item.wrong || 0), 0);
+        const total = correct + wrong;
+        const avgMs = items.length
+            ? Math.round(items.reduce((sum, item) => sum + (item.avgMs || 0), 0) / items.length)
+            : 0;
+        const accuracy = total ? Math.round((correct / total) * 100) : 0;
+
+        return {
+            script: row.script,
+            key: row.key,
+            correct,
+            wrong,
+            total,
+            accuracy,
+            avgMs,
+            score: total ? (accuracy - (avgMs / 1000) * 4) : -Infinity
+        };
+    }).filter(row => row.total > 0);
+
+    const hiragana = rows.filter(row => row.script === "hiragana");
+    const katakana = rows.filter(row => row.script === "katakana");
+
+    const pickWorst = (items) => items.length ? [...items].sort((a, b) => (a.score - b.score) || (b.wrong - a.wrong) || (b.avgMs - a.avgMs))[0] : null;
+    const pickBest = (items) => items.length ? [...items].sort((a, b) => (b.score - a.score) || (a.wrong - b.wrong) || (a.avgMs - b.avgMs))[0] : null;
+
+    return {
+        rows,
+        hiragana,
+        katakana,
+        hiraganaWorst: pickWorst(hiragana),
+        hiraganaBest: pickBest(hiragana),
+        katakanaWorst: pickWorst(katakana),
+        katakanaBest: pickBest(katakana)
+    };
+}
+
+
+function renderRowPerformance(result) {
+    const perf = computeRowPerformance(result);
+    if (!perf.rows.length) return "";
+
+    const renderSection = (title, rows, prefix, bestRow, worstRow) => `
+        <div class="row-performance-section">
+            <div class="row-performance-head">
+                <span>${title}</span>
+                <span style="color:var(--muted); font-size:12px;">Hover or click a row</span>
+            </div>
+            <div class="row-doughnut-strip">
+                ${rows.map((row, index) => {
+                    const isBest = bestRow && bestRow.key === row.key;
+                    const isWorst = worstRow && worstRow.key === row.key;
+                    return `
+                        <button
+                            class="row-doughnut-card ${isBest ? "best" : ""} ${isWorst ? "worst" : ""}"
+                            data-row-script="${row.script}"
+                            data-row-key="${row.key}"
+                            type="button"
+                        >
+                            ${isBest ? '<span class="row-flag best">Best</span>' : ''}
+                            ${isWorst ? '<span class="row-flag worst">Worst</span>' : ''}
+                            <canvas id="chart-${prefix}-${index}" width="70" height="70"></canvas>
+                            <div class="row-doughnut-label">${row.key}</div>
+                            <div class="row-doughnut-value">${row.accuracy}%</div>
+                        </button>
+                    `;
+                }).join("")}
+            </div>
+        </div>
+    `;
+
+    return `
+        <div class="row-performance">
+            <div class="row-tooltip-overlay" id="rowTooltipOverlay">
+                <div class="row-tooltip-card" id="rowTooltipCard">
+                    <div class="title">Row details</div>
+                    <div class="sub">Hover or click a row to see right vs wrong and average time.</div>
+                </div>
+            </div>
+            ${renderSection("Hiragana rows", perf.hiragana, "h", perf.hiraganaBest, perf.hiraganaWorst)}
+            ${renderSection("Katakana rows", perf.katakana, "k", perf.katakanaBest, perf.katakanaWorst)}
+        </div>
+    `;
+}
+
+const ALL_BASE_KANA = [
+    ...Object.entries(HIRAGANA_ROWS).flatMap(([, row]) => Object.entries(row)),
+    ...Object.entries(KATAKANA_ROWS).flatMap(([, row]) => Object.entries(row))
+];
+
+const ALL_DAKUTEN_KANA = Object.entries(DAKUTEN_ROWS).flatMap(([, row]) => Object.entries(row));
+
+function loadJSON(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function normalizeTestResult(result) {
+    if (!result || typeof result !== "object") return null;
+
+    const kana = result.kana && typeof result.kana === "object" ? result.kana : {};
+    const correct = Number(result.correct || 0);
+    const wrong = Number(result.wrong || 0);
+    const total = Number(result.total || (correct + wrong));
+    const durationMs = Number(result.durationMs || 0);
+    const avgMs = Number(result.avgMs || 0);
+    const overallScore = Number.isFinite(result.overallScore) ? Number(result.overallScore) : (total ? Math.round((correct / total) * 100) : 0);
+
+    return {
+        id: String(result.id || `${result.mode || "test"}-${Date.now()}`),
+        type: result.type === "average" ? "average" : "test",
+        title: String(result.title || "Untitled Test"),
+        mode: result.mode === "writing" ? "writing" : "reading",
+        date: String(result.date || "—"),
+        startedAt: String(result.startedAt || "—"),
+        overallScore,
+        correct,
+        wrong,
+        total,
+        durationMs,
+        avgMs,
+        dakuten: !!result.dakuten,
+        kanaAsked: Number(result.kanaAsked || total || Object.keys(kana).length || 0),
+        notes: String(result.notes || ""),
+        breakdown: {
+            hiragana: {
+                correct: Number(result.breakdown?.hiragana?.correct || 0),
+                wrong: Number(result.breakdown?.hiragana?.wrong || 0)
+            },
+            katakana: {
+                correct: Number(result.breakdown?.katakana?.correct || 0),
+                wrong: Number(result.breakdown?.katakana?.wrong || 0)
+            }
+        },
+        kana
+    };
+}
+
+function buildAverageResult(mode, tests) {
+    const filtered = tests.filter(test => test.mode === mode && test.type !== "average");
+    if (!filtered.length) return null;
+
+    const aggregate = {};
+    filtered.forEach(test => {
+        Object.entries(test.kana || {}).forEach(([char, item]) => {
+            if (!aggregate[char]) {
+                aggregate[char] = { romaji: item.romaji, correct: 0, wrong: 0, totalMs: 0, count: 0 };
+            }
+            aggregate[char].correct += Number(item.correct || 0);
+            aggregate[char].wrong += Number(item.wrong || 0);
+            aggregate[char].totalMs += Number(item.avgMs || 0);
+            aggregate[char].count += 1;
+        });
+    });
+
+    const kana = {};
+    Object.entries(aggregate).forEach(([char, item]) => {
+        kana[char] = {
+            romaji: item.romaji,
+            correct: item.correct,
+            wrong: item.wrong,
+            avgMs: item.count ? Math.round(item.totalMs / item.count) : 0
+        };
+    });
+
+    const correct = Object.values(kana).reduce((sum, item) => sum + item.correct, 0);
+    const wrong = Object.values(kana).reduce((sum, item) => sum + item.wrong, 0);
+    const total = correct + wrong;
+    const avgMs = Object.values(kana).length
+        ? Math.round(Object.values(kana).reduce((sum, item) => sum + item.avgMs, 0) / Object.values(kana).length)
+        : 0;
+
+    const hiraChars = Object.keys(kana).filter(ch =>
+        Object.values(HIRAGANA_ROWS).some(row => ch in row) ||
+        [DAKUTEN_ROWS.h_ka, DAKUTEN_ROWS.h_sa, DAKUTEN_ROWS.h_ta, DAKUTEN_ROWS.h_ha].some(row => row && ch in row)
+    );
+    const kataChars = Object.keys(kana).filter(ch =>
+        Object.values(KATAKANA_ROWS).some(row => ch in row) ||
+        [DAKUTEN_ROWS.k_ka, DAKUTEN_ROWS.k_sa, DAKUTEN_ROWS.k_ta, DAKUTEN_ROWS.k_ha].some(row => row && ch in row)
+    );
+
+    const hira = hiraChars.reduce((acc, ch) => ({ correct: acc.correct + kana[ch].correct, wrong: acc.wrong + kana[ch].wrong }), { correct: 0, wrong: 0 });
+    const kata = kataChars.reduce((acc, ch) => ({ correct: acc.correct + kana[ch].correct, wrong: acc.wrong + kana[ch].wrong }), { correct: 0, wrong: 0 });
+
+    return {
+        id: `overall-${mode}`,
+        type: "average",
+        title: `${mode === "reading" ? "Reading" : "Writing"} Overall Average`,
+        mode,
+        date: "All saved tests",
+        startedAt: "Pinned summary",
+        overallScore: total ? Math.round((correct / total) * 100) : 0,
+        correct,
+        wrong,
+        total,
+        durationMs: avgMs * Object.keys(kana).length,
+        avgMs,
+        dakuten: filtered.some(test => test.dakuten),
+        kanaAsked: Object.keys(kana).length,
+        notes: `Average view across all saved ${mode} tests.`,
+        breakdown: {
+            hiragana: hira,
+            katakana: kata
+        },
+        kana
+    };
+}
+
+function loadStoredResults() {
+    const raw = loadJSON("testModeResults", []);
+    const tests = Array.isArray(raw) ? raw.map(normalizeTestResult).filter(Boolean) : [];
+    const averages = [
+        buildAverageResult("reading", tests),
+        buildAverageResult("writing", tests)
+    ].filter(Boolean);
+    return [...averages, ...tests];
+}
+
+const SAMPLE_RESULTS = loadStoredResults();
+
+let selectedResultId = SAMPLE_RESULTS[0]?.id || null;
+let selectedKana = null;
+
+function summaryRow(label, value, extra = "") {
+    return `
+        <div class="summary-row">
+            <div class="summary-main">
+                <div class="summary-label">${label}</div>
+                ${extra ? `<div class="summary-extra">${extra}</div>` : ""}
+            </div>
+            <div class="summary-value">${value}</div>
+        </div>
+    `;
+}
+
+function detailMetric(label, value) {
+    return `
+        <div class="metric">
+            <div class="label">${label}</div>
+            <div class="value">${value}</div>
+        </div>
+    `;
+}
+
+function getSelectedResult() {
+    return SAMPLE_RESULTS.find(item => item.id === selectedResultId) || null;
+}
+
+function getHeatColor(record) {
+    if (!record) return "rgba(255,255,255,0.05)";
+    return (record.wrong || 0) > 0 ? "rgba(255,123,123,0.28)" : "rgba(103,215,139,0.32)";
+}
+
+function renderHero() {
+    HERO_STORED_TESTS.textContent = SAMPLE_RESULTS.filter(item => item.type !== "average").length;
+    const best = SAMPLE_RESULTS.length ? SAMPLE_RESULTS.reduce((max, item) => Math.max(max, item.overallScore || 0), 0) : 0;
+    HERO_BEST_SCORE.textContent = SAMPLE_RESULTS.length ? `${best}%` : "—";
+}
+
+function renderResultsList() {
+    if (!SAMPLE_RESULTS.length) {
+        TESTS_GRID.innerHTML = `<div class="empty">No test results yet. Complete a test in Reading Practice or Writing Practice and it will appear here.</div>`;
+        return;
+    }
+    TESTS_GRID.innerHTML = SAMPLE_RESULTS.map(item => `
+        <button class="test-tile ${item.mode} ${item.type === "average" ? "average" : ""} ${item.id === selectedResultId ? "active" : ""}" data-result-id="${item.id}" type="button">
+            <div class="test-tile-top">
+                <div>
+                    <div class="test-title">${item.title}</div>
+                    <div class="test-sub">${item.date} · ${item.startedAt} · ${item.kanaAsked} kana shown</div>
+                </div>
+                <div class="test-score">${item.overallScore}%</div>
+            </div>
+            <div class="tag-row">
+                <span class="tag ${item.mode === "reading" ? "reading" : "writing"}">${item.mode === "reading" ? "Reading" : "Writing"}</span>
+                <span class="tag gold">${item.type === "average" ? "Overall Average" : (item.dakuten ? "Dakuten on" : "Dakuten off")}</span>
+                <span class="tag">${item.correct} right / ${item.wrong} wrong</span>
+            </div>
+        </button>
+    `).join("");
+
+    TESTS_GRID.querySelectorAll(".test-tile").forEach(button => {
+        button.addEventListener("click", () => {
+            selectedResultId = button.dataset.resultId;
+            selectedKana = null;
+            
+KANA_MODAL_CLOSE.addEventListener("click", closeKanaModal);
+KANA_MODAL_BACKDROP.addEventListener("click", (e) => {
+    if (e.target === KANA_MODAL_BACKDROP) closeKanaModal();
+});
+
+
+renderAll();
+        });
+    });
+}
+
+function renderSnapshot(result) {
+    OVERALL_KICKER.textContent = result.type === "average" ? "Selected overall average" : "Selected test score";
+    OVERALL_SELECTED_NAME.textContent = result.title;
+    OVERALL_SCORE.textContent = `${result.overallScore}%`;
+    OVERALL_SUB.textContent = result.notes;
+    OVERALL_MODE.textContent = result.mode === "reading" ? "Read" : "Write";
+    OVERALL_CORRECT.textContent = result.correct;
+    OVERALL_WRONG.textContent = result.wrong;
+    OVERALL_TIME.textContent = formatDuration(result.durationMs);
+
+    OVERALL_SCORE_CARD.classList.remove("reading", "writing", "average");
+    if (result.type === "average") {
+        OVERALL_SCORE_CARD.classList.add("average");
+    } else if (result.mode === "reading") {
+        OVERALL_SCORE_CARD.classList.add("reading");
+    } else {
+        OVERALL_SCORE_CARD.classList.add("writing");
+    }
+
+    ROW_PERFORMANCE_MOUNT.innerHTML = renderRowPerformance(result);
+
+    SNAPSHOT_BREAKDOWN.innerHTML = [
+        `
+            <div class="mega-inline-card">
+                <div class="label">Hiragana</div>
+                <div class="value">${result.breakdown.hiragana.correct} / ${result.breakdown.hiragana.correct + result.breakdown.hiragana.wrong}</div>
+            </div>
+        `,
+        `
+            <div class="mega-inline-card">
+                <div class="label">Katakana</div>
+                <div class="value">${result.breakdown.katakana.correct} / ${result.breakdown.katakana.correct + result.breakdown.katakana.wrong}</div>
+            </div>
+        `,
+        `
+            <div class="mega-inline-card">
+                <div class="label">Dakuten</div>
+                <div class="value">${result.type === "average" ? (result.dakuten ? "Mixed" : "Off") : (result.dakuten ? "On" : "Off")}</div>
+            </div>
+        `,
+        `
+            <div class="mega-inline-card">
+                <div class="label">Kana shown</div>
+                <div class="value">${result.kanaAsked}</div>
+            </div>
+        `
+    ].join("");
+}
+
+function renderDetailHeader(result) {
+    DETAIL_TITLE.textContent = result.title;
+    DETAIL_SUB.textContent = `${result.mode === "reading" ? "Reading Practice" : "Writing Practice"} · ${result.type === "average" ? "Pinned summary" : result.date} · ${result.type === "average" ? "Click a kana for its average timing" : formatDuration(result.durationMs) + " total time"}`;
+    DETAIL_METRICS.innerHTML = [
+        detailMetric("Overall", `${result.overallScore}%`),
+        detailMetric("Correct", `${result.correct}`),
+        detailMetric("Wrong", `${result.wrong}`),
+        detailMetric("Avg Time", `${formatDuration(result.avgMs)}`)
+    ].join("");
+}
+
+function openKanaModal(result, kana) {
+    const record = result.kana[kana];
+    if (!record) return;
+
+    const attempts = (record.correct || 0) + (record.wrong || 0);
+    const accuracy = attempts ? Math.round((record.correct / attempts) * 100) : 0;
+    const wasCorrect = (record.wrong || 0) === 0;
+
+    KANA_MODAL_TITLE.textContent = `${result.title} · ${kana}`;
+    KANA_MODAL_SUB.textContent = result.type === "average"
+        ? `Average stats for ${result.mode === "reading" ? "Reading" : "Writing"}`
+        : `Single test result for ${result.mode === "reading" ? "Reading" : "Writing"}`;
+    KANA_MODAL_CHAR.textContent = kana;
+    KANA_MODAL_ROMAJI.textContent = record.romaji || "—";
+
+    if (result.type === "average") {
+        KANA_MODAL_STATS.innerHTML = `
+            <div class="modal-stat">
+                <div class="label">Correct</div>
+                <div class="value">${record.correct || 0}</div>
+            </div>
+            <div class="modal-stat">
+                <div class="label">Wrong</div>
+                <div class="value">${record.wrong || 0}</div>
+            </div>
+            <div class="modal-stat">
+                <div class="label">Accuracy</div>
+                <div class="value">${accuracy}%</div>
+            </div>
+            <div class="modal-stat">
+                <div class="label">Avg Time</div>
+                <div class="value">${formatDuration(record.avgMs)}</div>
+            </div>
+        `;
+    } else {
+        KANA_MODAL_STATS.innerHTML = `
+            <div class="modal-stat">
+                <div class="label">Result</div>
+                <div class="value" style="color:${wasCorrect ? '#bdf3cf' : '#ffb3b3'};">${wasCorrect ? 'Correct' : 'Wrong'}</div>
+            </div>
+            <div class="modal-stat">
+                <div class="label">Time</div>
+                <div class="value">${formatDuration(record.avgMs)}</div>
+            </div>
+        `;
+    }
+
+    KANA_MODAL_BACKDROP.classList.add("open");
+}
+
+function closeKanaModal() {
+    KANA_MODAL_BACKDROP.classList.remove("open");
+}
+
+function renderHeatmap(result) {
+    const entries = Object.entries(result.kana || {});
+    TEST_HEATMAP.innerHTML = entries.map(([char, record]) => `
+        <button class="cell ${selectedKana === char ? "active" : ""}" data-kana="${char}" type="button" style="background:${getHeatColor(record)};">
+            <div class="cell-char">${char}</div>
+            <div class="cell-time">${formatDuration(record.avgMs)}</div>
+        </button>
+    `).join("");
+
+    TEST_HEATMAP.querySelectorAll(".cell").forEach(button => {
+        button.addEventListener("click", () => {
+            selectedKana = button.dataset.kana;
+            renderHeatmap(result);
+            openKanaModal(result, selectedKana);
+        });
+    });
+}
+
+function renderAll() {
+    const result = getSelectedResult();
+    renderHero();
+    renderResultsList();
+    if (!result) {
+        OVERALL_KICKER.textContent = "Selected result score";
+        OVERALL_SELECTED_NAME.textContent = "No test results yet";
+        OVERALL_SCORE.textContent = "—";
+        OVERALL_SUB.textContent = "This page is ready for saved data from Test Mode in Reading Practice and Writing Practice.";
+        OVERALL_MODE.textContent = "—";
+        OVERALL_CORRECT.textContent = "0";
+        OVERALL_WRONG.textContent = "0";
+        OVERALL_TIME.textContent = "—";
+        OVERALL_SCORE_CARD.classList.remove("reading", "writing");
+        OVERALL_SCORE_CARD.classList.add("average");
+        SNAPSHOT_BREAKDOWN.innerHTML = [
+            `
+                <div class="mega-inline-card">
+                    <div class="label">Reading tests</div>
+                    <div class="value">0</div>
+                </div>
+            `,
+            `
+                <div class="mega-inline-card">
+                    <div class="label">Writing tests</div>
+                    <div class="value">0</div>
+                </div>
+            `,
+            `
+                <div class="mega-inline-card">
+                    <div class="label">Overall averages</div>
+                    <div class="value">Pending</div>
+                </div>
+            `,
+            `
+                <div class="mega-inline-card">
+                    <div class="label">Status</div>
+                    <div class="value">Ready for Test Mode</div>
+                </div>
+            `
+        ].join("");
+        ROW_PERFORMANCE_MOUNT.innerHTML = "";
+        DETAIL_TITLE.textContent = "No result selected";
+        DETAIL_SUB.textContent = "Complete a test to populate this page.";
+        DETAIL_METRICS.innerHTML = "";
+        TEST_HEATMAP.innerHTML = `<div class="empty" style="grid-column:1/-1;">No kana data yet.</div>`;
+        return;
+    }
+    renderSnapshot(result);
+    renderDetailHeader(result);
+    renderHeatmap(result);
+    drawRowCharts(result);
+    bindRowInteractions(result);
+}
+
+
+
+function findRowPerformanceEntry(result, script, key) {
+    const perf = computeRowPerformance(result);
+    return perf.rows.find(row => row.script === script && row.key === key) || null;
+}
+
+function updateRowTooltip(result, script, key) {
+    const overlay = document.getElementById("rowTooltipOverlay");
+    const card = document.getElementById("rowTooltipCard");
+    if (!overlay || !card) return;
+    const row = findRowPerformanceEntry(result, script, key);
+    if (!row) {
+        overlay.classList.remove("show");
+        return;
+    }
+    card.innerHTML = `
+        <div class="title">${row.key}</div>
+        <div class="sub">Right: ${row.correct} · Wrong: ${row.wrong}<br>Avg time: ${formatDuration(row.avgMs)}</div>
+    `;
+    overlay.classList.add("show");
+}
+
+function bindRowInteractions(result) {
+    const cards = document.querySelectorAll(".row-doughnut-card");
+    const overlay = document.getElementById("rowTooltipOverlay");
+    let locked = false;
+    let activeCard = null;
+
+    const clearActive = () => {
+        cards.forEach(c => c.classList.remove("active"));
+        activeCard = null;
+    };
+
+    const closeOverlay = () => {
+        locked = false;
+        clearActive();
+        if (overlay) overlay.classList.remove("show");
+    };
+
+    cards.forEach(card => {
+        card.addEventListener("mouseenter", () => {
+            if (locked) return;
+            updateRowTooltip(result, card.dataset.rowScript, card.dataset.rowKey);
+        });
+
+        card.addEventListener("mouseleave", () => {
+            if (locked) return;
+            if (overlay) overlay.classList.remove("show");
+        });
+
+        card.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (activeCard === card && locked) {
+                closeOverlay();
+                return;
+            }
+            locked = true;
+            clearActive();
+            activeCard = card;
+            card.classList.add("active");
+            updateRowTooltip(result, card.dataset.rowScript, card.dataset.rowKey);
+        });
+    });
+
+    document.addEventListener("click", () => {
+        closeOverlay();
+    });
+}
+function drawRowCharts(result) {
+    const perf = computeRowPerformance(result);
+
+    const drawSet = (rows, prefix, bestRow, worstRow) => {
+        rows.forEach((row, index) => {
+            const canvas = document.getElementById(`chart-${prefix}-${index}`);
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            const size = canvas.width || 70;
+            const cx = size / 2;
+            const cy = size / 2;
+            const radius = 24;
+            const lineWidth = 8;
+            const correct = Math.max(0, Math.min(100, row.accuracy));
+
+            ctx.clearRect(0, 0, size, size);
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = "rgba(255,255,255,0.08)";
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2) * (correct / 100));
+            let stroke = correct >= 80 ? "#67d78b" : correct >= 60 ? "#cba34a" : "#ff7b7b";
+            if (bestRow && bestRow.key === row.key) stroke = "#67d78b";
+            if (worstRow && worstRow.key === row.key) stroke = "#ff7b7b";
+            ctx.strokeStyle = stroke;
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = "round";
+            ctx.stroke();
+
+            ctx.fillStyle = "#f3f3f3";
+            ctx.font = "700 12px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(`${correct}%`, cx, cy);
+        });
+    };
+
+    drawSet(perf.hiragana, "h", perf.hiraganaBest, perf.hiraganaWorst);
+    drawSet(perf.katakana, "k", perf.katakanaBest, perf.katakanaWorst);
+}
+
+renderAll();
+// ensure charts render
+setTimeout(()=>drawRowCharts(getSelectedResult()),50);
+</script>
+</body>
+</html>

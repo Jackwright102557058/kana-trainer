@@ -424,7 +424,13 @@
         font-size: 14px;
     }
 
-    .funline strong { color: white; }
+    .funline strong {
+        color: white;
+        text-align: right;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
 
     .mid-band {
         display: grid;
@@ -1088,7 +1094,14 @@
                     <div class="mini-label">Today’s status</div>
                     <div class="hero-note" id="heroStatusText">No daily challenge data yet.</div>
                 </div>
-</div>
+
+                <a class="launch-card" href="results.html" style="padding:14px; font-size:14px; background:linear-gradient(180deg, rgba(203,163,74,0.18), rgba(20,20,20,0.96)); border-color: rgba(203,163,74,0.35);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:700;">Test Results</span>
+                        <span style="opacity:0.8;">→</span>
+                    </div>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -1124,7 +1137,7 @@
                         <h2 class="card-title">Performance gauges</h2>
                         <div class="card-sub">Your overall accuracy and progress across both modes.</div>
                     </div>
-                    <div class="accent green"></div>
+                    <div class="accent gold"></div>
                 </div>
                 <div class="gauge-grid" id="gaugeGrid"></div>
             </div>
@@ -1135,36 +1148,9 @@
                         <h2 class="card-title">Best runs</h2>
                         <div class="card-sub">Your best scores across each mode.</div>
                     </div>
-                    <div class="accent blue"></div>
+                    <div class="accent gold"></div>
                 </div>
                 <div class="bars" id="recordsBars"></div>
-            </div>
-        </section>
-
-        <section class="daily-zone">
-            <div class="card glass">
-                <div class="card-head">
-                    <div>
-                        <h2 class="card-title">Reading daily challenge</h2>
-                        <div class="card-sub">Complete today’s challenge and track your recent results.</div>
-                    </div>
-                    <div class="accent green"></div>
-                </div>
-                <div class="summary-rows" id="readingTodaySummary"></div>
-                <div style="height:14px;"></div>
-                <div class="timeline" id="readingTimeline"></div>
-            </div>
-
-            <div class="card glass">
-                <div class="card-head">
-                    <div>
-                        <h2 class="card-title">Writing daily challenge</h2>
-                    </div>
-                    <div class="accent blue"></div>
-                </div>
-                <div class="summary-rows" id="writingTodaySummary"></div>
-                <div style="height:14px;"></div>
-                <div class="timeline" id="writingTimeline"></div>
             </div>
         </section>
 
@@ -1197,6 +1183,33 @@
                         <div class="pulse-key-grid" id="learningPulse"></div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <section class="daily-zone">
+            <div class="card glass">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">Reading daily challenge</h2>
+                        <div class="card-sub">Complete today’s challenge and track your recent results.</div>
+                    </div>
+                    <div class="accent green"></div>
+                </div>
+                <div class="summary-rows" id="readingTodaySummary"></div>
+                <div style="height:14px;"></div>
+                <div class="timeline" id="readingTimeline"></div>
+            </div>
+
+            <div class="card glass">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">Writing daily challenge</h2>
+                    </div>
+                    <div class="accent blue"></div>
+                </div>
+                <div class="summary-rows" id="writingTodaySummary"></div>
+                <div style="height:14px;"></div>
+                <div class="timeline" id="writingTimeline"></div>
             </div>
         </section>
     </div>
@@ -1250,8 +1263,8 @@ function buildModeSummary({ stats, scoreHistory, dailyHistory, highScore, modeNa
     let totalCorrect = 0;
     let totalWrong = 0;
     let practicedChars = 0;
-    let toughest = null;
-    let strongest = null;
+    const toughestCandidates = [];
+    const strongestCandidates = [];
 
     for (const [ch, stat] of entries) {
         const c = Number(stat.correct || 0);
@@ -1263,14 +1276,33 @@ function buildModeSummary({ stats, scoreHistory, dailyHistory, highScore, modeNa
         if (attempts > 0) {
             practicedChars += 1;
             const accuracy = c / attempts;
-            if (!toughest || accuracy < toughest.accuracy || (accuracy === toughest.accuracy && attempts > toughest.attempts)) {
-                toughest = { ch, accuracy, attempts };
-            }
-            if (!strongest || accuracy > strongest.accuracy || (accuracy === strongest.accuracy && attempts > strongest.attempts)) {
-                strongest = { ch, accuracy, attempts };
+            toughestCandidates.push({ ch, accuracy, attempts, correct: c, wrong: w });
+            if (c >= 5) {
+                strongestCandidates.push({ ch, accuracy, attempts, correct: c, wrong: w });
             }
         }
     }
+
+    toughestCandidates.sort((a, b) => (a.accuracy - b.accuracy) || (b.attempts - a.attempts) || a.ch.localeCompare(b.ch));
+    strongestCandidates.sort((a, b) => (b.accuracy - a.accuracy) || (b.correct - a.correct) || (b.attempts - a.attempts) || a.ch.localeCompare(b.ch));
+
+    const toughest = toughestCandidates.length ? {
+        accuracy: toughestCandidates[0].accuracy,
+        attempts: toughestCandidates[0].attempts,
+        chars: toughestCandidates
+            .filter(item => item.accuracy === toughestCandidates[0].accuracy)
+            .slice(0, 10)
+            .map(item => item.ch)
+    } : null;
+
+    const strongest = strongestCandidates.length ? {
+        accuracy: strongestCandidates[0].accuracy,
+        attempts: strongestCandidates[0].attempts,
+        chars: strongestCandidates
+            .filter(item => item.accuracy === strongestCandidates[0].accuracy)
+            .slice(0, 10)
+            .map(item => item.ch)
+    } : null;
 
     const totalAttempts = totalCorrect + totalWrong;
     const accuracy = accuracyPct(totalCorrect, totalWrong);
@@ -1332,6 +1364,13 @@ function timelineItem(date, scoreText, metaText) {
     `;
 }
 
+function formatKanaGroup(entry, emptyText = '—') {
+    if (!entry || !Array.isArray(entry.chars) || !entry.chars.length) return emptyText;
+    const percent = `${Math.round(entry.accuracy * 100)}%`;
+    return `${percent} · ${entry.chars.join(', ')}`;
+}
+
+
 function renderSpotlight(modeId, summary) {
     document.getElementById(`${modeId}SpotlightStats`).innerHTML = [
         metric('High Score', summary.highScore || 0),
@@ -1340,13 +1379,8 @@ function renderSpotlight(modeId, summary) {
         metric('Total Attempts', summary.totalAttempts || 0)
     ].join('');
 
-    document.getElementById(`${modeId}Toughest`).textContent = summary.toughest
-        ? `${summary.toughest.ch} · ${Math.round(summary.toughest.accuracy * 100)}%`
-        : '—';
-
-    document.getElementById(`${modeId}Strongest`).textContent = summary.strongest
-        ? `${summary.strongest.ch} · ${Math.round(summary.strongest.accuracy * 100)}%`
-        : '—';
+    document.getElementById(`${modeId}Toughest`).textContent = formatKanaGroup(summary.toughest);
+    document.getElementById(`${modeId}Strongest`).textContent = formatKanaGroup(summary.strongest, '—');
 }
 
 function renderHero(summaryReading, summaryWriting) {
@@ -1489,17 +1523,17 @@ function renderLearningPulse(readingSummary, writingSummary) {
         },
         {
             label: 'Toughest kana',
-            total: `${readingSummary.toughest ? readingSummary.toughest.ch : '—'} / ${writingSummary.toughest ? writingSummary.toughest.ch : '—'}`,
-            reading: `${readingSummary.toughest ? readingSummary.toughest.ch : '—'}`,
-            writing: `${writingSummary.toughest ? writingSummary.toughest.ch : '—'}`,
+            total: `${formatKanaGroup(readingSummary.toughest)} / ${formatKanaGroup(writingSummary.toughest)}`,
+            reading: `${readingSummary.toughest && readingSummary.toughest.chars ? readingSummary.toughest.chars.join(', ') : '—'}`,
+            writing: `${writingSummary.toughest && writingSummary.toughest.chars ? writingSummary.toughest.chars.join(', ') : '—'}`,
             readingSub: `${readingSummary.toughest ? Math.round(readingSummary.toughest.accuracy * 100) : '—'}% accuracy`,
             writingSub: `${writingSummary.toughest ? Math.round(writingSummary.toughest.accuracy * 100) : '—'}% accuracy`
         },
         {
             label: 'Strongest kana',
-            total: `${readingSummary.strongest ? readingSummary.strongest.ch : '—'} / ${writingSummary.strongest ? writingSummary.strongest.ch : '—'}`,
-            reading: `${readingSummary.strongest ? readingSummary.strongest.ch : '—'}`,
-            writing: `${writingSummary.strongest ? writingSummary.strongest.ch : '—'}`,
+            total: `${formatKanaGroup(readingSummary.strongest)} / ${formatKanaGroup(writingSummary.strongest)}`,
+            reading: `${readingSummary.strongest && readingSummary.strongest.chars ? readingSummary.strongest.chars.join(', ') : '—'}`,
+            writing: `${writingSummary.strongest && writingSummary.strongest.chars ? writingSummary.strongest.chars.join(', ') : '—'}`,
             readingSub: `${readingSummary.strongest ? Math.round(readingSummary.strongest.accuracy * 100) : '—'}% accuracy`,
             writingSub: `${writingSummary.strongest ? Math.round(writingSummary.strongest.accuracy * 100) : '—'}% accuracy`
         },

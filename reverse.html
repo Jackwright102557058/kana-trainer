@@ -1293,6 +1293,8 @@ const endlessTotalPill = document.getElementById("endlessTotalPill");
 const endlessWrongPill = document.getElementById("endlessWrongPill");
 const heatmapEl = document.getElementById("heatmap");
 const popupEl = document.getElementById("popup");
+let popupLocked = false;
+let hoveredCell = null;
 const modifiersTabEl = document.getElementById("modifiersTab");
 const optionsTabEl = document.getElementById("optionsTab");
 const modifiersContentEl = document.getElementById("modifiersContent");
@@ -1305,6 +1307,10 @@ const scoresContentEl = document.getElementById("scoresContent");
 const scoresChevronEl = document.getElementById("scoresChevron");
 const retryBtn = document.getElementById("retryBtn");
 const resetBtn = document.getElementById("resetBtn");
+
+function setRetryButtonVisible(visible) {
+    retryBtn.style.display = visible ? "inline-block" : "none";
+}
 const startBtn = document.getElementById("startBtn");
 const startWrap = document.getElementById("startWrap");
 const sessionActionsEl = document.getElementById("sessionActions");
@@ -1428,6 +1434,47 @@ function getAnswerMapForCurrentMode() {
 function getRomajiForChars(chars) {
     const sourceMap = getAnswerMapForCurrentMode();
     return chars.split("").map(ch => sourceMap[ch] || "").join("");
+}
+
+function getAcceptedAnswersForCurrentChar() {
+    if (!currentChar) return [];
+
+    const sourceMap = getAnswerMapForCurrentMode();
+    const candidatesByRomaji = new Map();
+
+    for (const [candidate, romaji] of Object.entries(sourceMap)) {
+        if (!candidatesByRomaji.has(romaji)) candidatesByRomaji.set(romaji, []);
+        candidatesByRomaji.get(romaji).push(candidate);
+    }
+
+    const answerGroups = currentChar.split("").map(ch => {
+        const romaji = sourceMap[ch] || "";
+        const matches = candidatesByRomaji.get(romaji) || [];
+        return matches.length ? matches : [ch];
+    });
+
+    const allAnswers = answerGroups.reduce((acc, group) => {
+        const next = [];
+        for (const prefix of acc) {
+            for (const candidate of group) {
+                next.push(prefix + candidate);
+            }
+        }
+        return next;
+    }, [""]);
+
+    return [...new Set(allAnswers)];
+}
+
+function isAcceptedAnswer(answer) {
+    return getAcceptedAnswersForCurrentChar().includes(answer);
+}
+
+function getAcceptedAnswerDisplay() {
+    const answers = [...new Set(getAcceptedAnswersForCurrentChar())];
+    if (!answers.length) return getDisplayAnswerForCurrentChar();
+    if (answers.length === 1) return answers[0];
+    return answers.join(" or ");
 }
 
 function applyDailyChallengeTheme() {
@@ -1689,6 +1736,35 @@ function heatmapColor(char) {
     return "var(--yellow)";
 }
 
+function showPopupForChar(ch, e) {
+    const st = getStats(ch);
+    const tm = getAverageTime(ch);
+    const sr = getSrs(ch);
+
+    popupEl.innerHTML = `
+        <div class="popup-title">${ch}</div>
+        <div>Romaji: ${getAnswerMapForCurrentMode()[ch] || "—"}</div>
+        <div>Right: ${st.correct}</div>
+        <div>Wrong: ${st.wrong}</div>
+        <div>Avg time: ${formatDuration(tm)}</div>
+        <div>SRS level: ${sr.level}</div>
+    `;
+
+    popupEl.style.display = "block";
+
+    if (settings.mobileMode) {
+        popupEl.style.left = "50%";
+        popupEl.style.top = "50%";
+        popupEl.style.transform = "translate(-50%, -50%)";
+    } else {
+        popupEl.style.transform = "none";
+        const x = Math.min(window.innerWidth - 180, e.clientX + 10);
+        const y = Math.min(window.innerHeight - 120, e.clientY + 10);
+        popupEl.style.left = x + "px";
+        popupEl.style.top = y + "px";
+    }
+}
+
 function renderHeatmap() {
     heatmapEl.innerHTML = "";
 
@@ -1698,42 +1774,41 @@ function renderHeatmap() {
         cell.textContent = ch;
         cell.style.background = heatmapColor(ch);
 
-        cell.onclick = (e) => {
+        cell.addEventListener("mouseenter", (e) => {
+            hoveredCell = cell;
+            if (!popupLocked) showPopupForChar(ch, e);
+        });
+
+        cell.addEventListener("mousemove", (e) => {
+            if (!popupLocked && hoveredCell === cell) showPopupForChar(ch, e);
+        });
+
+        cell.addEventListener("mouseleave", () => {
+            if (hoveredCell === cell) hoveredCell = null;
+            if (!popupLocked) closePopup();
+        });
+
+        cell.addEventListener("click", (e) => {
             e.stopPropagation();
-            const st = getStats(ch);
-            const tm = getAverageTime(ch);
-            const sr = getSrs(ch);
-
-            popupEl.innerHTML = `
-                <div class="popup-title">${ch}</div>
-                <div>Romaji: ${getAnswerMapForCurrentMode()[ch] || "—"}</div>
-                <div>Right: ${st.correct}</div>
-                <div>Wrong: ${st.wrong}</div>
-                <div>Avg time: ${formatDuration(tm)}</div>
-                <div>SRS level: ${sr.level}</div>
-            `;
-
-            popupEl.style.display = "block";
-
-            if (settings.mobileMode) {
-                popupEl.style.left = "50%";
-                popupEl.style.top = "50%";
-                popupEl.style.transform = "translate(-50%, -50%)";
-            } else {
-                popupEl.style.transform = "none";
-                const x = Math.min(window.innerWidth - 180, e.clientX + 10);
-                const y = Math.min(window.innerHeight - 120, e.clientY + 10);
-                popupEl.style.left = x + "px";
-                popupEl.style.top = y + "px";
-            }
-        };
+            popupLocked = true;
+            hoveredCell = cell;
+            showPopupForChar(ch, e);
+        });
 
         heatmapEl.appendChild(cell);
     }
 }
 
-function closePopup() { popupEl.style.display = "none"; }
-document.addEventListener("click", closePopup);
+function closePopup() {
+    popupEl.style.display = "none";
+}
+
+document.addEventListener("click", (e) => {
+    if (e.target.closest(".cell") || e.target.closest(".popup")) return;
+    popupLocked = false;
+    hoveredCell = null;
+    closePopup();
+});
 
 function getEligiblePool() {
     let pool = [...activeChars];
@@ -1966,6 +2041,7 @@ function showIdleState() {
     gameOverEl.style.display = "none";
     gameOverTitleEl.textContent = "Wrong";
     gameOverAnswerEl.textContent = "";
+    setRetryButtonVisible(true);
     updateDailyChallengePills();
     applyDailyChallengeTheme();
 }
@@ -1982,38 +2058,51 @@ function shuffle(array) {
 function buildChoiceOptionStrings(correctAnswer) {
     const count = Math.max(2, Math.min(8, settings.choiceCount || 4));
     if (!correctAnswer) return [];
+
+    const acceptedAnswers = [...new Set(getAcceptedAnswersForCurrentChar())];
+    const equivalentAnswers = acceptedAnswers.filter(answer => answer !== correctAnswer);
+    const equivalentAnswerSet = new Set(equivalentAnswers);
     const answerLength = correctAnswer.length;
     const pool = Object.keys(getAnswerMapForCurrentMode());
     if (!pool.length) return [correctAnswer];
 
     if (answerLength === 1) {
-        const correctChar = correctAnswer;
-        const correctRow = getRowKeyForChar(correctChar);
-        const correctRomaji = getAnswerMapForCurrentMode()[correctChar] || "";
+        const correctRomaji = getAnswerMapForCurrentMode()[correctAnswer] || "";
         const scored = pool
-            .filter(ch => ch !== correctChar)
+            .filter(ch => ch !== correctAnswer && !equivalentAnswerSet.has(ch))
             .map(ch => {
                 let score = 0;
-                if (getRowKeyForChar(ch) === correctRow) score += 3;
+                if (getRowKeyForChar(ch) === getRowKeyForChar(correctAnswer)) score += 3;
                 const romaji = getAnswerMapForCurrentMode()[ch] || "";
                 if (romaji[0] === correctRomaji[0]) score += 2;
                 if (romaji.slice(-1) === correctRomaji.slice(-1)) score += 2;
-                return { ch, score: score + Math.random() * 0.4 };
+                return { ch, score: score + Math.random() * 3 };
             })
             .sort((a, b) => b.score - a.score)
-            .slice(0, count - 1)
             .map(item => item.ch);
 
-        while (scored.length < count - 1) {
+        const distractors = scored.slice(0, Math.max(0, count - 1));
+
+        while (1 + distractors.length < count && distractors.length < Math.max(0, pool.length - acceptedAnswers.length)) {
             const fallback = pool[Math.floor(Math.random() * pool.length)];
-            if (fallback !== correctChar && !scored.includes(fallback)) scored.push(fallback);
-            if (scored.length >= pool.length - 1) break;
+            if (fallback !== correctAnswer && !equivalentAnswerSet.has(fallback) && !distractors.includes(fallback)) {
+                distractors.push(fallback);
+            }
+            if (distractors.length >= pool.length - acceptedAnswers.length) break;
         }
 
-        return shuffle([correctChar, ...scored.slice(0, count - 1)]);
+        const shouldIncludeEquivalent = equivalentAnswers.length > 0 && distractors.length > 0 && Math.random() < 0.35;
+        if (shouldIncludeEquivalent) {
+            const replaceIndex = Math.floor(Math.random() * distractors.length);
+            const equivalent = equivalentAnswers[Math.floor(Math.random() * equivalentAnswers.length)];
+            distractors[replaceIndex] = equivalent;
+        }
+
+        return shuffle([correctAnswer, ...distractors.slice(0, Math.max(0, count - 1))]);
     }
 
     const options = [correctAnswer];
+    const acceptedAnswerSet = new Set(acceptedAnswers);
     while (options.length < count) {
         let candidate;
         if (settings.comboMode === "same_row" && settings.comboKana) {
@@ -2030,8 +2119,15 @@ function buildChoiceOptionStrings(correctAnswer) {
                 candidate += pool[Math.floor(Math.random() * pool.length)];
             }
         }
-        if (!options.includes(candidate)) options.push(candidate);
+        if (!acceptedAnswerSet.has(candidate) && !options.includes(candidate)) options.push(candidate);
     }
+
+    if (equivalentAnswers.length > 0 && options.length > 1 && Math.random() < 0.35) {
+        const replaceIndex = 1 + Math.floor(Math.random() * (options.length - 1));
+        const equivalent = equivalentAnswers[Math.floor(Math.random() * equivalentAnswers.length)];
+        options[replaceIndex] = equivalent;
+    }
+
     return shuffle(options);
 }
 
@@ -2188,7 +2284,7 @@ function getDisplayAnswerForCurrentChar() {
 
 function handleWrong() {
     const timeTaken = Date.now() - charStartTime;
-    const correctAnswer = getDisplayAnswerForCurrentChar();
+    const correctAnswer = getAcceptedAnswerDisplay();
 
     for (const ch of currentChar.split("")) {
         if (!stats[ch]) stats[ch] = { correct: 0, wrong: 0 };
@@ -2235,13 +2331,18 @@ function handleWrong() {
 function handleChoiceAnswer(answer, clickedBtn) {
     if (!sessionStarted || locked || settings.keyboardMode || gameOverEl.style.display === "block") return;
     for (const btn of choiceGridEl.querySelectorAll("button")) btn.disabled = true;
-    if (answer === currentChar) {
-        clickedBtn.classList.add("correct");
+
+    const acceptedAnswers = new Set(getAcceptedAnswersForCurrentChar());
+
+    if (isAcceptedAnswer(answer)) {
+        for (const btn of choiceGridEl.querySelectorAll("button")) {
+            if (acceptedAnswers.has(btn.textContent)) btn.classList.add("correct");
+        }
         handleCorrect();
     } else {
         clickedBtn.classList.add("wrong");
         for (const btn of choiceGridEl.querySelectorAll("button")) {
-            if (btn.textContent === currentChar) btn.classList.add("correct");
+            if (acceptedAnswers.has(btn.textContent)) btn.classList.add("correct");
         }
         handleWrong();
     }
@@ -2253,14 +2354,17 @@ inputEl.addEventListener("input", () => {
     const value = inputEl.value.trim();
     if (!value) return;
 
-    if (value === currentChar) {
+    const acceptedAnswers = getAcceptedAnswersForCurrentChar();
+    if (acceptedAnswers.includes(value)) {
         handleCorrect();
         return;
     }
 
-    if (currentChar.startsWith(value) && value.length < currentChar.length) return;
+    const hasPartialMatch = acceptedAnswers.some(answer => answer.startsWith(value) && value.length < answer.length);
+    if (hasPartialMatch) return;
 
-    if (value.length >= currentChar.length || !currentChar.startsWith(value)) {
+    const hasMismatch = acceptedAnswers.every(answer => value.length >= answer.length || !answer.startsWith(value));
+    if (hasMismatch) {
         handleWrong();
     }
 });
@@ -2324,6 +2428,7 @@ function startSession() {
 
     gameOverEl.style.display = "none";
     gameOverTitleEl.textContent = "Wrong";
+    setRetryButtonVisible(true);
     startWrap.style.display = "none";
     sessionActionsEl.style.display = "flex";
     inputEl.disabled = false;
@@ -2480,6 +2585,7 @@ function endDailyChallenge() {
     sessionStats.active = false;
     inputEl.disabled = true;
     gameOverEl.style.display = "block";
+    setRetryButtonVisible(false);
     sessionActionsEl.style.display = "none";
     startWrap.style.display = "flex";
     clearHint();
@@ -2676,6 +2782,14 @@ function applyImportedData(payload) {
 retryBtn.addEventListener("click", () => {
     gameOverEl.style.display = "none";
     gameOverAnswerEl.textContent = "";
+
+    if (sessionStarted) {
+        inputEl.disabled = false;
+        for (const btn of choiceGridEl.querySelectorAll("button")) btn.disabled = false;
+        nextCharacter();
+        return;
+    }
+
     startSession();
 });
 

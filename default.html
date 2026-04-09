@@ -1175,6 +1175,8 @@ const endlessTotalPill = document.getElementById("endlessTotalPill");
 const endlessWrongPill = document.getElementById("endlessWrongPill");
 const heatmapEl = document.getElementById("heatmap");
 const popupEl = document.getElementById("popup");
+let popupLocked = false;
+let hoveredCell = null;
 const modifiersTabEl = document.getElementById("modifiersTab");
 const optionsTabEl = document.getElementById("optionsTab");
 const modifiersContentEl = document.getElementById("modifiersContent");
@@ -1187,6 +1189,10 @@ const scoresContentEl = document.getElementById("scoresContent");
 const scoresChevronEl = document.getElementById("scoresChevron");
 const retryBtn = document.getElementById("retryBtn");
 const resetBtn = document.getElementById("resetBtn");
+
+function setRetryButtonVisible(visible) {
+    retryBtn.style.display = visible ? "inline-block" : "none";
+}
 const startBtn = document.getElementById("startBtn");
 const startWrap = document.getElementById("startWrap");
 const sessionActionsEl = document.getElementById("sessionActions");
@@ -1408,6 +1414,7 @@ function endDailyChallenge() {
     }
 
     gameOverEl.style.display = "block";
+    setRetryButtonVisible(false);
     buildModifierButtons();
     buildRows("rowOptions", hiraganaRows, "hiraganaRows", "h_");
     buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
@@ -1609,6 +1616,34 @@ function heatmapColor(char) {
     return "var(--yellow)";
 }
 
+function showPopupForChar(ch, e) {
+    const st = getStats(ch);
+    const tm = getAverageTime(ch);
+    const sr = getSrs(ch);
+
+    popupEl.innerHTML = `
+        <div class="popup-title">${ch}</div>
+        <div>Right: ${st.correct}</div>
+        <div>Wrong: ${st.wrong}</div>
+        <div>Avg time: ${formatDuration(tm)}</div>
+        <div>SRS level: ${sr.level}</div>
+    `;
+
+    popupEl.style.display = "block";
+
+    if (settings.mobileMode) {
+        popupEl.style.left = "50%";
+        popupEl.style.top = "50%";
+        popupEl.style.transform = "translate(-50%, -50%)";
+    } else {
+        popupEl.style.transform = "none";
+        const x = Math.min(window.innerWidth - 180, e.clientX + 10);
+        const y = Math.min(window.innerHeight - 120, e.clientY + 10);
+        popupEl.style.left = x + "px";
+        popupEl.style.top = y + "px";
+    }
+}
+
 function renderHeatmap() {
     heatmapEl.innerHTML = "";
 
@@ -1618,41 +1653,41 @@ function renderHeatmap() {
         cell.textContent = ch;
         cell.style.background = heatmapColor(ch);
 
-        cell.onclick = (e) => {
+        cell.addEventListener("mouseenter", (e) => {
+            hoveredCell = cell;
+            if (!popupLocked) showPopupForChar(ch, e);
+        });
+
+        cell.addEventListener("mousemove", (e) => {
+            if (!popupLocked && hoveredCell === cell) showPopupForChar(ch, e);
+        });
+
+        cell.addEventListener("mouseleave", () => {
+            if (hoveredCell === cell) hoveredCell = null;
+            if (!popupLocked) closePopup();
+        });
+
+        cell.addEventListener("click", (e) => {
             e.stopPropagation();
-            const st = getStats(ch);
-            const tm = getAverageTime(ch);
-            const sr = getSrs(ch);
-
-            popupEl.innerHTML = `
-                <div class="popup-title">${ch}</div>
-                <div>Right: ${st.correct}</div>
-                <div>Wrong: ${st.wrong}</div>
-                <div>Avg time: ${formatDuration(tm)}</div>
-                <div>SRS level: ${sr.level}</div>
-            `;
-
-            popupEl.style.display = "block";
-
-            if (settings.mobileMode) {
-                popupEl.style.left = "50%";
-                popupEl.style.top = "50%";
-                popupEl.style.transform = "translate(-50%, -50%)";
-            } else {
-                popupEl.style.transform = "none";
-                const x = Math.min(window.innerWidth - 180, e.clientX + 10);
-                const y = Math.min(window.innerHeight - 120, e.clientY + 10);
-                popupEl.style.left = x + "px";
-                popupEl.style.top = y + "px";
-            }
-        };
+            popupLocked = true;
+            hoveredCell = cell;
+            showPopupForChar(ch, e);
+        });
 
         heatmapEl.appendChild(cell);
     }
 }
 
-function closePopup() { popupEl.style.display = "none"; }
-document.addEventListener("click", closePopup);
+function closePopup() {
+    popupEl.style.display = "none";
+}
+
+document.addEventListener("click", (e) => {
+    if (e.target.closest(".cell") || e.target.closest(".popup")) return;
+    popupLocked = false;
+    hoveredCell = null;
+    closePopup();
+});
 
 function onSettingsChanged() {
     rebuildCharMap();
@@ -1812,6 +1847,7 @@ function showIdleState() {
     startWrap.style.display = "flex";
     sessionActionsEl.style.display = "none";
     gameOverEl.style.display = "none";
+    setRetryButtonVisible(true);
     gameOverTitleEl.textContent = "Wrong";
     gameOverAnswerEl.textContent = "";
     trialTimerPill.style.display = "none";
@@ -1917,6 +1953,7 @@ function startSession() {
     updateTopStats();
 
     gameOverEl.style.display = "none";
+    setRetryButtonVisible(true);
     gameOverTitleEl.textContent = "Wrong";
     startWrap.style.display = "none";
     sessionActionsEl.style.display = "flex";
@@ -2076,6 +2113,7 @@ function handleWrong() {
         gameOverAnswerEl.textContent = `Correct answer: ${correctAnswer}`;
         flashResult(false, () => {
             gameOverEl.style.display = "block";
+            setRetryButtonVisible(true);
             inputEl.disabled = true;
         });
     }
@@ -2104,9 +2142,12 @@ inputEl.addEventListener("input", () => {
 });
 
 retryBtn.addEventListener("click", () => {
+    if (!sessionStarted) return;
     gameOverEl.style.display = "none";
+    setRetryButtonVisible(true);
     gameOverAnswerEl.textContent = "";
-    startSession();
+    inputEl.disabled = false;
+    nextCharacter();
 });
 
 startBtn.addEventListener("click", startSession);
@@ -2274,6 +2315,7 @@ function endSession(autoEnded = false) {
         stopTrialTimer();
         inputEl.disabled = true;
         gameOverEl.style.display = "none";
+        setRetryButtonVisible(true);
         sessionActionsEl.style.display = "none";
         startWrap.style.display = "flex";
         clearHint();
@@ -2291,6 +2333,7 @@ function endSession(autoEnded = false) {
 
     inputEl.disabled = true;
     gameOverEl.style.display = "none";
+    setRetryButtonVisible(true);
     sessionActionsEl.style.display = "none";
     startWrap.style.display = "flex";
     clearHint();
@@ -2484,6 +2527,7 @@ resetBtn.addEventListener("click", () => {
     sessionModalBackdrop.classList.remove("open");
     importModalBackdrop.classList.remove("open");
     gameOverEl.style.display = "none";
+    setRetryButtonVisible(true);
     showIdleState();
     onSettingsChanged();
 });
