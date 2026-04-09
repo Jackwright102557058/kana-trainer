@@ -2163,6 +2163,11 @@ function handleCorrect() {
     renderScoreHistory();
     saveAll();
 
+    if (isFinalTestQuestionCompleted()) {
+        flashResult(true, () => endTestMode());
+        return;
+    }
+
     flashResult(true, () => nextCharacter());
 }
 
@@ -2206,7 +2211,11 @@ function handleWrong() {
         flashResult(false, () => nextCharacter());
     } else if (isTestModeSession()) {
         hintEl.textContent = `Answer: ${correctAnswer}`;
-        flashResult(false, () => nextCharacter());
+        if (isFinalTestQuestionCompleted()) {
+            flashResult(false, () => endTestMode());
+        } else {
+            flashResult(false, () => nextCharacter());
+        }
     } else if (currentFlowModeIsContinuous()) {
         hintEl.textContent = `Answer: ${correctAnswer}`;
         flashResult(false, () => nextCharacter());
@@ -2337,6 +2346,12 @@ function saveTestModeResult() {
 }
 
 function endTestMode() {
+    const durationMs = Math.max(0, Date.now() - testStartTime);
+    const totalAnswered = testCorrect + testWrong;
+    const scorePct = totalAnswered ? Math.round((testCorrect / totalAnswered) * 100) : 0;
+
+    saveTestModeResult();
+
     sessionStarted = false;
     sessionStats.active = false;
     stopTrialTimer();
@@ -2348,16 +2363,12 @@ function endTestMode() {
     clearHint();
     hiraganaEl.textContent = "—";
     currentChar = "";
-    saveTestModeResult();
-
-    const durationMs = Math.max(0, Date.now() - testStartTime);
-    const scorePct = (testCorrect + testWrong) ? Math.round((testCorrect / (testCorrect + testWrong)) * 100) : 0;
 
     sessionStatsGrid.innerHTML = [
         ["Score", `${scorePct}%`],
         ["Correct", testCorrect],
         ["Wrong", testWrong],
-        ["Questions", testSequence.length || 0],
+        ["Questions", testSequence.length || totalAnswered || 0],
         ["Avg Time", formatDuration(sessionStats.timings.length ? average(sessionStats.timings) : 0)],
         ["Test Time", formatDuration(durationMs)]
     ].map(([label, value]) => `
@@ -2369,10 +2380,13 @@ function endTestMode() {
 
     sessionHardList.style.display = "none";
     sessionEasyList.style.display = "none";
-    sessionModalBackdrop.querySelector("h2").textContent = "Reading Test Complete";
+    const modalTitle = sessionModalBackdrop.querySelector("h2");
+    if (modalTitle) modalTitle.textContent = "Reading Test Complete";
     sessionModalBackdrop.classList.add("open");
 
     updateTopStats();
+    renderScoreHistory();
+    saveAll();
     onSettingsChanged();
 }
 function updateBestScores() {
