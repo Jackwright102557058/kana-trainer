@@ -1621,6 +1621,10 @@ function normalizeTestResult(result) {
         dakuten: !!result.dakuten,
         kanaAsked: Number(result.kanaAsked || total || Object.keys(kana).length || 0),
         notes: String(result.notes || ""),
+        inputMode: String(result.inputMode || ""),
+        inputVariant: String(result.inputVariant || ""),
+        buttonLayout: result.buttonLayout ?? null,
+        keyboardLayout: String(result.keyboardLayout || ""),
         breakdown: {
             hiragana: {
                 correct: Number(result.breakdown?.hiragana?.correct || 0),
@@ -1991,6 +1995,31 @@ function detailMetric(label, value) {
     `;
 }
 
+function toTitleCase(value) {
+    return String(value || "")
+        .replace(/[_-]+/g, " ")
+        .replace(/\w/g, char => char.toUpperCase());
+}
+
+function getResultTypeLabel(result) {
+    if (!result) return "—";
+    if (result.type === "average") {
+        return result.mode === "reading" ? "Read Avg" : "Write Avg";
+    }
+
+    if (result.inputMode === "buttons") {
+        const layout = result.buttonLayout ?? result.inputVariant;
+        return layout ? `Buttons - ${layout}` : "Buttons";
+    }
+
+    if (result.inputMode === "keyboard") {
+        const layout = result.keyboardLayout || result.inputVariant;
+        return layout ? `Keyboard - ${toTitleCase(layout)}` : "Keyboard";
+    }
+
+    return result.mode === "reading" ? "Read" : "Write";
+}
+
 function getSelectedResult() {
     return STORED_RESULTS.find(item => item.id === selectedResultId) || null;
 }
@@ -2044,7 +2073,7 @@ function renderSnapshot(result) {
     OVERALL_SELECTED_NAME.textContent = result.title;
     OVERALL_SCORE.textContent = `${result.overallScore}%`;
     OVERALL_SUB.textContent = result.notes;
-    OVERALL_MODE.textContent = result.mode === "reading" ? "Read" : "Write";
+    OVERALL_MODE.textContent = getResultTypeLabel(result);
     OVERALL_CORRECT.textContent = result.correct;
     OVERALL_WRONG.textContent = result.wrong;
     OVERALL_TIME.textContent = formatDuration(result.durationMs);

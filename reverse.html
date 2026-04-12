@@ -2921,6 +2921,14 @@ function saveTestModeResult() {
         avgMs: sessionStats.timings.length ? Math.round(average(sessionStats.timings)) : 0,
         dakuten: !!settings.dakuten,
         kanaAsked: testSequence.length,
+        inputMode: settings.keyboardMode ? "keyboard" : "buttons",
+        inputVariant: settings.keyboardMode
+            ? (settings.keyboardInputType === "romaji" ? "romaji" : "kana")
+            : String(settings.choiceCount),
+        buttonLayout: settings.keyboardMode ? null : Number(settings.choiceCount),
+        keyboardLayout: settings.keyboardMode
+            ? (settings.keyboardInputType === "romaji" ? "romaji" : "kana")
+            : "",
         notes: "Full shuffled writing test run.",
         breakdown,
         kana
