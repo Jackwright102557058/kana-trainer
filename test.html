@@ -2024,8 +2024,20 @@ function getSelectedResult() {
     return STORED_RESULTS.find(item => item.id === selectedResultId) || null;
 }
 
-function getHeatColor(record) {
+function getHeatColor(result, record) {
     if (!record) return "rgba(255,255,255,0.05)";
+
+    if (result?.type === "average") {
+        const correct = Number(record.correct || 0);
+        const wrong = Number(record.wrong || 0);
+        const attempts = correct + wrong;
+        const ratio = attempts ? (correct / attempts) : 0;
+
+        if (ratio >= 0.75) return "rgba(103,215,139,0.32)";
+        if (ratio >= 0.50) return "rgba(255,210,102,0.30)";
+        return "rgba(255,123,123,0.28)";
+    }
+
     return (record.wrong || 0) > 0 ? "rgba(255,123,123,0.28)" : "rgba(103,215,139,0.32)";
 }
 
@@ -2208,7 +2220,7 @@ function renderHeatmap(result) {
             ? `<span class="cell-badge ${marker}">${marker === 'fastest' ? 'Fastest' : 'Slowest'}</span>`
             : '';
         return `
-            <button class="cell ${selectedKana === char ? "active" : ""}" data-kana="${char}" type="button" style="background:${getHeatColor(record)};">
+            <button class="cell ${selectedKana === char ? "active" : ""}" data-kana="${char}" type="button" style="background:${getHeatColor(result, record)};">
                 ${badge}
                 <div class="cell-char">${char}</div>
                 <div class="cell-time">${formatDuration(record.avgMs)}</div>
