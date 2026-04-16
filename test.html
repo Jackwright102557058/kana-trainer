@@ -481,37 +481,6 @@
         line-height: 1.55;
     }
 
-    .detail-controls {
-        display:flex;
-        justify-content:flex-end;
-        gap:10px;
-        margin-bottom:12px;
-    }
-
-    .inline-toggle-btn {
-        appearance:none;
-        border:1px solid rgba(255,255,255,0.10);
-        background:rgba(255,255,255,0.04);
-        color:var(--text);
-        border-radius:12px;
-        padding:10px 12px;
-        cursor:pointer;
-        font-size:13px;
-        font-weight:700;
-        transition:all 0.15s ease;
-    }
-
-    .inline-toggle-btn:hover {
-        border-color: rgba(203,163,74,0.35);
-        box-shadow: 0 0 0 1px rgba(203,163,74,0.12);
-    }
-
-    .inline-toggle-btn.active {
-        background: rgba(203,163,74,0.15);
-        border-color: rgba(203,163,74,0.35);
-        color: #ffe2a6;
-    }
-
     .detail-metrics {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -669,12 +638,9 @@
         h1 { font-size: 36px; }
         .meta-grid,
         .detail-metrics,
-        .duo-grid,
-        .mega-inline-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .duo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .kana-grid { grid-template-columns: 1fr; }
         .kana-big { max-width: 110px; }
-        .detail-controls { justify-content: stretch; }
-        .inline-toggle-btn { width: 100%; }
     }
 
     .mega-score.reading {
@@ -818,42 +784,6 @@
         gap: 8px;
     }
 
-    .row-performance-toolbar {
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:12px;
-        margin-bottom:8px;
-        flex-wrap:wrap;
-    }
-
-    .row-view-toggle {
-        display:inline-flex;
-        align-items:center;
-        gap:0;
-        padding:3px;
-        border-radius:999px;
-        background:rgba(255,255,255,0.04);
-        border:1px solid rgba(255,255,255,0.08);
-    }
-
-    .row-view-btn {
-        appearance:none;
-        border:none;
-        background:transparent;
-        color:var(--muted);
-        font-size:12px;
-        font-weight:800;
-        padding:8px 12px;
-        border-radius:999px;
-        cursor:pointer;
-    }
-
-    .row-view-btn.active {
-        background:rgba(203,163,74,0.16);
-        color:#ffe2a6;
-    }
-
     .row-performance-head {
         display: flex;
         justify-content: space-between;
@@ -930,42 +860,6 @@
     }
 
 
-    .row-performance-toolbar {
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:12px;
-        margin-bottom:8px;
-        flex-wrap:wrap;
-    }
-
-    .row-view-toggle {
-        display:inline-flex;
-        align-items:center;
-        gap:0;
-        padding:3px;
-        border-radius:999px;
-        background:rgba(255,255,255,0.04);
-        border:1px solid rgba(255,255,255,0.08);
-    }
-
-    .row-view-btn {
-        appearance:none;
-        border:none;
-        background:transparent;
-        color:var(--muted);
-        font-size:12px;
-        font-weight:800;
-        padding:8px 12px;
-        border-radius:999px;
-        cursor:pointer;
-    }
-
-    .row-view-btn.active {
-        background:rgba(203,163,74,0.16);
-        color:#ffe2a6;
-    }
-
     .row-performance-head {
         display: flex;
         justify-content: space-between;
@@ -1020,7 +914,7 @@
 
     .mega-inline-summary {
         display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 10px;
         margin-top: 16px;
     }
@@ -1418,10 +1312,6 @@
                         </div>
                     </div>
 
-                    <div class="detail-controls">
-                        <button class="inline-toggle-btn" id="hideUnusedBtn" type="button">Hide unused kana</button>
-                    </div>
-
                     <div class="detail-metrics" id="detailMetrics"></div>
 
                     <div class="heatmap-wrap">
@@ -1430,7 +1320,7 @@
                         <div class="legend">
                             <div class="legend-chip"><span class="legend-box" style="background: rgba(103,215,139,0.34);"></span> Correct</div>
                             <div class="legend-chip"><span class="legend-box" style="background: rgba(255,123,123,0.28);"></span> Wrong</div>
-                            <div class="legend-chip"><span class="legend-box" style="background: rgba(255,255,255,0.08);"></span> Modifier kana off</div>
+                            <div class="legend-chip"><span class="legend-box" style="background: rgba(255,255,255,0.08);"></span> Dakuten not used</div>
                             <div class="legend-chip"><span class="legend-box" style="background: rgba(255,255,255,0.06);"></span> Not included</div>
                         </div>
                     </div>
@@ -1504,136 +1394,45 @@ const DAKUTEN_ROWS = {
 };
 
 
-
-const YOON_ROWS = {
-    h_ka: {"きゃ":"kya","きゅ":"kyu","きょ":"kyo"},
-    h_sa: {"しゃ":"sha","しゅ":"shu","しょ":"sho"},
-    h_ta: {"ちゃ":"cha","ちゅ":"chu","ちょ":"cho"},
-    h_na: {"にゃ":"nya","にゅ":"nyu","にょ":"nyo"},
-    h_ha: {
-        "ひゃ":"hya","ひゅ":"hyu","ひょ":"hyo",
-        "びゃ":"bya","びゅ":"byu","びょ":"byo",
-        "ぴゃ":"pya","ぴゅ":"pyu","ぴょ":"pyo"
-    },
-    h_ma: {"みゃ":"mya","みゅ":"myu","みょ":"myo"},
-    h_ra: {"りゃ":"rya","りゅ":"ryu","りょ":"ryo"},
-    h_ka_dakuten: {"ぎゃ":"gya","ぎゅ":"gyu","ぎょ":"gyo"},
-    h_sa_dakuten: {"じゃ":"ja","じゅ":"ju","じょ":"jo"},
-    h_ta_dakuten: {"ぢゃ":"ja","ぢゅ":"ju","ぢょ":"jo"},
-    k_ka: {"キャ":"kya","キュ":"kyu","キョ":"kyo"},
-    k_sa: {"シャ":"sha","シュ":"shu","ショ":"sho"},
-    k_ta: {"チャ":"cha","チュ":"chu","チョ":"cho"},
-    k_na: {"ニャ":"nya","ニュ":"nyu","ニョ":"nyo"},
-    k_ha: {
-        "ヒャ":"hya","ヒュ":"hyu","ヒョ":"hyo",
-        "ビャ":"bya","ビュ":"byu","ビョ":"byo",
-        "ピャ":"pya","ピュ":"pyu","ピョ":"pyo"
-    },
-    k_ma: {"ミャ":"mya","ミュ":"myu","ミョ":"myo"},
-    k_ra: {"リャ":"rya","リュ":"ryu","リョ":"ryo"},
-    k_ka_dakuten: {"ギャ":"gya","ギュ":"gyu","ギョ":"gyo"},
-    k_sa_dakuten: {"ジャ":"ja","ジュ":"ju","ジョ":"jo"},
-    k_ta_dakuten: {"ヂャ":"ja","ヂュ":"ju","ヂョ":"jo"}
-};
-
-const EXTENDED_KATAKANA_ROWS = {
-    k_a: {
-        "イェ":"ye",
-        "ウィ":"wi","ウェ":"we","ウォ":"wo"
-    },
-    k_sa: {
-        "シェ":"she",
-        "ジェ":"je"
-    },
-    k_ta: {
-        "チェ":"che",
-        "ティ":"ti","ディ":"di",
-        "トゥ":"tu","ドゥ":"du",
-        "ツァ":"tsa","ツィ":"tsi","ツェ":"tse","ツォ":"tso"
-    },
-    k_ha: {
-        "ファ":"fa","フィ":"fi","フェ":"fe","フォ":"fo","フュ":"fyu"
-    },
-    k_wa: {
-        "ヴ":"vu","ヴァ":"va","ヴィ":"vi","ヴェ":"ve","ヴォ":"vo","ヴュ":"vyu"
-    }
-};
-
-const REGULAR_ROW_GROUPS = [
+const ROW_GROUPS = [
     { script: "hiragana", key: "あ", chars: [...Object.keys(HIRAGANA_ROWS.h_a)] },
-    { script: "hiragana", key: "か", chars: [...Object.keys(HIRAGANA_ROWS.h_ka), ...Object.keys(DAKUTEN_ROWS.h_ka), ...Object.keys(YOON_ROWS.h_ka), ...Object.keys(YOON_ROWS.h_ka_dakuten)] },
-    { script: "hiragana", key: "さ", chars: [...Object.keys(HIRAGANA_ROWS.h_sa), ...Object.keys(DAKUTEN_ROWS.h_sa), ...Object.keys(YOON_ROWS.h_sa), ...Object.keys(YOON_ROWS.h_sa_dakuten)] },
-    { script: "hiragana", key: "た", chars: [...Object.keys(HIRAGANA_ROWS.h_ta), ...Object.keys(DAKUTEN_ROWS.h_ta), ...Object.keys(YOON_ROWS.h_ta), ...Object.keys(YOON_ROWS.h_ta_dakuten)] },
-    { script: "hiragana", key: "な", chars: [...Object.keys(HIRAGANA_ROWS.h_na), ...Object.keys(YOON_ROWS.h_na)] },
-    { script: "hiragana", key: "は", chars: [...Object.keys(HIRAGANA_ROWS.h_ha), ...Object.keys(DAKUTEN_ROWS.h_ha), ...Object.keys(YOON_ROWS.h_ha)] },
-    { script: "hiragana", key: "ま", chars: [...Object.keys(HIRAGANA_ROWS.h_ma), ...Object.keys(YOON_ROWS.h_ma)] },
+    { script: "hiragana", key: "か", chars: [...Object.keys(HIRAGANA_ROWS.h_ka), ...Object.keys(DAKUTEN_ROWS.h_ka)] },
+    { script: "hiragana", key: "さ", chars: [...Object.keys(HIRAGANA_ROWS.h_sa), ...Object.keys(DAKUTEN_ROWS.h_sa)] },
+    { script: "hiragana", key: "た", chars: [...Object.keys(HIRAGANA_ROWS.h_ta), ...Object.keys(DAKUTEN_ROWS.h_ta)] },
+    { script: "hiragana", key: "な", chars: [...Object.keys(HIRAGANA_ROWS.h_na)] },
+    { script: "hiragana", key: "は", chars: [...Object.keys(HIRAGANA_ROWS.h_ha), ...Object.keys(DAKUTEN_ROWS.h_ha)] },
+    { script: "hiragana", key: "ま", chars: [...Object.keys(HIRAGANA_ROWS.h_ma)] },
     { script: "hiragana", key: "や", chars: [...Object.keys(HIRAGANA_ROWS.h_ya)] },
-    { script: "hiragana", key: "ら", chars: [...Object.keys(HIRAGANA_ROWS.h_ra), ...Object.keys(YOON_ROWS.h_ra)] },
+    { script: "hiragana", key: "ら", chars: [...Object.keys(HIRAGANA_ROWS.h_ra)] },
     { script: "hiragana", key: "わ", chars: [...Object.keys(HIRAGANA_ROWS.h_wa)] },
 
-    { script: "katakana", key: "ア", chars: [...Object.keys(KATAKANA_ROWS.k_a), ...Object.keys(EXTENDED_KATAKANA_ROWS.k_a)] },
-    { script: "katakana", key: "カ", chars: [...Object.keys(KATAKANA_ROWS.k_ka), ...Object.keys(DAKUTEN_ROWS.k_ka), ...Object.keys(YOON_ROWS.k_ka), ...Object.keys(YOON_ROWS.k_ka_dakuten)] },
-    { script: "katakana", key: "サ", chars: [...Object.keys(KATAKANA_ROWS.k_sa), ...Object.keys(DAKUTEN_ROWS.k_sa), ...Object.keys(YOON_ROWS.k_sa), ...Object.keys(YOON_ROWS.k_sa_dakuten), ...Object.keys(EXTENDED_KATAKANA_ROWS.k_sa)] },
-    { script: "katakana", key: "タ", chars: [...Object.keys(KATAKANA_ROWS.k_ta), ...Object.keys(DAKUTEN_ROWS.k_ta), ...Object.keys(YOON_ROWS.k_ta), ...Object.keys(YOON_ROWS.k_ta_dakuten), ...Object.keys(EXTENDED_KATAKANA_ROWS.k_ta)] },
-    { script: "katakana", key: "ナ", chars: [...Object.keys(KATAKANA_ROWS.k_na), ...Object.keys(YOON_ROWS.k_na)] },
-    { script: "katakana", key: "ハ", chars: [...Object.keys(KATAKANA_ROWS.k_ha), ...Object.keys(DAKUTEN_ROWS.k_ha), ...Object.keys(YOON_ROWS.k_ha), ...Object.keys(EXTENDED_KATAKANA_ROWS.k_ha)] },
-    { script: "katakana", key: "マ", chars: [...Object.keys(KATAKANA_ROWS.k_ma), ...Object.keys(YOON_ROWS.k_ma)] },
+    { script: "katakana", key: "ア", chars: [...Object.keys(KATAKANA_ROWS.k_a)] },
+    { script: "katakana", key: "カ", chars: [...Object.keys(KATAKANA_ROWS.k_ka), ...Object.keys(DAKUTEN_ROWS.k_ka)] },
+    { script: "katakana", key: "サ", chars: [...Object.keys(KATAKANA_ROWS.k_sa), ...Object.keys(DAKUTEN_ROWS.k_sa)] },
+    { script: "katakana", key: "タ", chars: [...Object.keys(KATAKANA_ROWS.k_ta), ...Object.keys(DAKUTEN_ROWS.k_ta)] },
+    { script: "katakana", key: "ナ", chars: [...Object.keys(KATAKANA_ROWS.k_na)] },
+    { script: "katakana", key: "ハ", chars: [...Object.keys(KATAKANA_ROWS.k_ha), ...Object.keys(DAKUTEN_ROWS.k_ha)] },
+    { script: "katakana", key: "マ", chars: [...Object.keys(KATAKANA_ROWS.k_ma)] },
     { script: "katakana", key: "ヤ", chars: [...Object.keys(KATAKANA_ROWS.k_ya)] },
-    { script: "katakana", key: "ラ", chars: [...Object.keys(KATAKANA_ROWS.k_ra), ...Object.keys(YOON_ROWS.k_ra)] },
-    { script: "katakana", key: "ワ", chars: [...Object.keys(KATAKANA_ROWS.k_wa), ...Object.keys(EXTENDED_KATAKANA_ROWS.k_wa)] }
+    { script: "katakana", key: "ラ", chars: [...Object.keys(KATAKANA_ROWS.k_ra)] },
+    { script: "katakana", key: "ワ", chars: [...Object.keys(KATAKANA_ROWS.k_wa)] }
 ];
 
-const SPECIAL_ROW_GROUPS = [
-    { script: "hiragana_special", key: "か Dakuten", chars: [...Object.keys(DAKUTEN_ROWS.h_ka)] },
-    { script: "hiragana_special", key: "さ Dakuten", chars: [...Object.keys(DAKUTEN_ROWS.h_sa)] },
-    { script: "hiragana_special", key: "た Dakuten", chars: [...Object.keys(DAKUTEN_ROWS.h_ta)] },
-    { script: "hiragana_special", key: "は Dakuten", chars: [...Object.keys(DAKUTEN_ROWS.h_ha)] },
-    { script: "hiragana_special", key: "か Yōon", chars: [...Object.keys(YOON_ROWS.h_ka), ...Object.keys(YOON_ROWS.h_ka_dakuten)] },
-    { script: "hiragana_special", key: "さ Yōon", chars: [...Object.keys(YOON_ROWS.h_sa), ...Object.keys(YOON_ROWS.h_sa_dakuten)] },
-    { script: "hiragana_special", key: "た Yōon", chars: [...Object.keys(YOON_ROWS.h_ta), ...Object.keys(YOON_ROWS.h_ta_dakuten)] },
-    { script: "hiragana_special", key: "な Yōon", chars: [...Object.keys(YOON_ROWS.h_na)] },
-    { script: "hiragana_special", key: "は Yōon", chars: [...Object.keys(YOON_ROWS.h_ha)] },
-    { script: "hiragana_special", key: "ま Yōon", chars: [...Object.keys(YOON_ROWS.h_ma)] },
-    { script: "hiragana_special", key: "ら Yōon", chars: [...Object.keys(YOON_ROWS.h_ra)] },
-
-    { script: "katakana_special", key: "カ Dakuten", chars: [...Object.keys(DAKUTEN_ROWS.k_ka)] },
-    { script: "katakana_special", key: "サ Dakuten", chars: [...Object.keys(DAKUTEN_ROWS.k_sa)] },
-    { script: "katakana_special", key: "タ Dakuten", chars: [...Object.keys(DAKUTEN_ROWS.k_ta)] },
-    { script: "katakana_special", key: "ハ Dakuten", chars: [...Object.keys(DAKUTEN_ROWS.k_ha)] },
-    { script: "katakana_special", key: "カ Yōon", chars: [...Object.keys(YOON_ROWS.k_ka), ...Object.keys(YOON_ROWS.k_ka_dakuten)] },
-    { script: "katakana_special", key: "サ Yōon", chars: [...Object.keys(YOON_ROWS.k_sa), ...Object.keys(YOON_ROWS.k_sa_dakuten)] },
-    { script: "katakana_special", key: "タ Yōon", chars: [...Object.keys(YOON_ROWS.k_ta), ...Object.keys(YOON_ROWS.k_ta_dakuten)] },
-    { script: "katakana_special", key: "ナ Yōon", chars: [...Object.keys(YOON_ROWS.k_na)] },
-    { script: "katakana_special", key: "ハ Yōon", chars: [...Object.keys(YOON_ROWS.k_ha)] },
-    { script: "katakana_special", key: "マ Yōon", chars: [...Object.keys(YOON_ROWS.k_ma)] },
-    { script: "katakana_special", key: "ラ Yōon", chars: [...Object.keys(YOON_ROWS.k_ra)] },
-    { script: "katakana_special", key: "ア Ext", chars: [...Object.keys(EXTENDED_KATAKANA_ROWS.k_a)] },
-    { script: "katakana_special", key: "サ Ext", chars: [...Object.keys(EXTENDED_KATAKANA_ROWS.k_sa)] },
-    { script: "katakana_special", key: "タ Ext", chars: [...Object.keys(EXTENDED_KATAKANA_ROWS.k_ta)] },
-    { script: "katakana_special", key: "ハ Ext", chars: [...Object.keys(EXTENDED_KATAKANA_ROWS.k_ha)] },
-    { script: "katakana_special", key: "ワ Ext", chars: [...Object.keys(EXTENDED_KATAKANA_ROWS.k_wa)] }
+const MODIFIER_ROW_GROUPS = [
+    { script: "hiragana", key: "が", chars: [...Object.keys(DAKUTEN_ROWS.h_ka)] },
+    { script: "hiragana", key: "ざ", chars: [...Object.keys(DAKUTEN_ROWS.h_sa)] },
+    { script: "hiragana", key: "だ", chars: [...Object.keys(DAKUTEN_ROWS.h_ta)] },
+    { script: "hiragana", key: "ば/ぱ", chars: [...Object.keys(DAKUTEN_ROWS.h_ha)] },
+    { script: "katakana", key: "ガ", chars: [...Object.keys(DAKUTEN_ROWS.k_ka)] },
+    { script: "katakana", key: "ザ", chars: [...Object.keys(DAKUTEN_ROWS.k_sa)] },
+    { script: "katakana", key: "ダ", chars: [...Object.keys(DAKUTEN_ROWS.k_ta)] },
+    { script: "katakana", key: "バ/パ", chars: [...Object.keys(DAKUTEN_ROWS.k_ha)] }
 ];
 
-const ROW_GROUPS = REGULAR_ROW_GROUPS;
-
-function getSpecialModifierType(rowKey = "") {
-    if (rowKey.includes("Dakuten")) return "dakuten";
-    if (rowKey.includes("Yōon")) return "yoon";
-    if (rowKey.includes("Ext")) return "extendedKatakana";
-    return "";
-}
-
-function isModifierEnabledForResult(result, modifierType) {
-    if (modifierType === "dakuten") return !!result.dakuten;
-    if (modifierType === "yoon") return !!result.yoon;
-    if (modifierType === "extendedKatakana") return !!result.extendedKatakana;
-    return true;
-}
-
-function computeRowPerformance(result, groups = REGULAR_ROW_GROUPS, includeEmpty = false) {
+function computeGroupedRowPerformance(result, groups, includeEmpty = false) {
     const rows = groups.map(row => {
         const items = row.chars
-            .filter(ch => result.kana[ch])
+            .filter(ch => result.kana && result.kana[ch])
             .map(ch => ({ ch, ...result.kana[ch] }));
 
         const correct = items.reduce((sum, item) => sum + (item.correct || 0), 0);
@@ -1643,8 +1442,6 @@ function computeRowPerformance(result, groups = REGULAR_ROW_GROUPS, includeEmpty
             ? Math.round(items.reduce((sum, item) => sum + (item.avgMs || 0), 0) / items.length)
             : 0;
         const accuracy = total ? Math.round((correct / total) * 100) : 0;
-        const modifierType = getSpecialModifierType(row.key);
-        const modifierEnabled = isModifierEnabledForResult(result, modifierType);
 
         return {
             script: row.script,
@@ -1654,19 +1451,17 @@ function computeRowPerformance(result, groups = REGULAR_ROW_GROUPS, includeEmpty
             total,
             accuracy,
             avgMs,
-            modifierType,
-            modifierEnabled,
-            isOff: !!modifierType && !modifierEnabled,
+            isOff: total === 0,
             score: total ? (accuracy - (avgMs / 1000) * 4) : -Infinity
         };
     }).filter(row => includeEmpty || row.total > 0);
 
-    const hiragana = rows.filter(row => row.script.startsWith("hiragana"));
-    const katakana = rows.filter(row => row.script.startsWith("katakana"));
+    const hiragana = rows.filter(row => row.script === "hiragana");
+    const katakana = rows.filter(row => row.script === "katakana");
 
-    const ranked = items => items.filter(item => item.total > 0);
-    const pickWorst = (items) => ranked(items).length ? [...ranked(items)].sort((a, b) => (a.score - b.score) || (b.wrong - a.wrong) || (b.avgMs - a.avgMs))[0] : null;
-    const pickBest = (items) => ranked(items).length ? [...ranked(items)].sort((a, b) => (b.score - a.score) || (a.wrong - b.wrong) || (a.avgMs - b.avgMs))[0] : null;
+    const withData = (items) => items.filter(item => item.total > 0);
+    const pickWorst = (items) => withData(items).length ? [...withData(items)].sort((a, b) => (a.score - b.score) || (b.wrong - a.wrong) || (b.avgMs - a.avgMs))[0] : null;
+    const pickBest = (items) => withData(items).length ? [...withData(items)].sort((a, b) => (b.score - a.score) || (a.wrong - b.wrong) || (a.avgMs - b.avgMs))[0] : null;
 
     return {
         rows,
@@ -1677,6 +1472,14 @@ function computeRowPerformance(result, groups = REGULAR_ROW_GROUPS, includeEmpty
         katakanaWorst: pickWorst(katakana),
         katakanaBest: pickBest(katakana)
     };
+}
+
+function computeRowPerformance(result) {
+    return computeGroupedRowPerformance(result, ROW_GROUPS, false);
+}
+
+function computeModifierRowPerformance(result) {
+    return computeGroupedRowPerformance(result, MODIFIER_ROW_GROUPS, true);
 }
 
 
@@ -1719,12 +1522,9 @@ function getRowCellExtremes(result) {
     return map;
 }
 
-function renderRowPerformance(result, viewMode = "regular") {
-    const groups = viewMode === "special" ? SPECIAL_ROW_GROUPS : REGULAR_ROW_GROUPS;
-    const perf = computeRowPerformance(result, groups, viewMode === "special");
-
-    const leftTitle = viewMode === "special" ? "Hiragana modifier rows" : "Hiragana rows";
-    const rightTitle = viewMode === "special" ? "Katakana modifier rows" : "Katakana rows";
+function renderRowPerformance(result) {
+    const isModifierView = rowGraphView === "modifier";
+    const perf = isModifierView ? computeModifierRowPerformance(result) : computeRowPerformance(result);
 
     const renderSection = (title, rows, prefix, bestRow, worstRow) => `
         <div class="row-performance-section">
@@ -1734,10 +1534,10 @@ function renderRowPerformance(result, viewMode = "regular") {
             </div>
             <div class="row-doughnut-strip">
                 ${rows.map((row, index) => {
-                    const badge = getRowBadgeType(row, bestRow, worstRow);
+                    const badge = row.isOff ? null : getRowBadgeType(row, bestRow, worstRow);
                     return `
                         <button
-                            class="row-doughnut-card ${badge ? badge.className : ""}"
+                            class="row-doughnut-card ${badge ? badge.className : ""} ${row.isOff ? "off" : ""}"
                             data-row-script="${row.script}"
                             data-row-key="${row.key}"
                             type="button"
@@ -1755,11 +1555,9 @@ function renderRowPerformance(result, viewMode = "regular") {
 
     return `
         <div class="row-performance">
-            <div class="row-performance-toolbar">
-                <div class="row-view-toggle">
-                    <button class="row-view-btn ${viewMode === "regular" ? "active" : ""}" data-row-view="regular" type="button">Regular rows</button>
-                    <button class="row-view-btn ${viewMode === "special" ? "active" : ""}" data-row-view="special" type="button">Modifier rows</button>
-                </div>
+            <div class="row-performance-head" style="margin-bottom:4px;">
+                <span>${isModifierView ? "Modifier rows" : "Regular rows"}</span>
+                <button class="btn" type="button" data-row-view-toggle>${isModifierView ? "Show Regular Rows" : "Show Modifier Rows"}</button>
             </div>
             <div class="row-tooltip-overlay" id="rowTooltipOverlay">
                 <div class="row-tooltip-card" id="rowTooltipCard">
@@ -1767,8 +1565,8 @@ function renderRowPerformance(result, viewMode = "regular") {
                     <div class="sub">Hover or click a row to see right vs wrong and average time.</div>
                 </div>
             </div>
-            ${renderSection(leftTitle, perf.hiragana, viewMode === "special" ? "sh" : "h", perf.hiraganaBest, perf.hiraganaWorst)}
-            ${renderSection(rightTitle, perf.katakana, viewMode === "special" ? "sk" : "k", perf.katakanaBest, perf.katakanaWorst)}
+            ${renderSection(isModifierView ? "Hiragana modifier rows" : "Hiragana rows", perf.hiragana, isModifierView ? "mh" : "h", perf.hiraganaBest, perf.hiraganaWorst)}
+            ${renderSection(isModifierView ? "Katakana modifier rows" : "Katakana rows", perf.katakana, isModifierView ? "mk" : "k", perf.katakanaBest, perf.katakanaWorst)}
         </div>
     `;
 }
@@ -1779,12 +1577,7 @@ const ALL_BASE_KANA = [
 ];
 
 const ALL_DAKUTEN_KANA = Object.entries(DAKUTEN_ROWS).flatMap(([, row]) => Object.entries(row));
-const ALL_YOON_KANA = Object.entries(YOON_ROWS).flatMap(([, row]) => Object.entries(row));
-const ALL_EXTENDED_KATAKANA = Object.entries(EXTENDED_KATAKANA_ROWS).flatMap(([, row]) => Object.entries(row));
 const DAKUTEN_CHAR_SET = new Set(ALL_DAKUTEN_KANA.map(([char]) => char));
-const YOON_CHAR_SET = new Set(ALL_YOON_KANA.map(([char]) => char));
-const EXTENDED_KATAKANA_CHAR_SET = new Set(ALL_EXTENDED_KATAKANA.map(([char]) => char));
-const SPECIAL_CHAR_SET = new Set([...DAKUTEN_CHAR_SET, ...YOON_CHAR_SET, ...EXTENDED_KATAKANA_CHAR_SET]);
 
 const READING_TEST_RESULTS_STORAGE_KEY = "testModeResults";
 const READING_TEST_RESULTS_STORAGE_BACKUP_KEY = "kanaTrainerTestModeResults";
@@ -1851,8 +1644,6 @@ function normalizeTestResult(result) {
         durationMs,
         avgMs,
         dakuten: !!result.dakuten,
-        yoon: !!result.yoon,
-        extendedKatakana: !!result.extendedKatakana,
         kanaAsked: Number(result.kanaAsked || total || Object.keys(kana).length || 0),
         notes: String(result.notes || ""),
         inputMode: String(result.inputMode || ""),
@@ -1909,11 +1700,11 @@ function buildAverageResult(mode, tests) {
 
     const hiraChars = Object.keys(kana).filter(ch =>
         Object.values(HIRAGANA_ROWS).some(row => ch in row) ||
-        [DAKUTEN_ROWS.h_ka, DAKUTEN_ROWS.h_sa, DAKUTEN_ROWS.h_ta, DAKUTEN_ROWS.h_ha, YOON_ROWS.h_ka, YOON_ROWS.h_sa, YOON_ROWS.h_ta, YOON_ROWS.h_na, YOON_ROWS.h_ha, YOON_ROWS.h_ma, YOON_ROWS.h_ra, YOON_ROWS.h_ka_dakuten, YOON_ROWS.h_sa_dakuten, YOON_ROWS.h_ta_dakuten].some(row => row && ch in row)
+        [DAKUTEN_ROWS.h_ka, DAKUTEN_ROWS.h_sa, DAKUTEN_ROWS.h_ta, DAKUTEN_ROWS.h_ha].some(row => row && ch in row)
     );
     const kataChars = Object.keys(kana).filter(ch =>
         Object.values(KATAKANA_ROWS).some(row => ch in row) ||
-        [DAKUTEN_ROWS.k_ka, DAKUTEN_ROWS.k_sa, DAKUTEN_ROWS.k_ta, DAKUTEN_ROWS.k_ha, YOON_ROWS.k_ka, YOON_ROWS.k_sa, YOON_ROWS.k_ta, YOON_ROWS.k_na, YOON_ROWS.k_ha, YOON_ROWS.k_ma, YOON_ROWS.k_ra, YOON_ROWS.k_ka_dakuten, YOON_ROWS.k_sa_dakuten, YOON_ROWS.k_ta_dakuten, EXTENDED_KATAKANA_ROWS.k_a, EXTENDED_KATAKANA_ROWS.k_sa, EXTENDED_KATAKANA_ROWS.k_ta, EXTENDED_KATAKANA_ROWS.k_ha, EXTENDED_KATAKANA_ROWS.k_wa].some(row => row && ch in row)
+        [DAKUTEN_ROWS.k_ka, DAKUTEN_ROWS.k_sa, DAKUTEN_ROWS.k_ta, DAKUTEN_ROWS.k_ha].some(row => row && ch in row)
     );
 
     const hira = hiraChars.reduce((acc, ch) => ({ correct: acc.correct + kana[ch].correct, wrong: acc.wrong + kana[ch].wrong }), { correct: 0, wrong: 0 });
@@ -1933,8 +1724,6 @@ function buildAverageResult(mode, tests) {
         durationMs: avgMs * Object.keys(kana).length,
         avgMs,
         dakuten: filtered.some(test => test.dakuten),
-        yoon: filtered.some(test => test.yoon),
-        extendedKatakana: filtered.some(test => test.extendedKatakana),
         kanaAsked: Object.keys(kana).length,
         notes: `Average view across all saved ${mode} tests.`,
         breakdown: {
@@ -1997,8 +1786,7 @@ let STORED_RESULTS = loadStoredResults();
 
 let selectedResultId = STORED_RESULTS[0]?.id || null;
 let selectedKana = null;
-let hideUnusedKana = false;
-let activeRowGraphView = "regular";
+let rowGraphView = "regular";
 
 const HERO_STORED_TESTS = document.getElementById("heroStoredTests");
 const HERO_BEST_SCORE = document.getElementById("heroBestScore");
@@ -2287,25 +2075,6 @@ function renderHero() {
     if (HERO_BEST_SCORE) HERO_BEST_SCORE.textContent = testsOnly.length ? `${best}%` : "—";
 }
 
-function getModifierTags(result) {
-    return [
-        result.dakuten ? "Dakuten on" : "Dakuten off",
-        result.yoon ? "Yōon on" : "Yōon off",
-        result.extendedKatakana ? "Extended Katakana on" : "Extended Katakana off"
-    ];
-}
-
-function getModifierStateLabel(result) {
-    if (result.type === "average") {
-        const states = [];
-        if (result.dakuten) states.push("Dakuten mixed");
-        if (result.yoon) states.push("Yōon mixed");
-        if (result.extendedKatakana) states.push("Extended Katakana mixed");
-        return states.length ? states.join(" · ") : "Base kana only";
-    }
-    return getModifierTags(result).join(" · ");
-}
-
 function renderResultsList() {
     if (!STORED_RESULTS.length) {
         TESTS_GRID.innerHTML = `<div class="empty">No test results yet. Complete a test in Reading Practice or Writing Practice and it will appear here.</div>`;
@@ -2321,8 +2090,8 @@ function renderResultsList() {
                 <div class="test-score">${item.overallScore}%</div>
             </div>
             <div class="tag-row">
-                ${item.type === "average" ? `<span class="tag gold">Overall Average</span>` : ''}
-                ${getModifierTags(item).map(tag => `<span class="tag gold">${tag}</span>`).join('')}
+                <span class="tag ${item.mode === "reading" ? "reading" : "writing"}">${item.mode === "reading" ? "Reading" : "Writing"}</span>
+                <span class="tag gold">${item.type === "average" ? "Overall Average" : (item.dakuten ? "Dakuten on" : "Dakuten off")}</span>
                 <span class="tag">${item.correct} right / ${item.wrong} wrong</span>
             </div>
         </button>
@@ -2356,7 +2125,7 @@ function renderSnapshot(result) {
         OVERALL_SCORE_CARD.classList.add("writing");
     }
 
-    ROW_PERFORMANCE_MOUNT.innerHTML = renderRowPerformance(result, activeRowGraphView);
+    ROW_PERFORMANCE_MOUNT.innerHTML = renderRowPerformance(result);
 
     SNAPSHOT_BREAKDOWN.innerHTML = [
         `
@@ -2379,18 +2148,6 @@ function renderSnapshot(result) {
         `,
         `
             <div class="mega-inline-card">
-                <div class="label">Yōon</div>
-                <div class="value">${result.type === "average" ? (result.yoon ? "Mixed" : "Off") : (result.yoon ? "On" : "Off")}</div>
-            </div>
-        `,
-        `
-            <div class="mega-inline-card">
-                <div class="label">Ext. Katakana</div>
-                <div class="value">${result.type === "average" ? (result.extendedKatakana ? "Mixed" : "Off") : (result.extendedKatakana ? "On" : "Off")}</div>
-            </div>
-        `,
-        `
-            <div class="mega-inline-card">
                 <div class="label">Kana shown</div>
                 <div class="value">${result.kanaAsked}</div>
             </div>
@@ -2407,11 +2164,6 @@ function renderDetailHeader(result) {
         detailMetric("Wrong", `${result.wrong}`),
         detailMetric("Avg Time", `${formatDuration(result.avgMs)}`)
     ].join("");
-    const hideBtn = document.getElementById("hideUnusedBtn");
-    if (hideBtn) {
-        hideBtn.classList.toggle("active", hideUnusedKana);
-        hideBtn.textContent = hideUnusedKana ? "Show unused kana" : "Hide unused kana";
-    }
 }
 
 function openKanaModal(result, kana) {
@@ -2470,18 +2222,16 @@ function closeKanaModal() {
 
 function renderHeatmap(result) {
     const rowExtremes = getRowCellExtremes(result);
-    const visibleGroups = REGULAR_ROW_GROUPS
+    const visibleGroups = ROW_GROUPS
         .map(row => {
             const rowEntries = row.chars.map(char => [char, result.kana?.[char]]).filter(([, record]) => record);
-            const activeChars = hideUnusedKana ? rowEntries.map(([char]) => char) : row.chars;
-            return { ...row, rowEntries, activeChars };
+            return { ...row, rowEntries };
         })
-        .filter(row => !hideUnusedKana || row.activeChars.length);
+        .filter(row => row.rowEntries.length);
 
     const buildCell = (char, record, markers) => {
         if (!record) {
-            if (SPECIAL_CHAR_SET.has(char)) {
-                if (hideUnusedKana) return `<div class="cell empty-slot" aria-hidden="true"></div>`;
+            if (DAKUTEN_CHAR_SET.has(char)) {
                 return `
                     <div class="cell reference" aria-label="${char} not used in this test">
                         <div class="cell-char">${char}</div>
@@ -2507,8 +2257,8 @@ function renderHeatmap(result) {
     TEST_HEATMAP.innerHTML = visibleGroups.map(row => {
         const markers = rowExtremes.get(`${row.script}:${row.key}`) || {};
         const chunks = [];
-        for (let i = 0; i < row.activeChars.length; i += 5) {
-            const slice = row.activeChars.slice(i, i + 5);
+        for (let i = 0; i < row.chars.length; i += 5) {
+            const slice = row.chars.slice(i, i + 5);
             while (slice.length < 5) slice.push(null);
             chunks.push(slice);
         }
@@ -2586,48 +2336,20 @@ function renderAll() {
         DETAIL_TITLE.textContent = "No result selected";
         DETAIL_SUB.textContent = "Complete a test to populate this page.";
         DETAIL_METRICS.innerHTML = "";
-        const hideBtn = document.getElementById("hideUnusedBtn");
-        if (hideBtn) { hideBtn.classList.remove("active"); hideBtn.textContent = "Hide unused kana"; }
         TEST_HEATMAP.innerHTML = `<div class="empty" style="grid-column:1/-1;">No kana data yet.</div>`;
         return;
     }
     renderSnapshot(result);
     renderDetailHeader(result);
     renderHeatmap(result);
-    drawRowCharts(result, activeRowGraphView);
+    drawRowCharts(result);
     bindRowInteractions(result);
-    const hideBtn = document.getElementById("hideUnusedBtn");
-    if (hideBtn) {
-        hideBtn.onclick = () => {
-            hideUnusedKana = !hideUnusedKana;
-            renderDetailHeader(result);
-            renderHeatmap(result);
-        };
-    }
-    document.querySelectorAll(".row-view-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            activeRowGraphView = btn.dataset.rowView === "special" ? "special" : "regular";
-            ROW_PERFORMANCE_MOUNT.innerHTML = renderRowPerformance(result, activeRowGraphView);
-            drawRowCharts(result, activeRowGraphView);
-            bindRowInteractions(result);
-            document.querySelectorAll(".row-view-btn").forEach(toggleBtn => {
-                toggleBtn.addEventListener("click", (evt) => {
-                    evt.stopPropagation();
-                    activeRowGraphView = toggleBtn.dataset.rowView === "special" ? "special" : "regular";
-                    ROW_PERFORMANCE_MOUNT.innerHTML = renderRowPerformance(result, activeRowGraphView);
-                    drawRowCharts(result, activeRowGraphView);
-                    bindRowInteractions(result);
-                });
-            });
-        });
-    });
 }
 
 
 
 function findRowPerformanceEntry(result, script, key) {
-    const perf = computeRowPerformance(result, activeRowGraphView === "special" ? SPECIAL_ROW_GROUPS : REGULAR_ROW_GROUPS, activeRowGraphView === "special");
+    const perf = rowGraphView === "modifier" ? computeModifierRowPerformance(result) : computeRowPerformance(result);
     return perf.rows.find(row => row.script === script && row.key === key) || null;
 }
 
@@ -2642,7 +2364,7 @@ function updateRowTooltip(result, script, key) {
     }
     card.innerHTML = `
         <div class="title">${row.key}</div>
-        <div class="sub">${row.isOff ? 'Modifier off for this result' : `Right: ${row.correct} · Wrong: ${row.wrong}<br>Avg time: ${formatDuration(row.avgMs)}`}</div>
+        <div class="sub">${row.isOff ? "Off for this result" : `Right: ${row.correct} · Wrong: ${row.wrong}<br>Avg time: ${formatDuration(row.avgMs)}`}</div>
     `;
     overlay.classList.add("show");
 }
@@ -2689,12 +2411,13 @@ function bindRowInteractions(result) {
         });
     });
 
-    document.onclick = () => {
+    document.addEventListener("click", () => {
         closeOverlay();
-    };
+    });
 }
-function drawRowCharts(result, viewMode = activeRowGraphView) {
-    const perf = computeRowPerformance(result, viewMode === "special" ? SPECIAL_ROW_GROUPS : REGULAR_ROW_GROUPS, viewMode === "special");
+function drawRowCharts(result) {
+    const isModifierView = rowGraphView === "modifier";
+    const perf = isModifierView ? computeModifierRowPerformance(result) : computeRowPerformance(result);
 
     const drawSet = (rows, prefix, bestRow, worstRow) => {
         rows.forEach((row, index) => {
@@ -2707,7 +2430,6 @@ function drawRowCharts(result, viewMode = activeRowGraphView) {
             const radius = 24;
             const lineWidth = 8;
             const correct = Math.max(0, Math.min(100, row.accuracy));
-            const offState = !!row.isOff;
 
             ctx.clearRect(0, 0, size, size);
 
@@ -2717,7 +2439,7 @@ function drawRowCharts(result, viewMode = activeRowGraphView) {
             ctx.lineWidth = lineWidth;
             ctx.stroke();
 
-            if (!offState) {
+            if (!row.isOff) {
                 ctx.beginPath();
                 ctx.arc(cx, cy, radius, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2) * (correct / 100));
                 let stroke = correct >= 80 ? "#67d78b" : correct >= 60 ? "#cba34a" : "#ff7b7b";
@@ -2731,17 +2453,29 @@ function drawRowCharts(result, viewMode = activeRowGraphView) {
                 ctx.stroke();
             }
 
-            ctx.fillStyle = offState ? "rgba(255,255,255,0.5)" : "#f3f3f3";
-            ctx.font = `700 ${offState ? 11 : 12}px Arial`;
+            ctx.fillStyle = row.isOff ? "rgba(255,255,255,0.45)" : "#f3f3f3";
+            ctx.font = row.isOff ? "700 11px Arial" : "700 12px Arial";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(offState ? "Off" : `${correct}%`, cx, cy);
+            ctx.fillText(row.isOff ? "Off" : `${correct}%`, cx, cy);
         });
     };
 
-    drawSet(perf.hiragana, viewMode === "special" ? "sh" : "h", perf.hiraganaBest, perf.hiraganaWorst);
-    drawSet(perf.katakana, viewMode === "special" ? "sk" : "k", perf.katakanaBest, perf.katakanaWorst);
+    drawSet(perf.hiragana, isModifierView ? "mh" : "h", perf.hiraganaBest, perf.hiraganaWorst);
+    drawSet(perf.katakana, isModifierView ? "mk" : "k", perf.katakanaBest, perf.katakanaWorst);
 }
+
+ROW_PERFORMANCE_MOUNT.addEventListener("click", (event) => {
+    const toggleBtn = event.target.closest("[data-row-view-toggle]");
+    if (!toggleBtn) return;
+    event.stopPropagation();
+    rowGraphView = rowGraphView === "regular" ? "modifier" : "regular";
+    const selected = getSelectedResult();
+    if (!selected) return;
+    ROW_PERFORMANCE_MOUNT.innerHTML = renderRowPerformance(selected);
+    drawRowCharts(selected);
+    bindRowInteractions(selected);
+});
 
 KANA_MODAL_CLOSE.addEventListener("click", closeKanaModal);
 KANA_MODAL_BACKDROP.addEventListener("click", (e) => {
@@ -2750,7 +2484,7 @@ KANA_MODAL_BACKDROP.addEventListener("click", (e) => {
 
 renderAll();
 // ensure charts render
-setTimeout(() => { const selected = getSelectedResult(); if (selected) drawRowCharts(selected, activeRowGraphView); }, 50);
+setTimeout(() => { const selected = getSelectedResult(); if (selected) drawRowCharts(selected); }, 50);
 
 window.addEventListener("focus", renderAll);
 document.addEventListener("visibilitychange", () => {
