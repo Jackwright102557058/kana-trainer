@@ -1616,7 +1616,21 @@ const SPECIAL_ROW_GROUPS = [
 
 const ROW_GROUPS = REGULAR_ROW_GROUPS;
 
-function computeRowPerformance(result, groups = REGULAR_ROW_GROUPS) {
+function getSpecialModifierType(rowKey = "") {
+    if (rowKey.includes("Dakuten")) return "dakuten";
+    if (rowKey.includes("Yōon")) return "yoon";
+    if (rowKey.includes("Ext")) return "extendedKatakana";
+    return "";
+}
+
+function isModifierEnabledForResult(result, modifierType) {
+    if (modifierType === "dakuten") return !!result.dakuten;
+    if (modifierType === "yoon") return !!result.yoon;
+    if (modifierType === "extendedKatakana") return !!result.extendedKatakana;
+    return true;
+}
+
+function computeRowPerformance(result, groups = REGULAR_ROW_GROUPS, includeEmpty = false) {
     const rows = groups.map(row => {
         const items = row.chars
             .filter(ch => result.kana[ch])
@@ -1629,6 +1643,8 @@ function computeRowPerformance(result, groups = REGULAR_ROW_GROUPS) {
             ? Math.round(items.reduce((sum, item) => sum + (item.avgMs || 0), 0) / items.length)
             : 0;
         const accuracy = total ? Math.round((correct / total) * 100) : 0;
+        const modifierType = getSpecialModifierType(row.key);
+        const modifierEnabled = isModifierEnabledForResult(result, modifierType);
 
         return {
             script: row.script,
@@ -1638,15 +1654,19 @@ function computeRowPerformance(result, groups = REGULAR_ROW_GROUPS) {
             total,
             accuracy,
             avgMs,
+            modifierType,
+            modifierEnabled,
+            isOff: !!modifierType && !modifierEnabled,
             score: total ? (accuracy - (avgMs / 1000) * 4) : -Infinity
         };
-    }).filter(row => row.total > 0);
+    }).filter(row => includeEmpty || row.total > 0);
 
     const hiragana = rows.filter(row => row.script.startsWith("hiragana"));
     const katakana = rows.filter(row => row.script.startsWith("katakana"));
 
-    const pickWorst = (items) => items.length ? [...items].sort((a, b) => (a.score - b.score) || (b.wrong - a.wrong) || (b.avgMs - a.avgMs))[0] : null;
-    const pickBest = (items) => items.length ? [...items].sort((a, b) => (b.score - a.score) || (a.wrong - b.wrong) || (a.avgMs - b.avgMs))[0] : null;
+    const ranked = items => items.filter(item => item.total > 0);
+    const pickWorst = (items) => ranked(items).length ? [...ranked(items)].sort((a, b) => (a.score - b.score) || (b.wrong - a.wrong) || (b.avgMs - a.avgMs))[0] : null;
+    const pickBest = (items) => ranked(items).length ? [...ranked(items)].sort((a, b) => (b.score - a.score) || (a.wrong - b.wrong) || (a.avgMs - b.avgMs))[0] : null;
 
     return {
         rows,
@@ -1701,8 +1721,7 @@ function getRowCellExtremes(result) {
 
 function renderRowPerformance(result, viewMode = "regular") {
     const groups = viewMode === "special" ? SPECIAL_ROW_GROUPS : REGULAR_ROW_GROUPS;
-    const perf = computeRowPerformance(result, groups);
-    if (!perf.rows.length) return "";
+    const perf = computeRowPerformance(result, groups, viewMode === "special");
 
     const leftTitle = viewMode === "special" ? "Hiragana modifier rows" : "Hiragana rows";
     const rightTitle = viewMode === "special" ? "Katakana modifier rows" : "Katakana rows";
@@ -1726,7 +1745,7 @@ function renderRowPerformance(result, viewMode = "regular") {
                             ${badge ? `<span class="row-flag ${badge.className}">${badge.label}</span>` : ''}
                             <canvas id="chart-${prefix}-${index}" width="70" height="70"></canvas>
                             <div class="row-doughnut-label">${row.key}</div>
-                            <div class="row-doughnut-value">${row.accuracy}%</div>
+                            <div class="row-doughnut-value">${row.isOff ? "Off" : `${row.accuracy}%`}</div>
                         </button>
                     `;
                 }).join("")}
@@ -2454,9 +2473,10 @@ function renderHeatmap(result) {
     const visibleGroups = REGULAR_ROW_GROUPS
         .map(row => {
             const rowEntries = row.chars.map(char => [char, result.kana?.[char]]).filter(([, record]) => record);
-            return { ...row, rowEntries };
+            const activeChars = hideUnusedKana ? rowEntries.map(([char]) => char) : row.chars;
+            return { ...row, rowEntries, activeChars };
         })
-        .filter(row => !hideUnusedKana || row.rowEntries.length);
+        .filter(row => !hideUnusedKana || row.activeChars.length);
 
     const buildCell = (char, record, markers) => {
         if (!record) {
@@ -2487,8 +2507,8 @@ function renderHeatmap(result) {
     TEST_HEATMAP.innerHTML = visibleGroups.map(row => {
         const markers = rowExtremes.get(`${row.script}:${row.key}`) || {};
         const chunks = [];
-        for (let i = 0; i < row.chars.length; i += 5) {
-            const slice = row.chars.slice(i, i + 5);
+        for (let i = 0; i < row.activeChars.length; i += 5) {
+            const slice = row.activeChars.slice(i, i + 5);
             while (slice.length < 5) slice.push(null);
             chunks.push(slice);
         }
@@ -2598,7 +2618,7 @@ function renderAll() {
 
 
 function findRowPerformanceEntry(result, script, key) {
-    const perf = computeRowPerformance(result, activeRowGraphView === "special" ? SPECIAL_ROW_GROUPS : REGULAR_ROW_GROUPS);
+    const perf = computeRowPerformance(result, activeRowGraphView === "special" ? SPECIAL_ROW_GROUPS : REGULAR_ROW_GROUPS, activeRowGraphView === "special");
     return perf.rows.find(row => row.script === script && row.key === key) || null;
 }
 
@@ -2613,7 +2633,7 @@ function updateRowTooltip(result, script, key) {
     }
     card.innerHTML = `
         <div class="title">${row.key}</div>
-        <div class="sub">Right: ${row.correct} · Wrong: ${row.wrong}<br>Avg time: ${formatDuration(row.avgMs)}</div>
+        <div class="sub">${row.isOff ? 'Modifier off for this result' : `Right: ${row.correct} · Wrong: ${row.wrong}<br>Avg time: ${formatDuration(row.avgMs)}`}</div>
     `;
     overlay.classList.add("show");
 }
@@ -2665,7 +2685,7 @@ function bindRowInteractions(result) {
     };
 }
 function drawRowCharts(result, viewMode = activeRowGraphView) {
-    const perf = computeRowPerformance(result, viewMode === "special" ? SPECIAL_ROW_GROUPS : REGULAR_ROW_GROUPS);
+    const perf = computeRowPerformance(result, viewMode === "special" ? SPECIAL_ROW_GROUPS : REGULAR_ROW_GROUPS, viewMode === "special");
 
     const drawSet = (rows, prefix, bestRow, worstRow) => {
         rows.forEach((row, index) => {
@@ -2678,6 +2698,7 @@ function drawRowCharts(result, viewMode = activeRowGraphView) {
             const radius = 24;
             const lineWidth = 8;
             const correct = Math.max(0, Math.min(100, row.accuracy));
+            const offState = !!row.isOff;
 
             ctx.clearRect(0, 0, size, size);
 
@@ -2687,23 +2708,25 @@ function drawRowCharts(result, viewMode = activeRowGraphView) {
             ctx.lineWidth = lineWidth;
             ctx.stroke();
 
-            ctx.beginPath();
-            ctx.arc(cx, cy, radius, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2) * (correct / 100));
-            let stroke = correct >= 80 ? "#67d78b" : correct >= 60 ? "#cba34a" : "#ff7b7b";
-            if (bestRow && bestRow.key === row.key) stroke = "#67d78b";
-            if (worstRow && worstRow.key === row.key) {
-                stroke = rowNeedsErrorStyling(row) ? "#ff7b7b" : "#cba34a";
+            if (!offState) {
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2) * (correct / 100));
+                let stroke = correct >= 80 ? "#67d78b" : correct >= 60 ? "#cba34a" : "#ff7b7b";
+                if (bestRow && bestRow.key === row.key) stroke = "#67d78b";
+                if (worstRow && worstRow.key === row.key) {
+                    stroke = rowNeedsErrorStyling(row) ? "#ff7b7b" : "#cba34a";
+                }
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = lineWidth;
+                ctx.lineCap = "round";
+                ctx.stroke();
             }
-            ctx.strokeStyle = stroke;
-            ctx.lineWidth = lineWidth;
-            ctx.lineCap = "round";
-            ctx.stroke();
 
-            ctx.fillStyle = "#f3f3f3";
-            ctx.font = "700 12px Arial";
+            ctx.fillStyle = offState ? "rgba(255,255,255,0.5)" : "#f3f3f3";
+            ctx.font = `700 ${offState ? 11 : 12}px Arial`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(`${correct}%`, cx, cy);
+            ctx.fillText(offState ? "Off" : `${correct}%`, cx, cy);
         });
     };
 
