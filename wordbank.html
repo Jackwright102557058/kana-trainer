@@ -629,7 +629,15 @@
     };
 
     let wordBank = loadWordBank();
-    const expandedEntries = new Set();
+    let expandedEntryId = null;
+
+    function openOnlyEntry(id) {
+      expandedEntryId = id || null;
+    }
+
+    function isEntryExpanded(id) {
+      return expandedEntryId === id;
+    }
 
     function loadWordBank() {
       try {
@@ -757,13 +765,14 @@
       const existing = wordBank.find(entry => entry.kana === kana);
       if (existing) {
         showStatus(`"${kana}" is already in your word bank.`, 'warn');
+        openOnlyEntry(existing.id);
         renderEntries(existing.id);
         return;
       }
 
       const entry = buildEntry(kana);
       wordBank.unshift(entry);
-      expandedEntries.add(entry.id);
+      openOnlyEntry(entry.id);
       saveWordBank();
       elements.kanaInput.value = '';
       clearStatus();
@@ -790,6 +799,7 @@
       const confirmed = window.confirm(`Delete "${entry.kana}" from your word bank?`);
       if (!confirmed) return;
       wordBank = wordBank.filter(item => item.id !== id);
+      if (expandedEntryId === id) openOnlyEntry(null);
       saveWordBank();
       renderEntries();
       showStatus(`Deleted ${entry.kana}.`, 'ok');
@@ -803,6 +813,7 @@
       const confirmed = window.confirm('Clear your entire word bank? This cannot be undone.');
       if (!confirmed) return;
       wordBank = [];
+      openOnlyEntry(null);
       saveWordBank();
       renderEntries();
       showStatus('All words cleared.', 'ok');
@@ -857,6 +868,7 @@
           }
 
           wordBank = merged;
+          openOnlyEntry(null);
           saveWordBank();
           renderEntries();
           showStatus('Import complete.', 'ok');
@@ -947,7 +959,7 @@
       elements.entries.innerHTML = items.map(entry => {
         const type = classifyKanaType(entry.kana);
         const englishMissing = !entry.english.trim();
-        const isExpanded = expandedEntries.has(entry.id);
+        const isExpanded = isEntryExpanded(entry.id);
         return `
           <details class="card" id="entry-${entry.id}" ${isExpanded ? 'open' : ''}>
             <summary class="card-summary" data-id="${entry.id}">
@@ -1039,8 +1051,15 @@
       const details = event.target.closest('details.card');
       if (!details) return;
       const id = details.id.replace('entry-', '');
-      if (details.open) expandedEntries.add(id);
-      else expandedEntries.delete(id);
+      if (details.open) {
+        openOnlyEntry(id);
+        const openDetails = elements.entries.querySelectorAll('details.card[open]');
+        openDetails.forEach(item => {
+          if (item !== details) item.open = false;
+        });
+      } else if (expandedEntryId === id) {
+        openOnlyEntry(null);
+      }
       const toggleEl = details.querySelector('.summary-toggle');
       if (toggleEl) toggleEl.textContent = details.open ? '−' : '+';
     });
@@ -1059,6 +1078,7 @@
       if (action === 'favorite') {
         const current = wordBank.find(entry => entry.id === id);
         if (!current) return;
+        openOnlyEntry(id);
         updateEntry(id, { favorite: !current.favorite });
         return;
       }
@@ -1076,10 +1096,12 @@
         const duplicate = wordBank.find(entry => entry.id !== id && entry.kana === nextKana);
         if (duplicate) {
           showStatus(`Cannot save. "${nextKana}" already exists in your word bank.`, 'err');
+          openOnlyEntry(duplicate.id);
           renderEntries(duplicate.id);
           return;
         }
 
+        openOnlyEntry(id);
         updateEntry(id, {
           kana: nextKana,
           english: (englishField?.value || '').trim(),
