@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kana Trainer</title>
+<style>
+    :root {
+        --bg-1: #090909;
+        --bg-2: #131313;
+        --panel: rgba(25,25,25,0.88);
+        --panel-strong: rgba(19,19,19,0.96);
+        --border: rgba(255,255,255,0.09);
+        --text: #f4f4f4;
+        --muted: #a4a4a4;
+        --gold: #cba34a;
+        --gold-soft: rgba(203,163,74,0.16);
+        --blue: #66a8ff;
+        --blue-soft: rgba(102,168,255,0.16);
+        --pink: #ff7bb2;
+        --pink-soft: rgba(255,123,178,0.14);
+        --green: #67d78b;
+        --green-soft: rgba(103,215,139,0.14);
+        --shadow: 0 22px 70px rgba(0,0,0,0.42);
+        --radius-xl: 28px;
+        --radius-lg: 22px;
+        --radius-md: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        color: var(--text);
+        background:
+            radial-gradient(circle at 15% 10%, rgba(102,168,255,0.14), transparent 26%),
+            radial-gradient(circle at 85% 0%, rgba(255,123,178,0.12), transparent 24%),
+            radial-gradient(circle at 50% 100%, rgba(203,163,74,0.11), transparent 30%),
+            linear-gradient(180deg, #171717 0%, #0a0a0a 100%);
+        padding: 24px;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        background-size: 34px 34px;
+        mask-image: radial-gradient(circle at center, black 42%, transparent 100%);
+        opacity: 0.35;
+    }
+
+    .shell {
+        width: min(1260px, 100%);
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .glass {
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        background: linear-gradient(180deg, rgba(27,27,27,0.92), rgba(16,16,16,0.94));
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+    }
+
+    .hero {
+        border-radius: var(--radius-xl);
+        padding: 30px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 22px;
+    }
+
+    .hero::before,
+    .hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(10px);
+        opacity: 0.9;
+        pointer-events: none;
+    }
+
+    .hero::before {
+        width: 240px;
+        height: 240px;
+        top: -80px;
+        right: -40px;
+        background: radial-gradient(circle, rgba(102,168,255,0.26) 0%, rgba(102,168,255,0) 70%);
+    }
+
+    .hero::after {
+        width: 220px;
+        height: 220px;
+        left: -60px;
+        bottom: -90px;
+        background: radial-gradient(circle, rgba(255,123,178,0.22) 0%, rgba(255,123,178,0) 70%);
+    }
+
+    .hero-grid {
+        display: grid;
+        grid-template-columns: 1.65fr 0.95fr;
+        gap: 22px;
+        align-items: stretch;
+    }
+
+    .eyebrow-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 13px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.04);
+    }
+
+    .pill.gold {
+        background: var(--gold-soft);
+        border-color: rgba(203,163,74,0.36);
+        color: #ffe2a6;
+    }
+
+    .pill.blue {
+        background: var(--blue-soft);
+        border-color: rgba(102,168,255,0.34);
+        color: #d7e8ff;
+    }
+
+    h1 {
+        margin: 0 0 12px;
+        font-size: 42px;
+        line-height: 1.02;
+        letter-spacing: -0.02em;
+    }
+
+    .hero-lead {
+        color: #d3d3d3;
+        font-size: 16px;
+        line-height: 1.65;
+        max-width: 760px;
+        margin-bottom: 22px;
+    }
+
+    .hero-copy {
+        color: #d9d9d9;
+        font-size: 17px;
+        line-height: 1.6;
+        max-width: 760px;
+        margin-bottom: 22px;
+    }
+
+    .launch-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .launch-card {
+        flex: 1 1 260px;
+        min-width: 0;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 22px;
+        padding: 18px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .launch-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255,255,255,0.18);
+        box-shadow: 0 18px 35px rgba(0,0,0,0.28);
+    }
+
+    .launch-card.reading {
+        background:
+            radial-gradient(circle at top right, rgba(103,215,139,0.20), transparent 42%),
+            linear-gradient(180deg, rgba(23,40,26,0.96), rgba(19,23,20,0.96));
+    }
+
+    .launch-card.writing {
+        background:
+            radial-gradient(circle at top right, rgba(102,168,255,0.22), transparent 42%),
+            linear-gradient(180deg, rgba(19,28,43,0.96), rgba(17,20,26,0.96));
+    }
+
+    .launch-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 18px;
+    }
+
+    .launch-kicker {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(255,255,255,0.66);
+        margin-bottom: 8px;
+    }
+
+    .launch-title {
+        font-size: 25px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .launch-sub {
+        color: #cfcfcf;
+        font-size: 14px;
+        line-height: 1.45;
+        max-width: 30ch;
+    }
+
+    .launch-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 62px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.1);
+        white-space: nowrap;
+    }
+
+    .launch-foot {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        color: #f1f1f1;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .launch-arrow {
+        font-size: 18px;
+        opacity: 0.9;
+    }
+
+    .hero-side {
+        display: grid;
+        gap: 14px;
+        align-content: start;
+    }
+
+    .mini-panel {
+        border-radius: 22px;
+        padding: 18px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.025));
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .mini-label {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 10px;
+    }
+
+    .duo-score {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .duo-chip {
+        padding: 12px;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .duo-chip .name {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .duo-chip .value {
+        font-size: 26px;
+        font-weight: 800;
+    }
+
+    .hero-note {
+        color: #d0d0d0;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .stage {
+        display: grid;
+        gap: 18px;
+        margin-top: 18px;
+    }
+
+    .card {
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        min-width: 0;
+    }
+
+    .card-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 18px;
+    }
+
+    .card-title {
+        margin: 0 0 6px;
+        font-size: 24px;
+    }
+
+    .card-sub {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .accent {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        margin-top: 8px;
+        flex: 0 0 auto;
+    }
+
+    .accent.green { background: var(--green); box-shadow: 0 0 16px rgba(103,215,139,0.45); }
+    .accent.blue { background: var(--blue); box-shadow: 0 0 16px rgba(102,168,255,0.45); }
+    .accent.gold { background: var(--gold); box-shadow: 0 0 16px rgba(203,163,74,0.45); }
+
+    .spotlight-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .spotlight-panel {
+        border-radius: 20px;
+        padding: 16px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .mode-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 14px;
+    }
+
+    .mode-tag.reading { background: var(--green-soft); color: #bdf3cf; }
+    .mode-tag.writing { background: var(--blue-soft); color: #d8e8ff; }
+
+    .hero-statline {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .metric {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 12px;
+    }
+
+    .metric .label {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 7px;
+    }
+
+    .metric .value {
+        font-size: 27px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .funline {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        margin-top: 8px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.07);
+        color: #d4d4d4;
+        font-size: 14px;
+    }
+
+    .funline strong {
+        color: white;
+        text-align: right;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .mid-band {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 18px;
+        align-items: stretch;
+    }
+
+    .gauge-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .gauge-card {
+        border-radius: 20px;
+        padding: 18px;
+        background: rgba(255,255,255,0.035);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .ring-wrap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 14px;
+    }
+
+    .ring {
+        --size: 104px;
+        width: var(--size);
+        height: var(--size);
+        border-radius: 50%;
+        position: relative;
+        background: conic-gradient(var(--ring-color) calc(var(--pct) * 1%), rgba(255,255,255,0.07) 0);
+        flex: 0 0 auto;
+    }
+
+    .ring::after {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border-radius: 50%;
+        background: #121212;
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .ring-center {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        z-index: 1;
+        text-align: center;
+    }
+
+    .ring-center .big {
+        font-size: 25px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .ring-center .small {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 4px;
+    }
+
+    .gauge-copy {
+        min-width: 0;
+    }
+
+    .gauge-copy h3 {
+        margin: 0 0 8px;
+        font-size: 22px;
+    }
+
+    .gauge-copy p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .mini-stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .mini-stat {
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .mini-stat .k {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+    .mini-stat .v {
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .bars {
+        display: grid;
+        gap: 14px;
+    }
+
+    .bar-row {
+        display: grid;
+        gap: 8px;
+    }
+
+    .bar-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: baseline;
+        font-size: 14px;
+    }
+
+    .bar-track {
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.07);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .bar-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, rgba(255,255,255,0.22), var(--bar-color));
+        min-width: 6px;
+    }
+
+    .summary-rows {
+        display: grid;
+        gap: 10px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 15px;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.075);
+    }
+
+    .summary-main {
+        min-width: 0;
+    }
+
+    .summary-label {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .summary-extra {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.4;
+    }
+
+    .summary-value {
+        font-size: 19px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .daily-zone {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .timeline {
+        display: grid;
+        gap: 12px;
+    }
+
+    .timeline-item {
+        display: grid;
+        grid-template-columns: 108px 1fr;
+        gap: 14px;
+        align-items: stretch;
+    }
+
+    .timeline-date {
+        border-radius: 16px;
+        padding: 14px 12px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+        font-size: 13px;
+        font-weight: 800;
+        color: #f3f3f3;
+        text-align: center;
+    }
+
+    .timeline-card {
+        border-radius: 16px;
+        padding: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .timeline-score {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    .timeline-meta {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .footer-band {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        align-items: stretch;
+    }
+
+    .comparison-title {
+        font-size: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: #e7c570;
+        font-weight: 800;
+    }
+
+    .comparison-copy {
+        color: #d8d8d8;
+        font-size: 16px;
+        line-height: 1.6;
+        max-width: 42ch;
+    }
+
+    .pulse-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        align-items: start;
+    }
+
+    .pulse-side {
+        display: grid;
+        gap: 14px;
+    }
+
+    .pulse-panel {
+        border-radius: 18px;
+        padding: 16px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.075);
+        min-height: 100%;
+    }
+
+    .pulse-panel h3 {
+        margin: 0 0 12px;
+        font-size: 18px;
+    }
+
+    .pulse-compare {
+        display: grid;
+        gap: 12px;
+    }
+
+    .pulse-top-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 18px;
+        align-items: stretch;
+    }
+
+    .pulse-key-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .pulse-key-card {
+        border-radius: 16px;
+        padding: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+        display: grid;
+        gap: 10px;
+    }
+
+    .pulse-key-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .pulse-key-head .k {
+        font-size: 13px;
+        color: var(--muted);
+    }
+
+    .pulse-key-head .v {
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .pulse-mode-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .pulse-mode-box {
+        border-radius: 12px;
+        padding: 10px 11px;
+        border: 1px solid rgba(255,255,255,0.07);
+        background: rgba(255,255,255,0.03);
+    }
+
+    .pulse-mode-box.reading {
+        box-shadow: inset 0 0 0 1px rgba(103,215,139,0.08);
+    }
+
+    .pulse-mode-box.writing {
+        box-shadow: inset 0 0 0 1px rgba(102,168,255,0.08);
+    }
+
+    .pulse-mode-name {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 6px;
+    }
+
+    .pulse-mode-box.reading .pulse-mode-name {
+        color: #bdf3cf;
+    }
+
+    .pulse-mode-box.writing .pulse-mode-name {
+        color: #d8e8ff;
+    }
+
+    .pulse-mode-value {
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1.05;
+    }
+
+    .pulse-mode-sub {
+        margin-top: 4px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.35;
+    }
+
+    .vs-row {
+        display: grid;
+        grid-template-columns: 92px 1fr 92px;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .vs-value {
+        font-size: 22px;
+        font-weight: 800;
+        text-align: center;
+    }
+
+    .vs-value.reading { color: #bdf3cf; }
+    .vs-value.writing { color: #d8e8ff; }
+
+    .vs-center {
+        min-width: 0;
+    }
+
+    .vs-label {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: baseline;
+        font-size: 14px;
+        margin-bottom: 7px;
+    }
+
+    .vs-track {
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.07);
+        overflow: hidden;
+        display: flex;
+    }
+
+    .vs-fill.reading {
+        background: linear-gradient(90deg, rgba(255,255,255,0.18), #67d78b);
+    }
+
+    .vs-fill.writing {
+        background: linear-gradient(90deg, rgba(255,255,255,0.18), #66a8ff);
+    }
+
+    .pulse-badges {
+        display: grid;
+        gap: 10px;
+    }
+
+    .pulse-badge {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        border-radius: 14px;
+        padding: 12px 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .pulse-badge .k {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 4px;
+    }
+
+    .pulse-badge .v {
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .pulse-winner {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 800;
+        padding: 6px 10px;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+
+    .pulse-winner.reading {
+        background: var(--green-soft);
+        color: #bdf3cf;
+    }
+
+    .pulse-winner.writing {
+        background: var(--blue-soft);
+        color: #d8e8ff;
+    }
+
+    .pulse-winner.tie {
+        background: var(--gold-soft);
+        color: #ffe2a6;
+    }
+
+    .pulse-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .pulse-split-card {
+        border-radius: 14px;
+        padding: 13px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .pulse-split-card .k {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+    }
+
+    .pulse-split-card .v {
+        font-size: 20px;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .pulse-split-card .sub {
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .empty {
+        min-height: 84px;
+        padding: 18px;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.03);
+        border: 1px dashed rgba(255,255,255,0.12);
+        color: var(--muted);
+        font-size: 14px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .footer-note {
+        margin-top: 18px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    @media (max-width: 1080px) {
+        .hero-grid,
+        .mid-band,
+        .gauge-grid,
+        .daily-zone,
+        .footer-band {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        body { padding: 14px; }
+        .hero, .card { padding: 18px; }
+        h1 { font-size: 34px; }
+        .hero-lead {
+        color: #d3d3d3;
+        font-size: 16px;
+        line-height: 1.65;
+        max-width: 760px;
+        margin-bottom: 22px;
+    }
+
+    .hero-copy { font-size: 15px; }
+        .spotlight-grid,
+        .duo-score,
+        .hero-statline,
+        .mini-stats {
+            grid-template-columns: 1fr;
+        }
+        .timeline-item {
+            grid-template-columns: 1fr;
+        }
+        .timeline-date {
+            text-align: left;
+        }
+        .ring-wrap {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .pulse-layout,
+        .pulse-top-grid,
+        .pulse-split,
+        .pulse-key-grid,
+        .pulse-mode-pair {
+            grid-template-columns: 1fr;
+        }
+        .vs-row {
+            grid-template-columns: 72px 1fr 72px;
+            gap: 8px;
+        }
+        .vs-value {
+            font-size: 18px;
+        }
+    }
+
+    .main-title {
+        margin: 0 0 10px;
+        font-size: 56px;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 0.96;
+        color: #ffffff;
+        text-shadow: 0 0 24px rgba(255,255,255,0.08), 0 0 42px rgba(102,168,255,0.10);
+    }
+
+    .hero-tagline {
+        font-size: 22px;
+        font-weight: 700;
+        color: #f0f0f0;
+        margin-bottom: 14px;
+        max-width: 760px;
+        line-height: 1.35;
+        letter-spacing: -0.01em;
+    }
+
+</style>
+</head>
+<body>
+<div class="shell">
+    <section class="hero glass">
+        <div class="hero-grid">
+            <div>
+                <h1 class="main-title">Kana Trainer</h1>
+
+                <div class="hero-tagline">
+                    Pick your lane, track your streaks, and watch your kana sharpen up.
+                </div>
+                <div class="hero-copy hero-lead">
+                    Jump into practice, track your progress, and keep your streak going.</div>
+
+                <div class="launch-row">
+                    <a class="launch-card reading" href="default.html">
+                        <div class="launch-top">
+                            <div>
+                                <div class="launch-kicker">Reading Mode</div>
+                                <div class="launch-title">Reading Practice</div>
+                                <div class="launch-sub">See kana, type the matching romaji, and build speed with classic recognition drills.</div>
+                            </div>
+                            <div class="launch-badge">Launch</div>
+                        </div>
+                        <div class="launch-foot">
+                            <span>Fast recognition focus</span>
+                            <span class="launch-arrow">→</span>
+                        </div>
+                    </a>
+
+                    <a class="launch-card writing" href="reverse.html">
+                        <div class="launch-top">
+                            <div>
+                                <div class="launch-kicker">Writing Mode</div>
+                                <div class="launch-title">Writing Practice</div>
+                                <div class="launch-sub">See romaji, choose the right kana, and reinforce recall with a more playful prompt style.</div>
+                            </div>
+                            <div class="launch-badge">Beta</div>
+                        </div>
+                        <div class="launch-foot">
+                            <span>Active recall focus</span>
+                            <span class="launch-arrow">→</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="footer-note" style="text-align:left; margin-top:6px;">Kana Trainer Home · v2.4</div>
+            </div>
+
+            <div class="hero-side">
+                <div class="mini-panel">
+                    <div class="mini-label">Quick compare</div>
+                    <div class="duo-score">
+                        <div class="duo-chip">
+                            <div class="name">Reading High Score</div>
+                            <div class="value" id="heroReadingHigh">0</div>
+                        </div>
+                        <div class="duo-chip">
+                            <div class="name">Writing High Score</div>
+                            <div class="value" id="heroWritingHigh">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mini-panel">
+                    <div class="mini-label">Today’s status</div>
+                    <div class="hero-note" id="heroStatusText">No daily challenge data yet.</div>
+                </div>
+
+                <a class="launch-card" href="test.html" style="padding:14px; font-size:14px; background:linear-gradient(180deg, rgba(203,163,74,0.18), rgba(20,20,20,0.96)); border-color: rgba(203,163,74,0.35);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:700;">Test Results</span>
+                        <span style="opacity:0.8;">→</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <div class="stage">
+        <section class="card glass">
+            <div class="card-head">
+                <div>
+                    <h2 class="card-title">Mode spotlight</h2>
+                    <div class="card-sub">See where you're improving and which kana need more focus.</div>
+                </div>
+                <div class="accent gold"></div>
+            </div>
+            <div class="spotlight-grid">
+                <div class="spotlight-panel">
+                    <div class="mode-tag reading">Reading Practice</div>
+                    <div class="hero-statline" id="readingSpotlightStats"></div>
+                    <div class="funline"><span>Toughest kana</span><strong id="readingToughest">—</strong></div>
+                    <div class="funline"><span>Strongest kana</span><strong id="readingStrongest">—</strong></div>
+                </div>
+                <div class="spotlight-panel">
+                    <div class="mode-tag writing">Writing Practice</div>
+                    <div class="hero-statline" id="writingSpotlightStats"></div>
+                    <div class="funline"><span>Toughest kana</span><strong id="writingToughest">—</strong></div>
+                    <div class="funline"><span>Strongest kana</span><strong id="writingStrongest">—</strong></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mid-band">
+            <div class="card glass">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">Performance gauges</h2>
+                        <div class="card-sub">Your overall accuracy and progress across both modes.</div>
+                    </div>
+                    <div class="accent gold"></div>
+                </div>
+                <div class="gauge-grid" id="gaugeGrid"></div>
+            </div>
+
+            <div class="card glass">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">Best runs</h2>
+                        <div class="card-sub">Your best scores across each mode.</div>
+                    </div>
+                    <div class="accent gold"></div>
+                </div>
+                <div class="bars" id="recordsBars"></div>
+            </div>
+        </section>
+
+        <section class="footer-band">
+            <div class="card glass">
+                <div class="card-head">
+                    <div>
+                        <div class="comparison-title">Learning pulse</div>
+                        <h2 class="card-title" style="margin-top:10px;">Reading vs Writing progress</h2>
+                        <div class="card-sub">See how your reading and writing skills compare at a glance.</div>
+                    </div>
+                    <div class="accent gold"></div>
+                </div>
+
+                <div class="pulse-layout">
+                    <div class="pulse-top-grid">
+                        <div class="pulse-panel">
+                            <h3>Performance comparison</h3>
+                            <div class="pulse-compare" id="learningPulseCompare"></div>
+                        </div>
+
+                        <div class="pulse-panel">
+                            <h3>Where you're improving</h3>
+                            <div class="pulse-badges" id="learningPulseHighlights"></div>
+                        </div>
+                    </div>
+
+                    <div class="pulse-panel">
+                        <h3>Your progress summary</h3>
+                        <div class="pulse-key-grid" id="learningPulse"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="daily-zone">
+            <div class="card glass">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">Reading daily challenge</h2>
+                        <div class="card-sub">Complete today’s challenge and track your recent results.</div>
+                    </div>
+                    <div class="accent green"></div>
+                </div>
+                <div class="summary-rows" id="readingTodaySummary"></div>
+                <div style="height:14px;"></div>
+                <div class="timeline" id="readingTimeline"></div>
+            </div>
+
+            <div class="card glass">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">Writing daily challenge</h2>
+                    </div>
+                    <div class="accent blue"></div>
+                </div>
+                <div class="summary-rows" id="writingTodaySummary"></div>
+                <div style="height:14px;"></div>
+                <div class="timeline" id="writingTimeline"></div>
+            </div>
+        </section>
+    </div>
+
+    <div class="footer-note">Your home dashboard reads from the same local save data as Reading Practice and Writing Practice.</div>
+</div>
+
+<script>
+function loadJSON(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function formatMs(ms) {
+    if (!Number.isFinite(ms) || ms <= 0) return '—';
+    if (ms < 1000) return `${Math.round(ms)} ms`;
+    return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function todayKey() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function normalizeScoreHistory(data) {
+    return {
+        endlessBest: { total: 0, correct: 0, wrong: 0, ...((data || {}).endlessBest || {}) },
+        comboKanaBest: { same_row: 0, random: 0, ...((data || {}).comboKanaBest || {}) },
+        timeTrialTop3: Array.isArray((data || {}).timeTrialTop3) ? data.timeTrialTop3 : []
+    };
+}
+
+function modeColor(mode) {
+    return mode === 'reading' ? '#67d78b' : '#66a8ff';
+}
+
+function accuracyPct(correct, wrong) {
+    const total = correct + wrong;
+    return total ? Math.round((correct / total) * 100) : 0;
+}
+
+function buildModeSummary({ stats, scoreHistory, dailyHistory, highScore, modeName }) {
+    const entries = Object.entries(stats || {});
+    let totalCorrect = 0;
+    let totalWrong = 0;
+    let practicedChars = 0;
+    const toughestCandidates = [];
+    const strongestCandidates = [];
+
+    for (const [ch, stat] of entries) {
+        const c = Number(stat.correct || 0);
+        const w = Number(stat.wrong || 0);
+        const attempts = c + w;
+        totalCorrect += c;
+        totalWrong += w;
+
+        if (attempts > 0) {
+            practicedChars += 1;
+            const accuracy = c / attempts;
+            toughestCandidates.push({ ch, accuracy, attempts, correct: c, wrong: w });
+            if (c >= 5) {
+                strongestCandidates.push({ ch, accuracy, attempts, correct: c, wrong: w });
+            }
+        }
+    }
+
+    toughestCandidates.sort((a, b) => (a.accuracy - b.accuracy) || (b.attempts - a.attempts) || a.ch.localeCompare(b.ch));
+    strongestCandidates.sort((a, b) => (b.accuracy - a.accuracy) || (b.correct - a.correct) || (b.attempts - a.attempts) || a.ch.localeCompare(b.ch));
+
+    const toughest = toughestCandidates.length ? {
+        accuracy: toughestCandidates[0].accuracy,
+        attempts: toughestCandidates[0].attempts,
+        chars: toughestCandidates
+            .filter(item => item.accuracy === toughestCandidates[0].accuracy)
+            .slice(0, 10)
+            .map(item => item.ch)
+    } : null;
+
+    const strongest = strongestCandidates.length ? {
+        accuracy: strongestCandidates[0].accuracy,
+        attempts: strongestCandidates[0].attempts,
+        chars: strongestCandidates
+            .filter(item => item.accuracy === strongestCandidates[0].accuracy)
+            .slice(0, 10)
+            .map(item => item.ch)
+    } : null;
+
+    const totalAttempts = totalCorrect + totalWrong;
+    const accuracy = accuracyPct(totalCorrect, totalWrong);
+    const daily = dailyHistory || {};
+    const today = daily[todayKey()] || null;
+    const historyEntries = Object.entries(daily).sort((a, b) => b[0].localeCompare(a[0]));
+    const bestDaily = historyEntries.reduce((best, [date, entry]) => {
+        const score = Number(entry.officialScore || 0);
+        if (!best || score > best.score) return { score, date, entry };
+        return best;
+    }, null);
+
+    return {
+        modeName,
+        highScore: Number(highScore || 0),
+        scoreHistory,
+        dailyHistory: daily,
+        totalCorrect,
+        totalWrong,
+        totalAttempts,
+        practicedChars,
+        accuracy,
+        today,
+        bestDaily,
+        toughest,
+        strongest
+    };
+}
+
+function metric(label, value) {
+    return `<div class="metric"><div class="label">${label}</div><div class="value">${value}</div></div>`;
+}
+
+function miniStat(label, value) {
+    return `<div class="mini-stat"><div class="k">${label}</div><div class="v">${value}</div></div>`;
+}
+
+function summaryRow(label, value, extra='') {
+    return `
+        <div class="summary-row">
+            <div class="summary-main">
+                <div class="summary-label">${label}</div>
+                ${extra ? `<div class="summary-extra">${extra}</div>` : ''}
+            </div>
+            <div class="summary-value">${value}</div>
+        </div>
+    `;
+}
+
+function timelineItem(date, scoreText, metaText) {
+    return `
+        <div class="timeline-item">
+            <div class="timeline-date">${date}</div>
+            <div class="timeline-card">
+                <div class="timeline-score">${scoreText}</div>
+                <div class="timeline-meta">${metaText}</div>
+            </div>
+        </div>
+    `;
+}
+
+function formatKanaGroup(entry, emptyText = '—') {
+    if (!entry || !Array.isArray(entry.chars) || !entry.chars.length) return emptyText;
+    const percent = `${Math.round(entry.accuracy * 100)}%`;
+    return `${percent} · ${entry.chars.join(', ')}`;
+}
+
+
+function renderSpotlight(modeId, summary) {
+    document.getElementById(`${modeId}SpotlightStats`).innerHTML = [
+        metric('High Score', summary.highScore || 0),
+        metric('Accuracy', `${summary.accuracy}%`),
+        metric('Chars Practiced', summary.practicedChars || 0),
+        metric('Total Attempts', summary.totalAttempts || 0)
+    ].join('');
+
+    document.getElementById(`${modeId}Toughest`).textContent = formatKanaGroup(summary.toughest);
+    document.getElementById(`${modeId}Strongest`).textContent = formatKanaGroup(summary.strongest, '—');
+}
+
+function renderHero(summaryReading, summaryWriting) {
+    document.getElementById('heroReadingHigh').textContent = summaryReading.highScore || 0;
+    document.getElementById('heroWritingHigh').textContent = summaryWriting.highScore || 0;
+
+    const readingToday = summaryReading.today ? `${summaryReading.today.officialScore || 0}/${summaryReading.today.total || 20}` : '—';
+    const writingToday = summaryWriting.today ? `${summaryWriting.today.officialScore || 0}/${summaryWriting.today.total || 20}` : '—';
+
+    document.getElementById('heroStatusText').innerHTML =
+        `Reading today: <strong>${readingToday}</strong><br>Writing today: <strong>${writingToday}</strong>`;
+}
+
+function renderGauges(readingSummary, writingSummary) {
+    const data = [
+        { key: 'reading', name: 'Reading Practice', summary: readingSummary },
+        { key: 'writing', name: 'Writing Practice', summary: writingSummary }
+    ];
+
+    document.getElementById('gaugeGrid').innerHTML = data.map(item => {
+        const color = modeColor(item.key);
+        const pct = Math.max(0, Math.min(100, item.summary.accuracy));
+        const today = item.summary.today;
+        return `
+            <div class="gauge-card">
+                <div class="ring-wrap">
+                    <div class="ring" style="--pct:${pct}; --ring-color:${color};">
+                        <div class="ring-center">
+                            <div>
+                                <div class="big">${pct}%</div>
+                                <div class="small">Accuracy</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gauge-copy">
+                        <h3>${item.name}</h3>
+                        <p>${item.key === 'reading'
+                            ? 'Recognition-heavy practice with fast feedback and classic romaji input.'
+                            : 'Recall-focused prompts built around choosing or typing the correct kana.'}</p>
+                    </div>
+                </div>
+                <div class="mini-stats">
+                    ${miniStat('High Score', item.summary.highScore || 0)}
+                    ${miniStat('Practiced', item.summary.practicedChars || 0)}
+                    ${miniStat('Attempts', item.summary.totalAttempts || 0)}
+                    ${miniStat('Today', today ? `${today.officialScore || 0}/${today.total || 20}` : '—')}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderRecords(readingSummary, writingSummary) {
+    const compareRows = [
+        {
+            label: 'Endless best',
+            reading: readingSummary.scoreHistory.endlessBest.correct || 0,
+            writing: writingSummary.scoreHistory.endlessBest.correct || 0,
+            extra: 'best correct count'
+        },
+        {
+            label: 'Combo same row',
+            reading: readingSummary.scoreHistory.comboKanaBest.same_row || 0,
+            writing: writingSummary.scoreHistory.comboKanaBest.same_row || 0,
+            extra: 'best streak'
+        },
+        {
+            label: 'Combo random',
+            reading: readingSummary.scoreHistory.comboKanaBest.random || 0,
+            writing: writingSummary.scoreHistory.comboKanaBest.random || 0,
+            extra: 'best streak'
+        },
+        {
+            label: 'Top time trial',
+            reading: (readingSummary.scoreHistory.timeTrialTop3[0] || {}).score || 0,
+            writing: (writingSummary.scoreHistory.timeTrialTop3[0] || {}).score || 0,
+            extra: 'best listed score'
+        }
+    ];
+
+    const maxValue = Math.max(1, ...compareRows.flatMap(row => [row.reading, row.writing]));
+
+    document.getElementById('recordsBars').innerHTML = compareRows.map(row => `
+        <div class="bar-row">
+            <div class="bar-top">
+                <strong>${row.label}</strong>
+                <span style="color:var(--muted);">${row.extra}</span>
+            </div>
+            <div class="bar-top" style="font-size:13px;">
+                <span>Reading · ${row.reading}</span>
+                <span>Writing · ${row.writing}</span>
+            </div>
+            <div class="bar-track">
+                <div class="bar-fill" style="--bar-color:#67d78b; width:${Math.max(4, (row.reading / maxValue) * 100)}%;"></div>
+            </div>
+            <div class="bar-track">
+                <div class="bar-fill" style="--bar-color:#66a8ff; width:${Math.max(4, (row.writing / maxValue) * 100)}%;"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderTodaySummary(targetId, summary, mode) {
+    const today = summary.today;
+    const bestDaily = summary.bestDaily;
+
+    const html = [
+        summaryRow('Today’s official score', today ? `${today.officialScore || 0}/${today.total || 20}` : '—', today ? `Official time ${formatMs(today.timeMs)} · Attempts ${today.attempts || 1}` : 'No completed daily challenge yet today'),
+        summaryRow('Best daily on record', bestDaily ? `${bestDaily.score}/${bestDaily.entry.total || 20}` : '—', bestDaily ? `${bestDaily.date} · ${formatMs(bestDaily.entry.timeMs)}` : 'No history yet'),
+        summaryRow('Mode high score', summary.highScore || 0, mode === 'reading' ? 'Best streak in Reading Practice' : 'Best streak in Writing Practice')
+    ].join('');
+
+    document.getElementById(targetId).innerHTML = html;
+}
+
+function renderTimeline(targetId, dailyHistory) {
+    const items = Object.entries(dailyHistory || {}).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 5);
+    document.getElementById(targetId).innerHTML = items.length
+        ? items.map(([date, entry]) => timelineItem(date, `${entry.officialScore || 0}/${entry.total || 20}`, `Official time ${formatMs(entry.timeMs)} · Attempts ${entry.attempts || 1}`)).join('')
+        : `<div class="empty">No daily challenge history yet.</div>`;
+}
+
+function renderLearningPulse(readingSummary, writingSummary) {
+    const cards = [
+        {
+            label: 'Correct answers',
+            total: `${readingSummary.totalCorrect + writingSummary.totalCorrect}`,
+            reading: `${readingSummary.totalCorrect}`,
+            writing: `${writingSummary.totalCorrect}`,
+            readingSub: 'Recognition mode',
+            writingSub: 'Recall mode'
+        },
+        {
+            label: 'Wrong answers',
+            total: `${readingSummary.totalWrong + writingSummary.totalWrong}`,
+            reading: `${readingSummary.totalWrong}`,
+            writing: `${writingSummary.totalWrong}`,
+            readingSub: 'Reading misses',
+            writingSub: 'Writing misses'
+        },
+        {
+            label: 'Toughest kana',
+            total: `${formatKanaGroup(readingSummary.toughest)} / ${formatKanaGroup(writingSummary.toughest)}`,
+            reading: `${readingSummary.toughest && readingSummary.toughest.chars ? readingSummary.toughest.chars.join(', ') : '—'}`,
+            writing: `${writingSummary.toughest && writingSummary.toughest.chars ? writingSummary.toughest.chars.join(', ') : '—'}`,
+            readingSub: `${readingSummary.toughest ? Math.round(readingSummary.toughest.accuracy * 100) : '—'}% accuracy`,
+            writingSub: `${writingSummary.toughest ? Math.round(writingSummary.toughest.accuracy * 100) : '—'}% accuracy`
+        },
+        {
+            label: 'Strongest kana',
+            total: `${formatKanaGroup(readingSummary.strongest)} / ${formatKanaGroup(writingSummary.strongest)}`,
+            reading: `${readingSummary.strongest && readingSummary.strongest.chars ? readingSummary.strongest.chars.join(', ') : '—'}`,
+            writing: `${writingSummary.strongest && writingSummary.strongest.chars ? writingSummary.strongest.chars.join(', ') : '—'}`,
+            readingSub: `${readingSummary.strongest ? Math.round(readingSummary.strongest.accuracy * 100) : '—'}% accuracy`,
+            writingSub: `${writingSummary.strongest ? Math.round(writingSummary.strongest.accuracy * 100) : '—'}% accuracy`
+        },
+        {
+            label: 'Practiced kana',
+            total: `${readingSummary.practicedChars + writingSummary.practicedChars}`,
+            reading: `${readingSummary.practicedChars}`,
+            writing: `${writingSummary.practicedChars}`,
+            readingSub: 'Reading coverage',
+            writingSub: 'Writing coverage'
+        },
+        {
+            label: 'High score',
+            total: `${Math.max(readingSummary.highScore, writingSummary.highScore)}`,
+            reading: `${readingSummary.highScore}`,
+            writing: `${writingSummary.highScore}`,
+            readingSub: 'Reading best streak',
+            writingSub: 'Writing best streak'
+        }
+    ];
+
+    document.getElementById('learningPulse').innerHTML = cards.map(card => `
+        <div class="pulse-key-card">
+            <div class="pulse-key-head">
+                <div class="k">${card.label}</div>
+                <div class="v">${card.total}</div>
+            </div>
+            <div class="pulse-mode-pair">
+                <div class="pulse-mode-box reading">
+                    <div class="pulse-mode-name">Reading</div>
+                    <div class="pulse-mode-value">${card.reading}</div>
+                    <div class="pulse-mode-sub">${card.readingSub}</div>
+                </div>
+                <div class="pulse-mode-box writing">
+                    <div class="pulse-mode-name">Writing</div>
+                    <div class="pulse-mode-value">${card.writing}</div>
+                    <div class="pulse-mode-sub">${card.writingSub}</div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderLearningPulseHighlights(readingSummary, writingSummary) {
+    const items = [
+        {
+            label: 'High score edge',
+            winner: readingSummary.highScore === writingSummary.highScore ? 'tie' : (readingSummary.highScore > writingSummary.highScore ? 'reading' : 'writing'),
+            value: readingSummary.highScore === writingSummary.highScore ? `Both at ${readingSummary.highScore}` : `${Math.max(readingSummary.highScore, writingSummary.highScore)} leads`
+        },
+        {
+            label: 'Accuracy edge',
+            winner: readingSummary.accuracy === writingSummary.accuracy ? 'tie' : (readingSummary.accuracy > writingSummary.accuracy ? 'reading' : 'writing'),
+            value: readingSummary.accuracy === writingSummary.accuracy ? `Both at ${readingSummary.accuracy}%` : `${Math.max(readingSummary.accuracy, writingSummary.accuracy)}% top accuracy`
+        },
+        {
+            label: 'Coverage edge',
+            winner: readingSummary.practicedChars === writingSummary.practicedChars ? 'tie' : (readingSummary.practicedChars > writingSummary.practicedChars ? 'reading' : 'writing'),
+            value: readingSummary.practicedChars === writingSummary.practicedChars ? `Both at ${readingSummary.practicedChars}` : `${Math.max(readingSummary.practicedChars, writingSummary.practicedChars)} practiced`
+        }
+    ];
+
+    document.getElementById('learningPulseHighlights').innerHTML = items.map(item => `
+        <div class="pulse-badge">
+            <div>
+                <div class="k">${item.label}</div>
+                <div class="v">${item.value}</div>
+            </div>
+            <div class="pulse-winner ${item.winner}">
+                ${item.winner === 'tie' ? 'Tie' : item.winner === 'reading' ? 'Reading' : 'Writing'}
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderLearningPulseCompare(readingSummary, writingSummary) {
+    const compareRows = [
+        { label: 'Correct answers', reading: readingSummary.totalCorrect, writing: writingSummary.totalCorrect },
+        { label: 'Wrong answers', reading: readingSummary.totalWrong, writing: writingSummary.totalWrong },
+        { label: 'Practiced kana', reading: readingSummary.practicedChars, writing: writingSummary.practicedChars },
+        { label: 'High score', reading: readingSummary.highScore, writing: writingSummary.highScore }
+    ];
+
+    document.getElementById('learningPulseCompare').innerHTML = compareRows.map(row => {
+        const maxVal = Math.max(1, row.reading, row.writing);
+        const readingPct = (row.reading / maxVal) * 100;
+        const writingPct = (row.writing / maxVal) * 100;
+
+        return `
+            <div class="vs-row">
+                <div class="vs-value reading">${row.reading}</div>
+                <div class="vs-center">
+                    <div class="vs-label">
+                        <strong>${row.label}</strong>
+                        <span style="color:var(--muted);">Reading vs Writing progress</span>
+                    </div>
+                    <div class="vs-track">
+                        <div class="vs-fill reading" style="width:${readingPct}%;"></div>
+                        <div class="vs-fill writing" style="width:${writingPct}%;"></div>
+                    </div>
+                </div>
+                <div class="vs-value writing">${row.writing}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderLearningPulseHighlights(readingSummary, writingSummary) {
+    const highlightRows = [
+        readingSummary.highScore === writingSummary.highScore
+            ? summaryRow('High score edge', 'Tie', `Both modes are sitting on ${readingSummary.highScore}`)
+            : (readingSummary.highScore > writingSummary.highScore
+                ? summaryRow('High score edge', 'Reading lead', `${readingSummary.highScore} vs ${writingSummary.highScore}`)
+                : summaryRow('High score edge', 'Writing lead', `${writingSummary.highScore} vs ${readingSummary.highScore}`)),
+
+        readingSummary.accuracy === writingSummary.accuracy
+            ? summaryRow('Accuracy edge', 'Tie', `Both modes are at ${readingSummary.accuracy}%`)
+            : (readingSummary.accuracy > writingSummary.accuracy
+                ? summaryRow('Accuracy edge', 'Reading lead', `${readingSummary.accuracy}% vs ${writingSummary.accuracy}%`)
+                : summaryRow('Accuracy edge', 'Writing lead', `${writingSummary.accuracy}% vs ${readingSummary.accuracy}%`)),
+
+        readingSummary.practicedChars === writingSummary.practicedChars
+            ? summaryRow('Coverage edge', 'Tie', `Both have ${readingSummary.practicedChars} practiced kana`)
+            : (readingSummary.practicedChars > writingSummary.practicedChars
+                ? summaryRow('Coverage edge', 'Reading lead', `${readingSummary.practicedChars} vs ${writingSummary.practicedChars} practiced kana`)
+                : summaryRow('Coverage edge', 'Writing lead', `${writingSummary.practicedChars} vs ${writingSummary.practicedChars} practiced kana`))
+    ];
+
+    document.getElementById('learningPulseHighlights').innerHTML = highlightRows.join('');
+}
+
+const readingStats = loadJSON('charStats', {});
+const readingScoreHistory = normalizeScoreHistory(loadJSON('scoreHistory', {}));
+const readingDailyHistory = loadJSON('dailyChallengeHistory', {});
+const readingHighScore = Number(localStorage.getItem('highScore') || '0');
+
+const writingStats = loadJSON('reverseCharStats', {});
+const writingScoreHistory = normalizeScoreHistory(loadJSON('reverseScoreHistory', {}));
+const writingDailyHistory = loadJSON('reverseDailyChallengeHistory', {});
+const writingHighScore = Number(localStorage.getItem('reverseHighScore') || '0');
+
+const readingSummary = buildModeSummary({
+    stats: readingStats,
+    scoreHistory: readingScoreHistory,
+    dailyHistory: readingDailyHistory,
+    highScore: readingHighScore,
+    modeName: 'Reading Practice'
+});
+
+const writingSummary = buildModeSummary({
+    stats: writingStats,
+    scoreHistory: writingScoreHistory,
+    dailyHistory: writingDailyHistory,
+    highScore: writingHighScore,
+    modeName: 'Writing Practice'
+});
+
+renderHero(readingSummary, writingSummary);
+renderSpotlight('reading', readingSummary);
+renderSpotlight('writing', writingSummary);
+renderGauges(readingSummary, writingSummary);
+renderRecords(readingSummary, writingSummary);
+renderTodaySummary('readingTodaySummary', readingSummary, 'reading');
+renderTodaySummary('writingTodaySummary', writingSummary, 'writing');
+renderTimeline('readingTimeline', readingSummary.dailyHistory);
+renderTimeline('writingTimeline', writingSummary.dailyHistory);
+renderLearningPulse(readingSummary, writingSummary);
+renderLearningPulseHighlights(readingSummary, writingSummary);
+renderLearningPulseCompare(readingSummary, writingSummary);
+</script>
+</body>
+</html>
