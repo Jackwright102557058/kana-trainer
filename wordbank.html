@@ -479,7 +479,7 @@
           <p>Type a word in kana and press Enter. The app will save it immediately and generate romaji for you.</p>
 
           <label for="kanaInput">Kana Word</label>
-          <input id="kanaInput" type="text" placeholder="e.g. ねこ / コーヒー" autocomplete="off" inputmode="text" />
+          <input id="kanaInput" type="text" name="kana_word" placeholder="e.g. ねこ / コーヒー" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" inputmode="text" />
           <div class="hint">Works with hiragana, katakana, small kana, っ / ッ, and ー. Duplicate kana words are blocked.</div>
 
           <div class="btn-row">
@@ -516,7 +516,7 @@
           <div class="toolbar">
             <div class="field">
               <label for="searchInput">Search</label>
-              <input id="searchInput" type="text" placeholder="Search kana, romaji, English, or notes" />
+              <input id="searchInput" type="text" name="wordbank_search" placeholder="Search kana, romaji, English, or notes" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" />
             </div>
             <div class="field">
               <label for="sortSelect">Sort</label>
@@ -629,15 +629,7 @@
     };
 
     let wordBank = loadWordBank();
-    let expandedEntryId = null;
-
-    function openOnlyEntry(id) {
-      expandedEntryId = id || null;
-    }
-
-    function isEntryExpanded(id) {
-      return expandedEntryId === id;
-    }
+    const expandedEntries = new Set();
 
     function loadWordBank() {
       try {
@@ -765,14 +757,13 @@
       const existing = wordBank.find(entry => entry.kana === kana);
       if (existing) {
         showStatus(`"${kana}" is already in your word bank.`, 'warn');
-        openOnlyEntry(existing.id);
         renderEntries(existing.id);
         return;
       }
 
       const entry = buildEntry(kana);
       wordBank.unshift(entry);
-      openOnlyEntry(entry.id);
+      expandedEntries.add(entry.id);
       saveWordBank();
       elements.kanaInput.value = '';
       clearStatus();
@@ -799,7 +790,6 @@
       const confirmed = window.confirm(`Delete "${entry.kana}" from your word bank?`);
       if (!confirmed) return;
       wordBank = wordBank.filter(item => item.id !== id);
-      if (expandedEntryId === id) openOnlyEntry(null);
       saveWordBank();
       renderEntries();
       showStatus(`Deleted ${entry.kana}.`, 'ok');
@@ -813,7 +803,6 @@
       const confirmed = window.confirm('Clear your entire word bank? This cannot be undone.');
       if (!confirmed) return;
       wordBank = [];
-      openOnlyEntry(null);
       saveWordBank();
       renderEntries();
       showStatus('All words cleared.', 'ok');
@@ -868,7 +857,6 @@
           }
 
           wordBank = merged;
-          openOnlyEntry(null);
           saveWordBank();
           renderEntries();
           showStatus('Import complete.', 'ok');
@@ -959,7 +947,7 @@
       elements.entries.innerHTML = items.map(entry => {
         const type = classifyKanaType(entry.kana);
         const englishMissing = !entry.english.trim();
-        const isExpanded = isEntryExpanded(entry.id);
+        const isExpanded = expandedEntries.has(entry.id);
         return `
           <details class="card" id="entry-${entry.id}" ${isExpanded ? 'open' : ''}>
             <summary class="card-summary" data-id="${entry.id}">
@@ -995,17 +983,17 @@
                 <div class="field-grid">
                   <div class="field-small">
                     <label for="kana-${entry.id}">Kana</label>
-                    <input id="kana-${entry.id}" type="text" value="${escapeHtml(entry.kana)}" data-field="kana" data-id="${entry.id}" />
+                    <input id="kana-${entry.id}" type="text" name="kana_word_${entry.id}" value="${escapeHtml(entry.kana)}" data-field="kana" data-id="${entry.id}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" />
                   </div>
                   <div class="field-small">
                     <label for="english-${entry.id}">English</label>
-                    <input id="english-${entry.id}" type="text" value="${escapeHtml(entry.english)}" placeholder="Add meaning now or later" data-field="english" data-id="${entry.id}" />
+                    <input id="english-${entry.id}" type="text" name="word_english_${entry.id}" value="${escapeHtml(entry.english)}" placeholder="Add meaning now or later" data-field="english" data-id="${entry.id}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" />
                   </div>
                 </div>
                 <div class="field-grid single">
                   <div class="field-small">
                     <label for="notes-${entry.id}">Notes</label>
-                    <textarea id="notes-${entry.id}" data-field="notes" data-id="${entry.id}" placeholder="Add notes, usage, reminders, mnemonics, etc.">${escapeHtml(entry.notes)}</textarea>
+                    <textarea id="notes-${entry.id}" name="word_notes_${entry.id}" data-field="notes" data-id="${entry.id}" placeholder="Add notes, usage, reminders, mnemonics, etc." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">${escapeHtml(entry.notes)}</textarea>
                   </div>
                 </div>
               </div>
@@ -1051,15 +1039,8 @@
       const details = event.target.closest('details.card');
       if (!details) return;
       const id = details.id.replace('entry-', '');
-      if (details.open) {
-        openOnlyEntry(id);
-        const openDetails = elements.entries.querySelectorAll('details.card[open]');
-        openDetails.forEach(item => {
-          if (item !== details) item.open = false;
-        });
-      } else if (expandedEntryId === id) {
-        openOnlyEntry(null);
-      }
+      if (details.open) expandedEntries.add(id);
+      else expandedEntries.delete(id);
       const toggleEl = details.querySelector('.summary-toggle');
       if (toggleEl) toggleEl.textContent = details.open ? '−' : '+';
     });
@@ -1078,7 +1059,6 @@
       if (action === 'favorite') {
         const current = wordBank.find(entry => entry.id === id);
         if (!current) return;
-        openOnlyEntry(id);
         updateEntry(id, { favorite: !current.favorite });
         return;
       }
@@ -1096,12 +1076,10 @@
         const duplicate = wordBank.find(entry => entry.id !== id && entry.kana === nextKana);
         if (duplicate) {
           showStatus(`Cannot save. "${nextKana}" already exists in your word bank.`, 'err');
-          openOnlyEntry(duplicate.id);
           renderEntries(duplicate.id);
           return;
         }
 
-        openOnlyEntry(id);
         updateEntry(id, {
           kana: nextKana,
           english: (englishField?.value || '').trim(),
