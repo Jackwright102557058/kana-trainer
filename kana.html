@@ -951,79 +951,6 @@
     }
 
 
-    .cloud-identity {
-        margin-top: 18px;
-        display: grid;
-        gap: 12px;
-        padding: 16px;
-        border-radius: 20px;
-        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
-        border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .cloud-identity-top {
-        display: flex;
-        justify-content: space-between;
-        gap: 14px;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .cloud-user {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .cloud-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 999px;
-        object-fit: cover;
-        border: 1px solid rgba(255,255,255,0.08);
-        background: rgba(255,255,255,0.06);
-        display: none;
-    }
-
-    .cloud-name {
-        font-size: 16px;
-        font-weight: 800;
-        margin-bottom: 4px;
-    }
-
-    .cloud-email {
-        color: var(--muted);
-        font-size: 13px;
-    }
-
-    .cloud-actions {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .cloud-btn {
-        appearance: none;
-        border: 1px solid rgba(255,255,255,0.10);
-        background: rgba(255,255,255,0.06);
-        color: var(--text);
-        border-radius: 12px;
-        padding: 10px 14px;
-        font-size: 14px;
-        font-weight: 700;
-        cursor: pointer;
-    }
-
-    .cloud-btn.primary {
-        background: rgba(132,187,255,0.16);
-        border-color: rgba(132,187,255,0.28);
-    }
-
-    .cloud-status {
-        color: #d7dbe5;
-        font-size: 14px;
-        line-height: 1.5;
-    }
 
     @media (max-width: 1080px) {
         .hero-grid,
@@ -1118,23 +1045,6 @@
                 </div>
                 <div class="hero-copy hero-lead">
                     Jump into practice, track your progress, and keep your streak going.</div>
-
-                <div class="cloud-identity">
-                    <div class="cloud-identity-top">
-                        <div class="cloud-user">
-                            <img class="cloud-avatar" id="cloudAvatar" alt="" />
-                            <div>
-                                <div class="cloud-name" id="cloudName">Guest</div>
-                                <div class="cloud-email" id="cloudEmail">Not signed in</div>
-                            </div>
-                        </div>
-                        <div class="cloud-actions">
-                            <button class="cloud-btn primary" id="cloudSignInBtn" type="button">Sign in with Google</button>
-                            <button class="cloud-btn" id="cloudSignOutBtn" type="button" style="display:none;">Sign out</button>
-                        </div>
-                    </div>
-                    <div class="cloud-status" id="cloudStatusText">Sign in with Google to sync your saves across devices.</div>
-                </div>
 
                 <div class="launch-row">
                     <a class="launch-card reading" href="default.html">
@@ -1764,44 +1674,51 @@ function renderLearningPulseHighlights(readingSummary, writingSummary) {
     document.getElementById('learningPulseHighlights').innerHTML = highlightRows.join('');
 }
 
-const readingStats = loadJSON('charStats', {});
-const readingScoreHistory = normalizeScoreHistory(loadJSON('scoreHistory', {}));
-const readingDailyHistory = loadJSON('dailyChallengeHistory', {});
-const readingHighScore = Number(localStorage.getItem('highScore') || '0');
+function renderDashboard() {
+    const readingStats = loadJSON('charStats', {});
+    const readingScoreHistory = normalizeScoreHistory(loadJSON('scoreHistory', {}));
+    const readingDailyHistory = loadJSON('dailyChallengeHistory', {});
+    const readingHighScore = Number(localStorage.getItem('highScore') || '0');
 
-const writingStats = loadJSON('reverseCharStats', {});
-const writingScoreHistory = normalizeScoreHistory(loadJSON('reverseScoreHistory', {}));
-const writingDailyHistory = loadJSON('reverseDailyChallengeHistory', {});
-const writingHighScore = Number(localStorage.getItem('reverseHighScore') || '0');
+    const writingStats = loadJSON('reverseCharStats', {});
+    const writingScoreHistory = normalizeScoreHistory(loadJSON('reverseScoreHistory', {}));
+    const writingDailyHistory = loadJSON('reverseDailyChallengeHistory', {});
+    const writingHighScore = Number(localStorage.getItem('reverseHighScore') || '0');
 
-const readingSummary = buildModeSummary({
-    stats: readingStats,
-    scoreHistory: readingScoreHistory,
-    dailyHistory: readingDailyHistory,
-    highScore: readingHighScore,
-    modeName: 'Reading Practice'
-});
+    const readingSummary = buildModeSummary({
+        stats: readingStats,
+        scoreHistory: readingScoreHistory,
+        dailyHistory: readingDailyHistory,
+        highScore: readingHighScore,
+        modeName: 'Reading Practice'
+    });
 
-const writingSummary = buildModeSummary({
-    stats: writingStats,
-    scoreHistory: writingScoreHistory,
-    dailyHistory: writingDailyHistory,
-    highScore: writingHighScore,
-    modeName: 'Writing Practice'
-});
+    const writingSummary = buildModeSummary({
+        stats: writingStats,
+        scoreHistory: writingScoreHistory,
+        dailyHistory: writingDailyHistory,
+        highScore: writingHighScore,
+        modeName: 'Writing Practice'
+    });
 
-renderHero(readingSummary, writingSummary);
-renderSpotlight('reading', readingSummary);
-renderSpotlight('writing', writingSummary);
-renderGauges(readingSummary, writingSummary);
-renderRecords(readingSummary, writingSummary);
-renderTodaySummary('readingTodaySummary', readingSummary, 'reading');
-renderTodaySummary('writingTodaySummary', writingSummary, 'writing');
-renderTimeline('readingTimeline', readingSummary.dailyHistory);
-renderTimeline('writingTimeline', writingSummary.dailyHistory);
-renderLearningPulse(readingSummary, writingSummary);
-renderLearningPulseHighlights(readingSummary, writingSummary);
-renderLearningPulseCompare(readingSummary, writingSummary);
+    renderHero(readingSummary, writingSummary);
+    renderSpotlight('reading', readingSummary);
+    renderSpotlight('writing', writingSummary);
+    renderGauges(readingSummary, writingSummary);
+    renderRecords(readingSummary, writingSummary);
+    renderTodaySummary('readingTodaySummary', readingSummary, 'reading');
+    renderTodaySummary('writingTodaySummary', writingSummary, 'writing');
+    renderTimeline('readingTimeline', readingSummary.dailyHistory);
+    renderTimeline('writingTimeline', writingSummary.dailyHistory);
+    renderLearningPulse(readingSummary, writingSummary);
+    renderLearningPulseHighlights(readingSummary, writingSummary);
+    renderLearningPulseCompare(readingSummary, writingSummary);
+}
+
+renderDashboard();
+setTimeout(renderDashboard, 1200);
+window.addEventListener('pageshow', renderDashboard);
+window.addEventListener('focus', () => setTimeout(renderDashboard, 150));
 </script>
 </body>
 </html>
