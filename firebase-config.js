@@ -1,4 +1,4 @@
-export const firebaseConfig = {
+window.KANA_FIREBASE_CONFIG = {
   apiKey: "AIzaSyB54HwbckuIdRQWfPYplfypl1GRo56g4KM",
   authDomain: "mode-atlus.firebaseapp.com",
   projectId: "mode-atlus",
