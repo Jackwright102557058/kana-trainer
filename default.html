@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
 <link rel="manifest" href="site.webmanifest" />
 <meta name="theme-color" content="#080b15" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Mode Atlas" />
 <meta name="description" content="Practice recognising kana and typing romaji." />
@@ -4146,7 +4146,7 @@ init();
   function getDisplay(){ return localStorage.getItem(KEY_DISPLAY) || 'auto'; }
   function setDisplay(value){ localStorage.setItem(KEY_DISPLAY, value); document.body.dataset.displayMode = value; refreshSettings(); }
   function applyDisplay(){ document.body.dataset.displayMode = getDisplay(); }
-  function tone(freq, dur, type='sine', gain=0.22){
+  function tone(freq, dur, type='sine', gain=0.95){
     if (getSound() === 'off' || prefersReduced) return;
     try {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -4163,10 +4163,10 @@ init();
     } catch(e) {}
   }
   function play(name){
-    if (name === 'correct') { tone(660,0.10,'sine',0.24); setTimeout(()=>tone(880,0.12,'sine',0.18),70); return; }
-    if (name === 'wrong') { tone(180,0.16,'triangle',0.22); return; }
-    if (name === 'open') { tone(440,0.08,'sine',0.16); return; }
-    tone(520,0.06,'sine',0.14);
+    if (name === 'correct') { tone(660,0.14,'sine',0.95); setTimeout(()=>tone(880,0.16,'sine',0.80),80); return; }
+    if (name === 'wrong') { tone(180,0.22,'triangle',0.90); return; }
+    if (name === 'open') { tone(440,0.11,'sine',0.72); return; }
+    tone(520,0.10,'sine',0.70);
   }
   function injectSettings(){
     const drawers = document.querySelectorAll('.profile-drawer, #profileDrawer, .drawer, aside[aria-hidden]');
@@ -4222,10 +4222,10 @@ init();
   const p=document.createElement('div');p.className='ma-dev-panel';p.id='maDevPanel';
   const hasPageDebug=(typeof window.renderDebugPanel==='function'||typeof renderDebugPanel==='function');
   const hasCloseDebug=(typeof window.closeDebugPanel==='function'||typeof closeDebugPanel==='function');
-  const debugLabel=document.getElementById('testHeatmap')?'Storage debug':'SRS debug';
+  const debugLabel='SRS debug';
   p.innerHTML='<div class="ma-dev-card" role="dialog" aria-modal="false" aria-labelledby="maDevTitle"><div class="ma-dev-head"><div class="ma-dev-title" id="maDevTitle">Dev menu</div><button class="ma-dev-btn" type="button" data-ma-dev-close>Close</button></div><div class="ma-dev-row"><div class="ma-dev-label">Sound</div><div class="ma-dev-actions"><button class="ma-dev-btn" type="button" data-ma-dev-sound="soft">Sound on</button><button class="ma-dev-btn" type="button" data-ma-dev-sound="off">Sound off</button><button class="ma-dev-btn" type="button" data-ma-dev-test-sound>Test sound</button></div></div>'+(hasPageDebug?'<div class="ma-dev-row"><div class="ma-dev-label">Page tools</div><div class="ma-dev-actions"><button class="ma-dev-btn" type="button" data-ma-dev-page-debug>'+debugLabel+'</button>'+(hasCloseDebug?'<button class="ma-dev-btn" type="button" data-ma-dev-page-debug-close>Close debug</button>':'')+'</div></div>':'')+'<div class="ma-dev-row"><div class="ma-dev-label">Console</div><div style="color:var(--muted,#9aa3b8);font-size:13px;line-height:1.5;">Open this panel with <strong>dev()</strong>. It stays in the bottom-right so the page remains usable.</div></div></div>';
   document.body.appendChild(p);
-  p.addEventListener('click',e=>{if(e.target.closest('[data-ma-dev-close]'))closeDev();const s=e.target.closest('[data-ma-dev-sound]');if(s){setSound(s.dataset.maDevSound);playSound('open')}if(e.target.closest('[data-ma-dev-test-sound]')){playSound('correct');setTimeout(()=>playSound('wrong'),180)}if(e.target.closest('[data-ma-dev-page-debug]')){try{(window.renderDebugPanel||renderDebugPanel)()}catch(err){console.warn('Debug panel unavailable',err)}}if(e.target.closest('[data-ma-dev-page-debug-close]')){try{(window.closeDebugPanel||closeDebugPanel)()}catch(err){console.warn('Close debug unavailable',err)}}});
+  p.addEventListener('click',e=>{if(e.target.closest('[data-ma-dev-close]'))closeDev();const s=e.target.closest('[data-ma-dev-sound]');if(s){setSound(s.dataset.maDevSound);playSound('open')}if(e.target.closest('[data-ma-dev-test-sound]')){playSound('correct');setTimeout(()=>playSound('open'),220);setTimeout(()=>playSound('wrong'),420)}if(e.target.closest('[data-ma-dev-page-debug]')){try{(window.renderDebugPanel||renderDebugPanel)()}catch(err){console.warn('Debug panel unavailable',err)}}if(e.target.closest('[data-ma-dev-page-debug-close]')){try{(window.closeDebugPanel||closeDebugPanel)()}catch(err){console.warn('Close debug unavailable',err)}}});
   updateDevState();
 }
     function updateDevState(){document.querySelectorAll('[data-ma-dev-sound]').forEach(b=>b.classList.toggle('active',b.dataset.maDevSound===getSound()))}
