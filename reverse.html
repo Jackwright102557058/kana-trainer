@@ -1693,6 +1693,11 @@ body[data-display-mode="mobile"] .main {
   padding: 20px 14px 130px !important;
 }
 
+
+/* Mode Atlas profile/dev polish */
+.drawer-close,.profile-close,#profileCloseBtn,#studyProfileClose{min-width:42px!important;min-height:38px!important;height:auto!important;padding:8px 12px!important;font-size:13px!important;line-height:1!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;}
+.ma-dev-panel{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999;background:rgba(0,0,0,.58);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:18px}.ma-dev-panel.open{display:flex}.ma-dev-card{width:min(420px,100%);border-radius:24px;padding:18px;background:linear-gradient(180deg,rgba(22,25,34,.98),rgba(9,11,16,.98));border:1px solid rgba(255,255,255,.11);box-shadow:0 28px 90px rgba(0,0,0,.58);color:var(--text,#f7f8ff)}.ma-dev-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.ma-dev-title{font-size:20px;font-weight:900;letter-spacing:-.03em}.ma-dev-row{display:grid;gap:8px;padding:12px 0;border-top:1px solid rgba(255,255,255,.08)}.ma-dev-label{color:var(--muted,#9aa3b8);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.10em}.ma-dev-actions{display:flex;flex-wrap:wrap;gap:8px}.ma-dev-btn{appearance:none;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.055);color:var(--text,#f7f8ff);border-radius:999px;padding:9px 12px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}.ma-dev-btn.active,.ma-dev-btn:hover{background:rgba(125,181,255,.14);border-color:rgba(125,181,255,.34)}
+.ma-profile-nav-cleaned .drawer-action[href$="test.html"],.ma-profile-nav-cleaned .drawer-action[href$="wordbank.html"],.ma-profile-nav-cleaned .drawer-action[href$="default.html"],.ma-profile-nav-cleaned .drawer-action[href$="reverse.html"]{display:none!important}
 </style>
 </head>
 <body>
@@ -4613,19 +4618,7 @@ init();
            document.querySelector('.drawer-panel') ||
            document.querySelector('[id*="profileDrawer"]');
   }
-  function injectDisplayControls() {
-    if (document.querySelector('.ma-display-controls')) return;
-    const container = findProfileContainer();
-    if (!container) return;
-    const block = document.createElement('div');
-    block.className = 'ma-display-controls';
-    block.innerHTML = '<div class="ma-display-title">Display</div><div class="ma-display-row"><button class="ma-display-btn" type="button" data-mode-atlas-display="auto">Auto</button><button class="ma-display-btn" type="button" data-mode-atlas-display="compact">Compact</button><button class="ma-display-btn" type="button" data-mode-atlas-display="mobile">Mobile</button></div><div class="ma-sync-badge"><span class="ma-sync-dot"></span><span>Cloud sync ready</span></div>';
-    container.appendChild(block);
-    block.querySelectorAll('.ma-display-btn').forEach(btn => {
-      btn.addEventListener('click', () => setMode(btn.dataset.modeAtlasDisplay));
-    });
-    applyMode();
-  }
+  function injectDisplayControls() { applyMode(); }
   window.ModeAtlasDisplay = { getMode, setMode, applyMode, injectDisplayControls };
   applyMode();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectDisplayControls);
@@ -4670,7 +4663,7 @@ init();
   function getDisplay(){ return localStorage.getItem(KEY_DISPLAY) || 'auto'; }
   function setDisplay(value){ localStorage.setItem(KEY_DISPLAY, value); document.body.dataset.displayMode = value; refreshSettings(); }
   function applyDisplay(){ document.body.dataset.displayMode = getDisplay(); }
-  function tone(freq, dur, type='sine', gain=0.035){
+  function tone(freq, dur, type='sine', gain=0.05){
     if (getSound() === 'off' || prefersReduced) return;
     try {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -4687,7 +4680,7 @@ init();
     } catch(e) {}
   }
   function play(name){
-    if (name === 'correct') { tone(660,0.10,'sine',0.04); setTimeout(()=>tone(880,0.12,'sine',0.03),70); return; }
+    if (name === 'correct') { tone(660,0.10,'sine',0.055); setTimeout(()=>tone(880,0.12,'sine',0.03),70); return; }
     if (name === 'wrong') { tone(180,0.14,'triangle',0.035); return; }
     if (name === 'open') { tone(440,0.07,'sine',0.025); return; }
     tone(520,0.055,'sine',0.018);
@@ -4706,13 +4699,6 @@ init();
             <button type="button" class="ma-display-option" data-display="auto">Auto</button>
             <button type="button" class="ma-display-option" data-display="compact">Compact</button>
             <button type="button" class="ma-display-option" data-display="mobile">Mobile</button>
-          </div>
-        </div>
-        <div class="ma-settings-row">
-          <div style="font-size:12px;color:var(--muted,#9aa3b8);font-weight:800;">Sound</div>
-          <div class="ma-settings-buttons" data-ma-sound>
-            <button type="button" class="ma-sound-toggle" data-sound="soft">Soft</button>
-            <button type="button" class="ma-sound-toggle" data-sound="off">Off</button>
           </div>
         </div>`;
       drawer.appendChild(panel);
@@ -4739,5 +4725,22 @@ init();
 })();
 </script>
 
+
+<script>
+(function ModeAtlasProfileDevPolish(){
+  const KEY_SOUND='modeAtlasSound';
+  function getSound(){return localStorage.getItem(KEY_SOUND)||'soft'}
+  function setSound(v){localStorage.setItem(KEY_SOUND,v);updateDevState()}
+  function playSound(n){if(window.ModeAtlasUI&&typeof window.ModeAtlasUI.playSound==='function')window.ModeAtlasUI.playSound(n||'open')}
+  function cleanDuplicateDisplay(){document.querySelectorAll('.ma-display-controls').forEach(el=>el.remove());document.querySelectorAll('.ma-settings-panel').forEach(panel=>{const rows=[...panel.querySelectorAll('.ma-settings-row')];rows.filter(r=>/Display/i.test(r.textContent||'')).slice(1).forEach(r=>r.remove());rows.filter(r=>/Sound/i.test(r.textContent||'')).forEach(r=>r.remove())})}
+  function normalizeProfileActions(){document.querySelectorAll('.profile-drawer,#profileDrawer').forEach(drawer=>{const actions=drawer.querySelector('.drawer-actions');if(!actions)return;actions.classList.add('ma-profile-nav-cleaned');[...actions.querySelectorAll('a')].forEach(a=>{const href=(a.getAttribute('href')||'').toLowerCase();const isAtlas=href==='index.html'||href.endsWith('/index.html')||/mode-atlas\/?$/.test(href);const isKana=href==='kana.html'||href.endsWith('/kana.html');if(!isAtlas&&!isKana)a.remove();else{a.classList.add('drawer-action');a.textContent=isAtlas?'Atlas':'Kana Trainer';a.setAttribute('href',isAtlas?'index.html':'kana.html')}});if(!actions.querySelector('a[href="index.html"]')){const a=document.createElement('a');a.className='drawer-action';a.href='index.html';a.textContent='Atlas';actions.appendChild(a)}if(!actions.querySelector('a[href="kana.html"]')){const a=document.createElement('a');a.className='drawer-action';a.href='kana.html';a.textContent='Kana Trainer';actions.appendChild(a)}})}
+  function ensureDevPanel(){if(document.getElementById('maDevPanel'))return;const p=document.createElement('div');p.className='ma-dev-panel';p.id='maDevPanel';p.innerHTML='<div class="ma-dev-card" role="dialog" aria-modal="true" aria-labelledby="maDevTitle"><div class="ma-dev-head"><div class="ma-dev-title" id="maDevTitle">Dev menu</div><button class="ma-dev-btn" type="button" data-ma-dev-close>Close</button></div><div class="ma-dev-row"><div class="ma-dev-label">Sound</div><div class="ma-dev-actions"><button class="ma-dev-btn" type="button" data-ma-dev-sound="soft">Soft</button><button class="ma-dev-btn" type="button" data-ma-dev-sound="off">Off</button><button class="ma-dev-btn" type="button" data-ma-dev-test-sound>Test sound</button></div></div><div class="ma-dev-row"><div class="ma-dev-label">Console</div><div style="color:var(--muted,#9aa3b8);font-size:13px;line-height:1.5;">Open this menu with <strong>dev()</strong>.</div></div></div>';document.body.appendChild(p);p.addEventListener('click',e=>{if(e.target===p||e.target.closest('[data-ma-dev-close]'))closeDev();const s=e.target.closest('[data-ma-dev-sound]');if(s){setSound(s.dataset.maDevSound);playSound('open')}if(e.target.closest('[data-ma-dev-test-sound]'))playSound('correct')});updateDevState()}
+  function updateDevState(){document.querySelectorAll('[data-ma-dev-sound]').forEach(b=>b.classList.toggle('active',b.dataset.maDevSound===getSound()))}
+  function openDev(){ensureDevPanel();document.getElementById('maDevPanel').classList.add('open');updateDevState()}
+  function closeDev(){const p=document.getElementById('maDevPanel');if(p)p.classList.remove('open')}
+  function polish(){cleanDuplicateDisplay();normalizeProfileActions();ensureDevPanel()}
+  window.dev=openDev;window.atlasDev=openDev;document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDev()});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',polish);else polish();setTimeout(polish,300);setTimeout(polish,1200);
+})();
+</script>
 </body>
 </html>
