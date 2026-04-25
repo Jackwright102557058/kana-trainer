@@ -2537,7 +2537,7 @@ body::before { pointer-events: none; }
 
 <script src="firebase-config.js"></script>
 <script type="module">
-import "./cloud-sync.js?v=cloud-data-drawer-repair-20260425";
+import "./cloud-sync.js?v=local-import-guard-20260425";
 await window.KanaCloudSync.beforePageLoad();
 window.KanaCloudSync?.bindUi?.({
     signInBtn: document.getElementById('profileSignInBtn'),
@@ -3870,7 +3870,7 @@ renderAll();
 setTimeout(() => { const selected = getSelectedResult(); if (selected) drawRowCharts(selected, activeRowGraphView); }, 50);
 
 window.addEventListener("focus", async () => {
-    await window.KanaCloudSync?.hydrateFromCloud(true).catch(() => {});
+    await window.KanaCloudSync?.hydrateFromCloud().catch(() => {});
     renderAll();
 });
 document.addEventListener("visibilitychange", () => {
@@ -4133,14 +4133,15 @@ window.addEventListener("storage", (event) => {
         const parsed=JSON.parse(String(r.result||'{}'));
         const data=parsed&&parsed.data&&typeof parsed.data==='object'?parsed.data:parsed;
         if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('bad');
+        try{ window.KanaCloudSync?.beginLocalImport?.(); }catch{}
         Object.entries(data).forEach(([k,v])=>{
           if(!k||BLOCK.test(k))return;
           localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v));
         });
         try{
           if(window.KanaCloudSync){
-            ['reading','writing','wordBank','test'].forEach(s=>window.KanaCloudSync.markSectionUpdated?.(s));
-            window.KanaCloudSync.scheduleSync?.();
+            ['reading','writing','wordBank','readingTests','writingTests'].forEach(s=>window.KanaCloudSync.markSectionUpdated?.(s));
+            window.KanaCloudSync.scheduleSync?.(50);
           }
         }catch{}
         announce('Full save imported. Reloading…');

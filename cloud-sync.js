@@ -14,6 +14,7 @@ import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/fireb
 const CONFIG = window.KANA_FIREBASE_CONFIG || null;
 const CONFIG_READY = !!(CONFIG && CONFIG.apiKey && CONFIG.apiKey !== 'REPLACE_ME' && CONFIG.projectId && CONFIG.projectId !== 'REPLACE_ME' && CONFIG.appId && CONFIG.appId !== 'REPLACE_ME');
 const DOC_PATH = ['users', null, 'appData', 'kanaTrainer'];
+const LOCAL_IMPORT_GUARD_KEY = 'modeAtlasLocalImportGuardUntil';
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 
@@ -168,6 +169,31 @@ function numberStringIsPositive(value) {
   return Number.isFinite(num) && num > 0;
 }
 
+function deepHasProgress(value) {
+  if (!value) return false;
+  if (Array.isArray(value)) return value.some(deepHasProgress);
+  if (typeof value === 'number') return Number.isFinite(value) && value > 0;
+  if (typeof value === 'string') {
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0;
+  }
+  if (typeof value === 'object') return Object.values(value).some(deepHasProgress);
+  return false;
+}
+
+function hasLocalImportGuard() {
+  const until = Number(localStorage.getItem(LOCAL_IMPORT_GUARD_KEY) || 0);
+  return Number.isFinite(until) && Date.now() < until;
+}
+
+function beginLocalImport(ms = 10 * 60 * 1000) {
+  localStorage.setItem(LOCAL_IMPORT_GUARD_KEY, String(Date.now() + ms));
+}
+
+function clearLocalImportGuard() {
+  localStorage.removeItem(LOCAL_IMPORT_GUARD_KEY);
+}
+
 function sectionHasMeaningfulData(sectionName, data = {}) {
   if (!data || typeof data !== 'object') return false;
   if (sectionName === 'wordBank') return arrayHasItems(data.items);
@@ -175,9 +201,9 @@ function sectionHasMeaningfulData(sectionName, data = {}) {
     return arrayHasItems(data.primary) || arrayHasItems(data.backup) || arrayHasItems(data.altPrimary) || arrayHasItems(data.altBackup);
   }
   if (sectionName === 'reading' || sectionName === 'writing') {
-    return objectHasKeys(data.stats) || objectHasKeys(data.times) || objectHasKeys(data.srs) || objectHasKeys(data.scoreHistory) || objectHasKeys(data.dailyChallengeHistory) || numberStringIsPositive(data.highScore);
+    return deepHasProgress(data.stats) || deepHasProgress(data.times) || deepHasProgress(data.srs) || deepHasProgress(data.scoreHistory) || deepHasProgress(data.dailyChallengeHistory) || numberStringIsPositive(data.highScore);
   }
-  return Object.keys(data).length > 0;
+  return deepHasProgress(data);
 }
 
 function getLocalSectionData(sectionName) {
@@ -186,7 +212,7 @@ function getLocalSectionData(sectionName) {
 
 function mergeCloudIntoLocal(snapshot, options = {}) {
   if (!snapshot || typeof snapshot !== 'object' || !snapshot.sections) return { localPreferred: false };
-  const forceRemote = !!options.forceRemote;
+  const forceRemote = !!options.forceRemote && !hasLocalImportGuard();
   let localPreferred = false;
   Object.keys(SECTION_DEFS).forEach((name) => {
     const remoteSection = snapshot.sections[name];
@@ -321,7 +347,7 @@ async function hydrateFromCloud(force = false) {
   if (snap.exists()) {
     const { localPreferred } = mergeCloudIntoLocal(snap.data(), { forceRemote: !!force });
     hydratedForUserId = currentUser.uid;
-    if (localPreferred) scheduleSync(250);
+    if (localPreferred || hasLocalImportGuard()) scheduleSync(250);
   } else {
     hydratedForUserId = currentUser.uid;
     scheduleSync(250);
@@ -390,6 +416,7 @@ async function syncNow() {
   }
 
   await setDoc(getDocRef(currentUser.uid), snapshot, { merge: true });
+  if (hasLocalImportGuard()) clearLocalImportGuard();
   return true;
 }
 
@@ -427,6 +454,7 @@ window.KanaCloudSync = {
   scheduleSync,
   syncNow,
   markSectionUpdated,
+  beginLocalImport,
   getUser,
   isConfigured: () => CONFIG_READY,
   debugLocalSnapshot: buildLocalSnapshot

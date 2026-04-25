@@ -2073,14 +2073,15 @@ try {
         const parsed=JSON.parse(String(r.result||'{}'));
         const data=parsed&&parsed.data&&typeof parsed.data==='object'?parsed.data:parsed;
         if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('bad');
+        try{ window.KanaCloudSync?.beginLocalImport?.(); }catch{}
         Object.entries(data).forEach(([k,v])=>{
           if(!k||BLOCK.test(k))return;
           localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v));
         });
         try{
           if(window.KanaCloudSync){
-            ['reading','writing','wordBank','test'].forEach(s=>window.KanaCloudSync.markSectionUpdated?.(s));
-            window.KanaCloudSync.scheduleSync?.();
+            ['reading','writing','wordBank','readingTests','writingTests'].forEach(s=>window.KanaCloudSync.markSectionUpdated?.(s));
+            window.KanaCloudSync.scheduleSync?.(50);
           }
         }catch{}
         announce('Full save imported. Reloading…');
