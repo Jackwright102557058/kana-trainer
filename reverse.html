@@ -5696,9 +5696,17 @@ init();
     const tab = document.getElementById('modifiersTab');
     if (!drawer || drawer.dataset.maKeepOpenRepair) return;
     drawer.dataset.maKeepOpenRepair = 'true';
-    ['click','pointerdown','touchstart','mousedown'].forEach(type => {
-      drawer.addEventListener(type, event => { event.stopPropagation(); }, true);
+    ['pointerdown','touchstart','mousedown'].forEach(type => {
+      drawer.addEventListener(type, event => {
+        const interactive = event.target && event.target.closest && event.target.closest('button, input, select, textarea, label, a, .toggle-btn, .btn');
+        if (interactive) return;
+        event.stopPropagation();
+      }, true);
     });
+    drawer.addEventListener('click', event => {
+      const interactive = event.target && event.target.closest && event.target.closest('button, input, select, textarea, label, a, .toggle-btn, .btn');
+      if (!interactive) event.stopPropagation();
+    }, true);
     drawer.addEventListener('click', () => {
       const keep = () => {
         try { settings.activeBottomTab = 'modifiers'; } catch {}
