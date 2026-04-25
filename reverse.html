@@ -2317,59 +2317,6 @@ body::before { pointer-events: none; }
 }
 
 </style>
-<style id="MODE_ATLAS_STANDARD_PROFILE_V1">
-/* Mode Atlas standardized profile drawer */
-.profile-drawer.ma-standard-profile,
-.profile-overlay .profile-drawer.ma-standard-profile,
-#profileDrawer.ma-standard-profile{
-  position:fixed !important;
-  top:64px !important;
-  right:28px !important;
-  width:min(430px, calc(100vw - 32px)) !important;
-  max-height:calc(100vh - 88px) !important;
-  overflow-y:auto !important;
-  z-index:9999 !important;
-  padding:22px !important;
-  border-radius:28px !important;
-  background:radial-gradient(circle at top right, rgba(102,168,255,.15), transparent 34%),linear-gradient(180deg, rgba(21,25,35,.98), rgba(8,10,15,.98)) !important;
-  border:1px solid rgba(255,255,255,.11) !important;
-  box-shadow:0 34px 90px rgba(0,0,0,.62) !important;
-  color:#f7f8ff !important;
-  transform:translateX(calc(100% + 48px)) !important;
-  transition:transform .24s ease !important;
-  backdrop-filter:blur(18px) !important;
-  -webkit-backdrop-filter:blur(18px) !important;
-}
-.profile-overlay.open .profile-drawer.ma-standard-profile,
-.profile-drawer.ma-standard-profile.open,
-#profileDrawer.ma-standard-profile.open{transform:translateX(0) !important;}
-.drawer-backdrop.open,#drawerBackdrop.open,#profileBackdrop.open,.profile-overlay.open{display:block !important;}
-.ma-profile-head{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:20px;}
-.ma-profile-title{font-size:24px;font-weight:900;letter-spacing:-.04em;line-height:1;}
-.ma-profile-close{appearance:none;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.055);color:#f7f8ff;border-radius:14px;padding:0 16px;min-width:72px;height:44px;font:inherit;font-size:14px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;line-height:1;cursor:pointer;}
-.ma-profile-user-card{display:flex;align-items:center;gap:14px;padding:16px;border-radius:22px;background:linear-gradient(135deg, rgba(255,255,255,.07), rgba(125,181,255,.08));border:1px solid rgba(255,255,255,.09);margin-bottom:16px;}
-.ma-profile-avatar{width:62px;height:62px;border-radius:18px;object-fit:cover;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);flex:0 0 auto;}
-.ma-profile-user-copy{min-width:0;}
-.ma-profile-name{font-size:19px;font-weight:900;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:285px;}
-.ma-profile-email{margin-top:5px;color:#aab2c4;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:285px;}
-.ma-profile-status{color:#aab2c4;font-size:15px;line-height:1.45;margin:8px 0 12px;}
-.ma-sync-pill{display:inline-flex;align-items:center;gap:9px;width:max-content;max-width:100%;padding:9px 13px;border-radius:999px;background:rgba(103,215,139,.16);border:1px solid rgba(103,215,139,.34);color:#cbf8d9;font-size:13px;font-weight:900;margin-bottom:16px;}
-.ma-sync-pill span{width:8px;height:8px;border-radius:999px;background:#67d78b;box-shadow:0 0 12px rgba(103,215,139,.65);}
-.ma-profile-actions{display:grid !important;grid-template-columns:1fr 1fr !important;gap:10px !important;margin-bottom:16px !important;}
-.ma-profile-action{appearance:none;min-height:46px;width:100%;display:inline-flex !important;align-items:center;justify-content:center;text-align:center;text-decoration:none;border-radius:15px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.055);color:#f7f8ff;font:inherit;font-size:14px;font-weight:900;cursor:pointer;padding:10px 12px;line-height:1.1;}
-.ma-profile-action.primary{background:rgba(125,181,255,.18);border-color:rgba(125,181,255,.38);}
-.ma-profile-section{padding:16px;border-radius:22px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);margin-top:16px;}
-.ma-profile-section-title{color:#b8bdcb;text-transform:uppercase;letter-spacing:.16em;font-size:13px;font-weight:900;margin-bottom:12px;}
-.ma-save-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.ma-save-grid .ma-profile-action:nth-child(3){grid-column:1 / span 1;}
-.ma-save-note{margin-top:12px;color:#aab2c4;font-size:13px;line-height:1.45;}
-.ma-pref-label{color:#aab2c4;font-size:14px;font-weight:800;margin-bottom:10px;}
-.ma-display-row{display:flex;gap:10px;flex-wrap:wrap;}
-.ma-display-choice{appearance:none;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.055);color:#f7f8ff;border-radius:999px;min-height:40px;padding:9px 14px;font:inherit;font-size:13px;font-weight:900;cursor:pointer;}
-.ma-display-choice.active{background:rgba(125,181,255,.18);border-color:rgba(125,181,255,.42);color:#d9e9ff;}
-@media(max-width:640px){.profile-drawer.ma-standard-profile,#profileDrawer.ma-standard-profile{top:12px !important;right:12px !important;width:calc(100vw - 24px) !important;max-height:calc(100vh - 24px) !important;padding:18px !important;border-radius:24px !important}.ma-profile-actions,.ma-save-grid{grid-template-columns:1fr !important}.ma-profile-name,.ma-profile-email{max-width:220px}.ma-profile-close{height:40px;min-width:68px}}
-
-</style>
 </head>
 <body><div class="ma-loading-screen" id="maLoadingScreen" aria-live="polite"><div class="ma-loading-card"><div class="ma-loading-head"><div class="ma-loading-mark">学</div><div><div class="ma-loading-title">Mode Atlas</div><div class="ma-loading-sub">Preparing your study space…</div></div></div><div class="ma-skeleton"></div><div class="ma-skeleton"></div><div class="ma-skeleton short"></div></div></div>
 
@@ -5941,165 +5888,66 @@ init();
 })();
 </script>
 
-<script id="MODE_ATLAS_STANDARD_PROFILE_JS_V1">
+<style id="ma-kana-profile-clone-style">
+/* Kana profile clone: applied to non-kana pages only */
+.drawer-backdrop{position:fixed;inset:0;z-index:80;display:none;background:rgba(0,0,0,.52);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.drawer-backdrop.open{display:block}
+.profile-drawer{position:fixed;top:18px;right:18px;z-index:90;width:min(390px,calc(100vw - 36px));max-height:calc(100vh - 36px);overflow-y:auto;padding:18px;border-radius:28px;background:radial-gradient(circle at top right,rgba(102,168,255,.18),transparent 34%),linear-gradient(180deg,rgba(22,25,34,.98),rgba(9,11,16,.98));border:1px solid rgba(255,255,255,.10);box-shadow:0 32px 90px rgba(0,0,0,.55);transform:translateX(calc(100% + 40px));transition:transform .24s ease;color:var(--text,#f3f3f3);box-sizing:border-box}
+.profile-drawer.open{transform:translateX(0)}
+.drawer-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.drawer-title{font-size:20px;font-weight:900;letter-spacing:-.03em}.drawer-close{appearance:none;min-width:42px!important;min-height:38px!important;height:auto!important;padding:8px 12px!important;font-size:13px!important;line-height:1!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:var(--text,#f3f3f3);font-weight:800;cursor:pointer}.drawer-close:hover{background:rgba(255,255,255,.08)}
+.drawer-user{display:flex;align-items:center;gap:14px;padding:14px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);margin-bottom:14px}.drawer-avatar{width:56px;height:56px;border-radius:18px;object-fit:cover;display:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}.drawer-name{font-size:17px;font-weight:900;margin-bottom:4px}.drawer-email,.drawer-status{color:var(--muted,#9aa3b8);font-size:13px;line-height:1.45}.drawer-status{margin-bottom:14px}.drawer-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.drawer-action{display:inline-flex;align-items:center;justify-content:center;min-height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:var(--text,#f3f3f3);text-decoration:none;font-weight:800;font-size:13px;cursor:pointer;padding:10px 12px;box-sizing:border-box}.drawer-action.primary{background:rgba(102,168,255,.16);border-color:rgba(102,168,255,.32)}.drawer-action:hover{background:rgba(255,255,255,.08);transform:translateY(-1px)}
+.ma-save-section,.ma-settings-panel{margin-top:14px;padding:14px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}.ma-save-title,.ma-settings-title{font-weight:900;font-size:14px;margin-bottom:10px;letter-spacing:-.01em}.ma-save-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ma-save-grid .drawer-action{width:100%}.ma-save-note{margin-top:10px;color:var(--muted,#9aa3b8);font-size:12px;line-height:1.45}.ma-settings-row{display:grid;gap:8px}.ma-settings-label{font-size:12px;color:var(--muted,#9aa3b8);font-weight:800}.ma-display-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ma-display-option{border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:var(--text,#f3f3f3);font-size:12px;font-weight:900;min-height:38px;cursor:pointer}.ma-display-option.active{background:rgba(102,168,255,.16);border-color:rgba(102,168,255,.34);color:#d7e8ff}@media(max-width:640px){.profile-drawer{top:12px;right:12px;width:calc(100vw - 24px);max-height:calc(100vh - 24px);border-radius:22px}.drawer-actions,.ma-save-grid{grid-template-columns:1fr}.ma-display-options{grid-template-columns:1fr 1fr 1fr}}
+</style>
+<script id="ma-kana-profile-clone-script">
 (function(){
-  const SAVE_KEYS_SKIP = new Set([]);
-  function esc(v){return String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-  function findDrawer(){
-    const d = document.querySelector('#profileDrawer') || document.querySelector('.profile-overlay .profile-drawer') || document.querySelector('.profile-drawer');
-    if (d && !d.id) d.id = 'profileDrawer';
-    return d;
+  function collectSave(){
+    var keys=['highScore','settings','charStats','charTimes','charSrs','scoreHistory','dailyChallengeHistory','reverseHighScore','reverseSettings','reverseCharStats','reverseCharTimes','reverseCharSrs','reverseScoreHistory','reverseDailyChallengeHistory','kanaWordBank','testModeResults','readingTestModeResults','writingTestModeResults','modeAtlasDisplayMode'];
+    var out={version:'mode-atlas-unified-save-v1',exportedAt:new Date().toISOString(),localStorage:{}};
+    keys.forEach(function(k){var v=localStorage.getItem(k); if(v!==null) out.localStorage[k]=v;});
+    return out;
   }
-  function findOverlay(){ return document.querySelector('#studyProfileOverlay') || document.querySelector('.profile-overlay'); }
-  function findBackdrop(){ return document.querySelector('#drawerBackdrop') || document.querySelector('#profileBackdrop') || document.querySelector('.drawer-backdrop'); }
-  function readExisting(){
-    const q = sel => document.querySelector(sel);
-    const name = q('#profileName,#identityName,#studyProfileName,.profile-name,.drawer-name')?.textContent?.trim() || 'Guest';
-    const email = q('#profileEmail,#identityEmail,#studyProfileEmail,.profile-email,.drawer-email')?.textContent?.trim() || 'Not signed in';
-    const status = q('#profileStatus,#identityStatus,#studyProfileStatus,.profile-status,.drawer-status')?.textContent?.trim() || 'Cloud save is active.';
-    const img = q('#profileAvatar,#identityAvatar,#studyProfileAvatar,.profile-avatar,.drawer-avatar');
-    const src = img?.getAttribute('src') || '';
-    return {name,email,status,src};
-  }
-  function exportSave(){
-    const payload = {version:'mode-atlas-local-v1', exportedAt:new Date().toISOString(), localStorage:{}};
-    for (let i=0;i<localStorage.length;i++){
-      const k = localStorage.key(i);
-      if (!SAVE_KEYS_SKIP.has(k)) payload.localStorage[k] = localStorage.getItem(k);
-    }
-    const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'mode-atlas-save.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  }
-  async function copySave(){
-    const payload = {version:'mode-atlas-local-v1', exportedAt:new Date().toISOString(), localStorage:{}};
-    for (let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); payload.localStorage[k]=localStorage.getItem(k); }
-    try { await navigator.clipboard.writeText(JSON.stringify(payload,null,2)); alert('Save copied.'); } catch { alert('Copy failed. Use Export save instead.'); }
-  }
-  function importSaveFile(file){
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result);
-        const store = data.localStorage && typeof data.localStorage === 'object' ? data.localStorage : data;
-        window.KanaCloudSync?.beginLocalImport?.(10*60*1000);
-        Object.entries(store).forEach(([k,v]) => {
-          if (typeof v === 'string') localStorage.setItem(k,v);
-          else localStorage.setItem(k, JSON.stringify(v));
-        });
-        ['reading','writing','readingTests','writingTests','wordBank'].forEach(s => window.KanaCloudSync?.markSectionUpdated?.(s));
-        window.KanaCloudSync?.scheduleSync?.(300);
-        alert('Save imported. Reloading now.');
-        location.reload();
-      } catch(e) { console.error(e); alert('Import failed. Please choose a valid Mode Atlas save JSON.'); }
-    };
-    reader.readAsText(file);
-  }
-  function applyDisplay(mode){
-    localStorage.setItem('modeAtlasDisplayMode', mode);
-    document.body.dataset.displayMode = mode;
-    document.querySelectorAll('[data-ma-display-choice]').forEach(b => b.classList.toggle('active', b.dataset.maDisplayChoice === mode));
-  }
-  function setOpen(open){
-    const d=findDrawer(), o=findOverlay(), b=findBackdrop();
-    d?.classList.toggle('open', open);
-    if(d) d.setAttribute('aria-hidden', open?'false':'true');
-    o?.classList.toggle('open', open);
-    if(o) o.setAttribute('aria-hidden', open?'false':'true');
-    b?.classList.toggle('open', open);
-  }
-  function renderProfile(){
-    const drawer = findDrawer(); if(!drawer) return;
-    const old = readExisting();
-    drawer.classList.add('ma-standard-profile');
-    drawer.setAttribute('role','dialog');
-    drawer.setAttribute('aria-modal','true');
-    drawer.innerHTML = `
-      <div class="ma-profile-head">
-        <div class="ma-profile-title">Profile</div>
-        <button class="ma-profile-close" id="profileCloseBtn" type="button">Close</button>
-      </div>
-      <div class="ma-profile-user-card">
-        <img class="ma-profile-avatar" id="profileAvatar" alt="" ${old.src ? `src="${esc(old.src)}"` : ''} />
-        <div class="ma-profile-user-copy">
-          <div class="ma-profile-name" id="profileName">${esc(old.name)}</div>
-          <div class="ma-profile-email" id="profileEmail">${esc(old.email)}</div>
-        </div>
-      </div>
-      <div class="ma-profile-status" id="profileStatus">${esc(old.status || 'Cloud save is active.')}</div>
-      <div class="ma-sync-pill" id="maSyncChecked"><span></span>Sync checked just now</div>
-      <div class="ma-profile-actions drawer-actions">
-        <button class="ma-profile-action" id="profileSignInBtn" type="button">Sign in</button>
-        <button class="ma-profile-action" id="profileSignOutBtn" type="button">Sign out</button>
-        <a class="ma-profile-action" href="index.html">Atlas</a>
-        <a class="ma-profile-action" href="kana.html">Kana Trainer</a>
-      </div>
-      <section class="ma-profile-section ma-save-section">
-        <div class="ma-profile-section-title">Save / Load</div>
-        <div class="ma-save-grid">
-          <button class="ma-profile-action primary" type="button" data-ma-std-export>Export save</button>
-          <button class="ma-profile-action" type="button" data-ma-std-copy>Copy save</button>
-          <button class="ma-profile-action" type="button" data-ma-std-import>Import save</button>
-        </div>
-        <input type="file" accept=".json,application/json" data-ma-std-file hidden>
-        <div class="ma-save-note">One backup for Kana Trainer, Test Results, Word Bank, preferences, and local progress.</div>
-      </section>
-      <section class="ma-profile-section ma-pref-section">
-        <div class="ma-profile-section-title">Preferences</div>
-        <div class="ma-pref-label">Display</div>
-        <div class="ma-display-row">
-          <button class="ma-display-choice" type="button" data-ma-display-choice="auto">Auto</button>
-          <button class="ma-display-choice" type="button" data-ma-display-choice="compact">Compact</button>
-          <button class="ma-display-choice" type="button" data-ma-display-choice="mobile">Mobile</button>
-        </div>
-      </section>`;
-    drawer.querySelector('#profileCloseBtn')?.addEventListener('click', () => setOpen(false));
-    drawer.querySelector('[data-ma-std-export]')?.addEventListener('click', exportSave);
-    drawer.querySelector('[data-ma-std-copy]')?.addEventListener('click', copySave);
-    drawer.querySelector('[data-ma-std-import]')?.addEventListener('click', () => drawer.querySelector('[data-ma-std-file]')?.click());
-    drawer.querySelector('[data-ma-std-file]')?.addEventListener('change', e => importSaveFile(e.target.files && e.target.files[0]));
-    drawer.querySelectorAll('[data-ma-display-choice]').forEach(b => b.addEventListener('click', () => applyDisplay(b.dataset.maDisplayChoice)));
-    applyDisplay(localStorage.getItem('modeAtlasDisplayMode') || 'auto');
-    drawer.querySelector('#profileSignInBtn')?.addEventListener('click', () => window.KanaCloudSync?.signInWithGoogle?.());
-    drawer.querySelector('#profileSignOutBtn')?.addEventListener('click', () => window.KanaCloudSync?.signOut?.());
-    updateProfileFromCloud();
-  }
-  function updateProfileFromCloud(){
-    const u = window.KanaCloudSync?.getUser?.();
-    const name = document.getElementById('profileName');
-    const email = document.getElementById('profileEmail');
-    const avatar = document.getElementById('profileAvatar');
-    const status = document.getElementById('profileStatus');
-    const signIn = document.getElementById('profileSignInBtn');
-    const signOut = document.getElementById('profileSignOutBtn');
-    if (name) name.textContent = u?.displayName || u?.email || name.textContent || 'Guest';
-    if (email) email.textContent = u?.email || (window.KanaCloudSync?.isConfigured?.() ? 'Not signed in' : 'Firebase config missing');
-    if (status) status.textContent = u ? 'Cloud save is active.' : 'Sign in with Google to sync your saves across devices.';
-    if (avatar) {
-      if (u?.photoURL) { avatar.src = u.photoURL; avatar.style.display='block'; }
-      else { avatar.removeAttribute('src'); avatar.style.display='none'; }
-    }
-    if (signIn) signIn.style.display = u ? 'none' : 'inline-flex';
-    if (signOut) signOut.style.display = u ? 'inline-flex' : 'none';
-  }
-  function bindOpeners(){
-    document.querySelectorAll('#profileOpenBtn,#studyProfileOpen,.profile-trigger,[data-profile-open]').forEach(btn => {
-      if(btn.dataset.maStdProfileBound) return; btn.dataset.maStdProfileBound='1';
-      btn.addEventListener('click', e => { e.preventDefault(); renderProfile(); setOpen(true); });
+  function importSaveObject(obj){
+    var map=obj && (obj.localStorage || obj);
+    if(!map || typeof map!=='object') throw new Error('Invalid save file');
+    Object.keys(map).forEach(function(k){
+      var v=map[k];
+      if(v===undefined || v===null) return;
+      localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
     });
-    const b=findBackdrop(); if(b && !b.dataset.maStdProfileBound){ b.dataset.maStdProfileBound='1'; b.addEventListener('click', () => setOpen(false)); }
-    const o=findOverlay(); if(o && !o.dataset.maStdProfileOverlayBound){ o.dataset.maStdProfileOverlayBound='1'; o.addEventListener('click', e => { if(e.target===o) setOpen(false); }); }
+    localStorage.setItem('modeAtlasImportProtectUntil', String(Date.now()+15000));
+    if(window.KanaCloudSync){
+      try{['reading','writing','wordBank','readingTests','writingTests'].forEach(function(s){window.KanaCloudSync.markSectionUpdated&&window.KanaCloudSync.markSectionUpdated(s);}); window.KanaCloudSync.scheduleSync&&window.KanaCloudSync.scheduleSync();}catch(e){}
+    }
   }
-  function init(){ renderProfile(); bindOpeners(); updateProfileFromCloud(); }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
-  window.addEventListener('load', () => { init(); setTimeout(updateProfileFromCloud, 400); setTimeout(updateProfileFromCloud, 1200); });
-  document.addEventListener('keydown', e => { if(e.key==='Escape') setOpen(false); });
-  setInterval(updateProfileFromCloud, 2500);
-  window.ModeAtlasProfile = { open(){renderProfile();setOpen(true);}, close(){setOpen(false);}, refresh:updateProfileFromCloud };
+  function ensureDrawer(){
+    document.querySelectorAll('.profile-drawer,#profileDrawer,.drawer-backdrop,#profileBackdrop').forEach(function(el){el.remove();});
+    var backdrop=document.createElement('div');backdrop.className='drawer-backdrop';backdrop.id='profileBackdrop';
+    var drawer=document.createElement('aside');drawer.className='profile-drawer';drawer.id='profileDrawer';drawer.setAttribute('aria-hidden','true');
+    drawer.innerHTML='<div class="drawer-head"><div class="drawer-title">Profile</div><button class="drawer-close" id="profileCloseBtn" type="button">Close</button></div>'+
+      '<div class="drawer-user"><img class="drawer-avatar" id="profileAvatar" alt=""/><div><div class="drawer-name" id="profileName">Guest</div><div class="drawer-email" id="profileEmail">Not signed in</div></div></div>'+
+      '<div class="drawer-status" id="profileStatus">Sign in on Mode Atlas to sync your learning across devices.</div>'+
+      '<div class="drawer-actions"><button class="drawer-action primary" id="profileSignInBtn" type="button">Sign in</button><button class="drawer-action" id="profileSignOutBtn" type="button" style="display:none;">Sign out</button><a class="drawer-action" href="index.html">Atlas</a><a class="drawer-action" href="kana.html">Kana Trainer</a></div>'+
+      '<div class="ma-save-section"><div class="ma-save-title">Save / Load</div><div class="ma-save-grid"><button class="drawer-action primary" type="button" data-ma-save-export>Export save</button><button class="drawer-action" type="button" data-ma-save-copy>Copy save</button><button class="drawer-action" type="button" data-ma-save-import>Import save</button></div><input type="file" accept=".json,application/json" data-ma-save-file style="display:none"/><div class="ma-save-note">One backup for Kana Trainer, Test Results, Word Bank, preferences, and local progress.</div></div>'+
+      '<div class="ma-settings-panel"><div class="ma-settings-title">Preferences</div><div class="ma-settings-row"><div class="ma-settings-label">Display</div><div class="ma-display-options"><button class="ma-display-option" data-display="auto" type="button">Auto</button><button class="ma-display-option" data-display="compact" type="button">Compact</button><button class="ma-display-option" data-display="mobile" type="button">Mobile</button></div></div></div>';
+    document.body.insertBefore(backdrop,document.body.firstChild); document.body.insertBefore(drawer,backdrop.nextSibling);
+    bindDrawer(); bindSave(); bindPrefs(); bindCloud();
+  }
+  function setOpen(v){var d=document.getElementById('profileDrawer'),b=document.getElementById('profileBackdrop'); if(d){d.classList.toggle('open',v);d.setAttribute('aria-hidden',v?'false':'true')} if(b)b.classList.toggle('open',v)}
+  function bindDrawer(){
+    document.getElementById('profileCloseBtn')?.addEventListener('click',function(){setOpen(false)});
+    document.getElementById('profileBackdrop')?.addEventListener('click',function(){setOpen(false)});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false)});
+    document.querySelectorAll('#profileOpenBtn,.profile-trigger,[data-profile-open],#studyProfileOpen').forEach(function(btn){btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();setOpen(true)},true)});
+    window.ModeAtlasKanaProfile={open:function(){setOpen(true)},close:function(){setOpen(false)}};
+    window.ModeAtlasProfile=window.ModeAtlasKanaProfile;
+  }
+  function bindSave(){var d=document.getElementById('profileDrawer'); if(!d)return; var file=d.querySelector('[data-ma-save-file]'); d.querySelector('[data-ma-save-export]')?.addEventListener('click',function(){var blob=new Blob([JSON.stringify(collectSave(),null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mode-atlas-save.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},0)}); d.querySelector('[data-ma-save-copy]')?.addEventListener('click',function(){navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify(collectSave(),null,2));}); d.querySelector('[data-ma-save-import]')?.addEventListener('click',function(){file&&file.click()}); file&&file.addEventListener('change',function(e){var f=e.target.files&&e.target.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){try{importSaveObject(JSON.parse(r.result)); location.reload();}catch(err){alert('Import failed. Please use a valid Mode Atlas save file.')}}; r.readAsText(f);});}
+  function bindPrefs(){function mode(){return localStorage.getItem('modeAtlasDisplayMode')||'auto'} function apply(){document.body.dataset.displayMode=mode(); document.querySelectorAll('.ma-display-option').forEach(function(b){b.classList.toggle('active',b.dataset.display===mode())})} document.querySelectorAll('.ma-display-option').forEach(function(b){b.addEventListener('click',function(){localStorage.setItem('modeAtlasDisplayMode',b.dataset.display);apply();window.dispatchEvent(new CustomEvent('modeAtlasDisplayModeChanged',{detail:{mode:b.dataset.display}}));})}); apply();}
+  function bindCloud(){if(window.KanaCloudSync&&window.KanaCloudSync.bindUi){try{window.KanaCloudSync.bindUi({signInBtn:document.getElementById('profileSignInBtn'),signOutBtn:document.getElementById('profileSignOutBtn'),statusEl:document.getElementById('profileStatus'),nameEl:document.getElementById('profileName'),emailEl:document.getElementById('profileEmail'),photoEl:document.getElementById('profileAvatar')});}catch(e){}}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureDrawer);else ensureDrawer();
+  setTimeout(bindCloud,500); setTimeout(bindCloud,1500);
 })();
-
 </script>
+
 </body>
 </html>
