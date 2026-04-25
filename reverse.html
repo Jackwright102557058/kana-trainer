@@ -2243,6 +2243,17 @@ body::before { pointer-events: none; }
 .bottom-shell.ma-modifiers-only .tab-button{cursor:pointer !important; user-select:none !important;}
 .bottom-shell.ma-modifiers-only .drawer-content{display:none;}
 .bottom-shell.ma-modifiers-only .drawer-content.open{display:block !important;}
+
+/* Final profile Save/Load guarantee */
+.profile-drawer .ma-save-section,
+#profileDrawer .ma-save-section,
+.profile-overlay aside .ma-save-section{display:block !important;margin-top:14px !important;}
+.ma-save-grid button.profile-action,
+.ma-save-grid button.drawer-action{display:inline-flex !important;align-items:center !important;justify-content:center !important;}
+
+/* Final active states for Writing modifiers */
+.bottom-shell.ma-modifiers-only .toggle-btn.active,
+.bottom-shell.ma-modifiers-only .btn.active{background:linear-gradient(180deg, rgba(102,168,255,.24), rgba(102,168,255,.12)) !important;border-color:rgba(102,168,255,.72) !important;color:#d8e8ff !important;box-shadow:inset 0 0 0 1px rgba(102,168,255,.22), 0 0 0 1px rgba(102,168,255,.14), 0 10px 24px rgba(102,168,255,.10) !important;}
 </style>
 </head>
 <body><div class="ma-loading-screen" id="maLoadingScreen" aria-live="polite"><div class="ma-loading-card"><div class="ma-loading-head"><div class="ma-loading-mark">学</div><div><div class="ma-loading-title">Mode Atlas</div><div class="ma-loading-sub">Preparing your study space…</div></div></div><div class="ma-skeleton"></div><div class="ma-skeleton"></div><div class="ma-skeleton short"></div></div></div>
@@ -3340,7 +3351,11 @@ function makeToggleButton(label, active, onClick, disabled = false) {
     const div = document.createElement("div");
     div.className = "toggle-btn" + (active ? " active" : "") + (disabled ? " disabled" : "");
     div.textContent = label;
-    div.onclick = () => {
+    div.setAttribute("role", "button");
+    div.setAttribute("aria-pressed", active ? "true" : "false");
+    div.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
         if (disabled) return;
         onClick();
     };
@@ -5418,6 +5433,53 @@ init();
 })();
 </script>
 
+
+
+<script>
+(function ModeAtlasForceProfileSave(){
+  function makeSection(buttonClass){
+    const cls = buttonClass || 'drawer-action';
+    const section = document.createElement('div');
+    section.className = 'ma-save-section';
+    section.innerHTML = `
+      <div class="ma-save-title">Save / Load</div>
+      <div class="ma-save-grid">
+        <button class="${cls} primary" type="button" data-ma-force-export>Export save</button>
+        <button class="${cls}" type="button" data-ma-force-copy>Copy save</button>
+        <button class="${cls}" type="button" data-ma-force-import>Import save</button>
+      </div>
+      <input type="file" accept=".json,application/json" data-ma-force-file style="display:none" />
+      <div class="ma-save-note">One backup for Kana Trainer, Test Results, Word Bank, preferences, and local progress.</div>
+    `;
+    const file = section.querySelector('[data-ma-force-file]');
+    section.querySelector('[data-ma-force-export]').addEventListener('click', () => window.ModeAtlasSaveLoad?.export?.());
+    section.querySelector('[data-ma-force-copy]').addEventListener('click', () => window.ModeAtlasSaveLoad?.copy?.());
+    section.querySelector('[data-ma-force-import]').addEventListener('click', () => file.click());
+    file.addEventListener('change', e => window.ModeAtlasSaveLoad?.importFile?.(e.target.files && e.target.files[0]));
+    return section;
+  }
+  function ensureSave(){
+    document.querySelectorAll('.profile-drawer, #profileDrawer, .profile-overlay aside').forEach(drawer => {
+      if (drawer.querySelector('.ma-save-section')) return;
+      const actions = drawer.querySelector('.profile-actions, .drawer-actions');
+      if (!actions) return;
+      const cls = actions.classList.contains('profile-actions') ? 'profile-action' : 'drawer-action';
+      actions.insertAdjacentElement('afterend', makeSection(cls));
+    });
+  }
+  window.ModeAtlasEnsureProfileSave = ensureSave;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureSave);
+  else ensureSave();
+  window.addEventListener('pageshow', () => setTimeout(ensureSave, 50));
+  document.addEventListener('click', event => {
+    if (event.target.closest('.profile-trigger, #profileOpenBtn, #studyProfileOpen, [data-profile-open]')) {
+      setTimeout(ensureSave, 60);
+    }
+  });
+  setTimeout(ensureSave, 300);
+  setTimeout(ensureSave, 1200);
+})();
+</script>
 
 </body>
 </html>

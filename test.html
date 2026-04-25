@@ -2306,6 +2306,13 @@ body::before { pointer-events: none; }
 .ma-save-note{margin-top:10px;color:var(--muted,#9aa4b2);font-size:12px;line-height:1.45}
 @media(max-width:640px){.ma-save-grid{grid-template-columns:1fr}}
 
+
+/* Final profile Save/Load guarantee */
+.profile-drawer .ma-save-section,
+#profileDrawer .ma-save-section,
+.profile-overlay aside .ma-save-section{display:block !important;margin-top:14px !important;}
+.ma-save-grid button.profile-action,
+.ma-save-grid button.drawer-action{display:inline-flex !important;align-items:center !important;justify-content:center !important;}
 </style>
 </head>
 <body><div class="ma-loading-screen" id="maLoadingScreen" aria-live="polite"><div class="ma-loading-card"><div class="ma-loading-head"><div class="ma-loading-mark">学</div><div><div class="ma-loading-title">Mode Atlas</div><div class="ma-loading-sub">Preparing your study space…</div></div></div><div class="ma-skeleton"></div><div class="ma-skeleton"></div><div class="ma-skeleton short"></div></div></div>
@@ -4205,6 +4212,53 @@ window.addEventListener("storage", (event) => {
 })();
 </script>
 
+
+
+<script>
+(function ModeAtlasForceProfileSave(){
+  function makeSection(buttonClass){
+    const cls = buttonClass || 'drawer-action';
+    const section = document.createElement('div');
+    section.className = 'ma-save-section';
+    section.innerHTML = `
+      <div class="ma-save-title">Save / Load</div>
+      <div class="ma-save-grid">
+        <button class="${cls} primary" type="button" data-ma-force-export>Export save</button>
+        <button class="${cls}" type="button" data-ma-force-copy>Copy save</button>
+        <button class="${cls}" type="button" data-ma-force-import>Import save</button>
+      </div>
+      <input type="file" accept=".json,application/json" data-ma-force-file style="display:none" />
+      <div class="ma-save-note">One backup for Kana Trainer, Test Results, Word Bank, preferences, and local progress.</div>
+    `;
+    const file = section.querySelector('[data-ma-force-file]');
+    section.querySelector('[data-ma-force-export]').addEventListener('click', () => window.ModeAtlasSaveLoad?.export?.());
+    section.querySelector('[data-ma-force-copy]').addEventListener('click', () => window.ModeAtlasSaveLoad?.copy?.());
+    section.querySelector('[data-ma-force-import]').addEventListener('click', () => file.click());
+    file.addEventListener('change', e => window.ModeAtlasSaveLoad?.importFile?.(e.target.files && e.target.files[0]));
+    return section;
+  }
+  function ensureSave(){
+    document.querySelectorAll('.profile-drawer, #profileDrawer, .profile-overlay aside').forEach(drawer => {
+      if (drawer.querySelector('.ma-save-section')) return;
+      const actions = drawer.querySelector('.profile-actions, .drawer-actions');
+      if (!actions) return;
+      const cls = actions.classList.contains('profile-actions') ? 'profile-action' : 'drawer-action';
+      actions.insertAdjacentElement('afterend', makeSection(cls));
+    });
+  }
+  window.ModeAtlasEnsureProfileSave = ensureSave;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureSave);
+  else ensureSave();
+  window.addEventListener('pageshow', () => setTimeout(ensureSave, 50));
+  document.addEventListener('click', event => {
+    if (event.target.closest('.profile-trigger, #profileOpenBtn, #studyProfileOpen, [data-profile-open]')) {
+      setTimeout(ensureSave, 60);
+    }
+  });
+  setTimeout(ensureSave, 300);
+  setTimeout(ensureSave, 1200);
+})();
+</script>
 
 </body>
 </html>
