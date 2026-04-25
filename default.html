@@ -2862,7 +2862,7 @@ function rebuildCharMap() {
 function ensureDataObjects() {
     rebuildCharMap();
 
-    for (const ch of activeChars) {
+    for (const ch of getHeatmapCharsForDisplay()) {
         if (!stats[ch]) stats[ch] = { correct: 0, wrong: 0 };
         if (!times[ch]) times[ch] = { avg: 1200, count: 0 };
         if (!srs[ch]) srs[ch] = { level: 0, due: 0, lastSeen: 0, lastWrong: 0 };
@@ -3341,6 +3341,30 @@ function showPopupForChar(ch, e) {
         popupEl.style.left = x + "px";
         popupEl.style.top = y + "px";
     }
+}
+
+
+function getHeatmapCharsForDisplay() {
+    const seen = new Set();
+    const out = [];
+    const add = (ch) => {
+        if (!ch || seen.has(ch)) return;
+        seen.add(ch);
+        out.push(ch);
+    };
+
+    activeChars.forEach(add);
+    Object.keys(stats || {}).forEach((ch) => {
+        const st = stats[ch] || {};
+        const hasStats = Number(st.correct || 0) > 0 || Number(st.wrong || 0) > 0;
+        if (hasStats) add(ch);
+    });
+    Object.keys(times || {}).forEach((ch) => {
+        const t = times[ch] || {};
+        if (Number(t.count || 0) > 0) add(ch);
+    });
+
+    return out;
 }
 
 function renderHeatmap() {

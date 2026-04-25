@@ -934,6 +934,33 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     .choice-btn.correct { background: #224a29; border-color: #3e7f48; }
     .choice-btn.wrong { background: #472323; border-color: #6c3030; }
 
+    .choice-availability-toast {
+        position: fixed;
+        left: 50%;
+        bottom: 86px;
+        z-index: 120;
+        max-width: min(360px, calc(100vw - 32px));
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(18, 18, 18, 0.94);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #f3f3f3;
+        box-shadow: 0 16px 36px rgba(0,0,0,0.34);
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.35;
+        opacity: 0;
+        transform: translate(-50%, 10px);
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .choice-availability-toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+
     .keyboard-wrap { margin-top: 8px; }
     .keyboard-note {
         margin-top: 8px;
@@ -2987,7 +3014,7 @@ function rebuildCharMap() {
 function ensureDataObjects() {
     rebuildCharMap();
 
-    for (const ch of activeChars) {
+    for (const ch of getHeatmapCharsForDisplay()) {
         if (!stats[ch]) stats[ch] = { correct: 0, wrong: 0 };
         if (!times[ch]) times[ch] = { avg: 1200, count: 0 };
         if (!srs[ch]) srs[ch] = { level: 0, due: 0, lastSeen: 0, lastWrong: 0 };
@@ -3538,6 +3565,30 @@ function showPopupForChar(ch, e) {
         popupEl.style.left = x + "px";
         popupEl.style.top = y + "px";
     }
+}
+
+
+function getHeatmapCharsForDisplay() {
+    const seen = new Set();
+    const out = [];
+    const add = (ch) => {
+        if (!ch || seen.has(ch)) return;
+        seen.add(ch);
+        out.push(ch);
+    };
+
+    activeChars.forEach(add);
+    Object.keys(stats || {}).forEach((ch) => {
+        const st = stats[ch] || {};
+        const hasStats = Number(st.correct || 0) > 0 || Number(st.wrong || 0) > 0;
+        if (hasStats) add(ch);
+    });
+    Object.keys(times || {}).forEach((ch) => {
+        const t = times[ch] || {};
+        if (Number(t.count || 0) > 0) add(ch);
+    });
+
+    return out;
 }
 
 function renderHeatmap() {
@@ -4803,6 +4854,54 @@ function endSession(autoEnded = false) {
     onSettingsChanged();
 }
 
+
+let choiceAvailabilityToastTimer = null;
+let lastChoiceAvailabilityNoticeKey = '';
+
+function getAvailableChoiceCountForNotice() {
+    try {
+        if (settings.keyboardMode) return 0;
+        rebuildCharMap();
+        return Array.isArray(activeChars) ? activeChars.length : 0;
+    } catch {
+        return 0;
+    }
+}
+
+function showChoiceAvailabilityNotice(availableCount) {
+    const count = Number(availableCount || 0);
+    if (count <= 0) return;
+    let toast = document.getElementById('choiceAvailabilityToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'choiceAvailabilityToast';
+        toast.className = 'choice-availability-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+    }
+    toast.textContent = `Only ${count} choices available with the current rows.`;
+    toast.classList.add('show');
+    clearTimeout(choiceAvailabilityToastTimer);
+    choiceAvailabilityToastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2400);
+}
+
+function maybeShowChoiceAvailabilityNotice() {
+    if (settings.keyboardMode) return;
+    const requested = Number(settings.choiceCount || 4);
+    if (requested < 6) return;
+    const available = getAvailableChoiceCountForNotice();
+    if (available > 0 && available < requested) {
+        const key = `${requested}:${available}:${(settings.hiraganaRows || []).join(',')}:${(settings.katakanaRows || []).join(',')}`;
+        if (key !== lastChoiceAvailabilityNoticeKey) {
+            lastChoiceAvailabilityNoticeKey = key;
+            showChoiceAvailabilityNotice(available);
+        }
+    }
+}
+
 function onSettingsChanged() {
     rebuildCharMap();
     ensureDataObjects();
@@ -4812,6 +4911,7 @@ function onSettingsChanged() {
     buildRows("katakanaRowOptions", katakanaRows, "katakanaRows", "k_");
     applyPanelStates();
     updateTrialConfigVisibility();
+    maybeShowChoiceAvailabilityNotice();
     renderHeatmap();
     updateTopStats();
     if (DEBUG_PANEL) renderDebugPanel();
