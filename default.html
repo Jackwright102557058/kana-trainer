@@ -2149,6 +2149,12 @@ body::before { pointer-events: none; }
   .bottom-shell.ma-modifiers-only .toggle-btn{font-size:14px;padding:10px 8px}
 }
 
+
+/* Emergency-stable modifiers drawer binding */
+.bottom-shell.ma-modifiers-only{z-index:9999 !important; pointer-events:auto !important;}
+.bottom-shell.ma-modifiers-only .tab-button{cursor:pointer !important; user-select:none !important;}
+.bottom-shell.ma-modifiers-only .drawer-content{display:none;}
+.bottom-shell.ma-modifiers-only .drawer-content.open{display:block !important;}
 </style>
 </head>
 <body><div class="ma-loading-screen" id="maLoadingScreen" aria-live="polite"><div class="ma-loading-card"><div class="ma-loading-head"><div class="ma-loading-mark">学</div><div><div class="ma-loading-title">Mode Atlas</div><div class="ma-loading-sub">Preparing your study space…</div></div></div><div class="ma-skeleton"></div><div class="ma-skeleton"></div><div class="ma-skeleton short"></div></div></div>
@@ -2364,6 +2370,7 @@ body::before { pointer-events: none; }
         <h2>Import Save Data</h2>
         <p style="color:#ccc; margin-top:0;">Paste exported JSON below, or use the file picker.</p>
         <textarea id="importTextarea" placeholder="Paste save JSON here..."></textarea>
+            <input class="file-input" id="importFile" type="file" accept=".json,application/json" style="display:none" />
         <div class="modal-actions">
             <button class="btn" id="importFileBtn" type="button">Choose File</button>
             <button class="btn btn-secondary" id="confirmImportBtn" type="button">Import</button>
@@ -4370,11 +4377,11 @@ importModalBackdrop.addEventListener("click", (e) => {
     if (e.target === importModalBackdrop) closeImportModal();
 });
 
-importFileBtn.addEventListener("click", () => {
+if (importFileBtn && importFile) importFileBtn.addEventListener("click", () => {
     importFile.click();
 });
 
-importFile.addEventListener("change", async (e) => {
+if (importFile) importFile.addEventListener("change", async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -4862,5 +4869,26 @@ init();
 </script>
 
 
+<script>
+(function(){
+  function bindStableModifiersDrawer(){
+    var tab=document.getElementById('modifiersTab');
+    var drawer=document.getElementById('modifiersContent');
+    if(!tab||!drawer||tab.dataset.stableModifiersBound==='true') return;
+    tab.dataset.stableModifiersBound='true';
+    tab.addEventListener('click',function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      var willOpen=!drawer.classList.contains('open');
+      drawer.classList.toggle('open',willOpen);
+      tab.classList.toggle('active',willOpen);
+      tab.textContent=willOpen?'Modifiers ▲':'Modifiers ▼';
+    }, true);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bindStableModifiersDrawer);
+  else bindStableModifiersDrawer();
+  window.addEventListener('load', bindStableModifiersDrawer);
+})();
+</script>
 </body>
 </html>
