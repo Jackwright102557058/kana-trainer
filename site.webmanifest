@@ -1,11 +1,13 @@
 {
   "name": "Mode Atlas",
   "short_name": "Mode Atlas",
-  "description": "A study ecosystem for kana, words, and future learning branches.",
-  "start_url": "/mode-atlas/",
+  "description": "A focused Japanese study ecosystem for kana, words, and future learning branches.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#111827",
-  "theme_color": "#111827",
+  "background_color": "#0b1020",
+  "theme_color": "#7c8cff",
+  "orientation": "any",
   "icons": [
     {
       "src": "assets/android-chrome-512.png",
@@ -26,5 +28,22 @@
       "purpose": "any"
     }
   ],
-  "scope": "/mode-atlas/"
+  "shortcuts": [
+    {
+      "name": "Kana Trainer",
+      "url": "kana.html"
+    },
+    {
+      "name": "Reading Practice",
+      "url": "default.html"
+    },
+    {
+      "name": "Writing Practice",
+      "url": "reverse.html"
+    },
+    {
+      "name": "Results",
+      "url": "test.html"
+    }
+  ]
 }

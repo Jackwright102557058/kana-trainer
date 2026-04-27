@@ -2314,6 +2314,8 @@ body::before { pointer-events: none; }
 .ma-save-grid button.profile-action,
 .ma-save-grid button.drawer-action{display:inline-flex !important;align-items:center !important;justify-content:center !important;}
 </style>
+<link rel="stylesheet" href="assets/mode-atlas-qol.css" />
+<script defer src="assets/mode-atlas-qol.js"></script>
 </head>
 <body><div class="ma-loading-screen" id="maLoadingScreen" aria-live="polite"><div class="ma-loading-card"><div class="ma-loading-head"><div class="ma-loading-mark">学</div><div><div class="ma-loading-title">Mode Atlas</div><div class="ma-loading-sub">Preparing your study space…</div></div></div><div class="ma-skeleton"></div><div class="ma-skeleton"></div><div class="ma-skeleton short"></div></div></div>
 
@@ -4086,210 +4088,10 @@ window.addEventListener("storage", (event) => {
 })();
 </script>
 <script>
-(function(){function fmt(ts){const n=Number(ts||0);if(!n)return'Sync checked just now';const d=new Date(n);if(Number.isNaN(d.getTime()))return'Sync checked just now';const diff=Math.max(0,Date.now()-n);if(diff<60000)return'Sync checked just now';if(diff<3600000)return'Sync checked '+Math.round(diff/60000)+'m ago';if(diff<86400000)return'Sync checked '+Math.round(diff/3600000)+'h ago';return'Sync checked '+d.toLocaleDateString([],{month:'short',day:'numeric'})}function bestSyncTime(){const keys=['modeAtlasLastSyncCheck','kanaWordBankUpdatedAt','cloudReadingUpdatedAt','cloudWritingUpdatedAt','testModeResultsUpdatedAt','readingTestModeResultsUpdatedAt','writingTestModeResultsUpdatedAt'];return keys.map(k=>Number(localStorage.getItem(k)||0)).filter(Boolean).sort((a,b)=>b-a)[0]||Date.now()}function addSyncPill(){let target=document.getElementById('profileStatus')||document.getElementById('identityStatus')||document.getElementById('studyProfileStatus');if(!target||document.getElementById('maSyncPill'))return;const pill=document.createElement('div');pill.className='ma-sync-pill';pill.id='maSyncPill';pill.textContent=fmt(bestSyncTime());target.insertAdjacentElement('afterend',pill)}function hideLoader(){localStorage.setItem('modeAtlasLastSyncCheck',String(Date.now()));addSyncPill();const el=document.getElementById('maLoadingScreen');if(el){el.classList.add('done');setTimeout(()=>el.remove(),450)}}window.ModeAtlasSyncPolish={hideLoader,addSyncPill};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(hideLoader,450));else setTimeout(hideLoader,450);window.addEventListener('load',()=>setTimeout(hideLoader,250));setTimeout(hideLoader,2200)})();
+(function(){function fmt(ts){const n=Number(ts||0);if(!n)return'Sync checked just now';const d=new Date(n);if(Number.isNaN(d.getTime()))return'Sync checked just now';const diff=Math.max(0,Date.now()-n);if(diff<60000)return'Sync checked just now';if(diff<3600000)return'Sync checked '+Math.round(diff/60000)+'m ago';if(diff<86400000)return'Sync checked '+Math.round(diff/3600000)+'h ago';return'Sync checked '+d.toLocaleDateString([],{month:'short',day:'numeric'})}function bestSyncTime(){const keys=['modeAtlasLastSyncCheck','kanaWordBankUpdatedAt','cloudReadingUpdatedAt','cloudWritingUpdatedAt','testModeResultsUpdatedAt','readingTestModeResultsUpdatedAt','writingTestModeResultsUpdatedAt'];return keys.map(k=>Number(localStorage.getItem(k)||0)).filter(Boolean).sort((a,b)=>b-a)[0]||Date.now()}function addSyncPill(){let target=document.getElementById('profileStatus')||document.getElementById('identityStatus')||document.getElementById('studyProfileStatus');if(!target||document.getElementById('maSyncPill')||document.querySelector('.ma-sync-pill'))return;const pill=document.createElement('div');pill.className='ma-sync-pill';pill.id='maSyncPill';pill.textContent=fmt(bestSyncTime());target.insertAdjacentElement('afterend',pill)}function hideLoader(){localStorage.setItem('modeAtlasLastSyncCheck',String(Date.now()));addSyncPill();const el=document.getElementById('maLoadingScreen');if(el){el.classList.add('done');setTimeout(()=>el.remove(),450)}}window.ModeAtlasSyncPolish={hideLoader,addSyncPill};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(hideLoader,450));else setTimeout(hideLoader,450);window.addEventListener('load',()=>setTimeout(hideLoader,250));setTimeout(hideLoader,2200)})();
 </script>
 
 
-
-<script>
-(function(){
-  if(window.ModeAtlasSaveLoad)return;
-  const ALLOW=/^(kana|reverse|test|reading|writing|modeAtlas|cloud|char|score|daily|highScore|settings|wordBank|srs|timeTrial|combo|selected|display|sound)/i;
-  const BLOCK=/^(firebase:|firestore|google|__|debug|devtools)/i;
-  function collect(){
-    const data={};
-    for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i);
-      if(!k||BLOCK.test(k))continue;
-      if(ALLOW.test(k)||k.includes('Kana')||k.includes('kana')||k.includes('ModeAtlas')||k.includes('modeAtlas')){
-        data[k]=localStorage.getItem(k);
-      }
-    }
-    return{app:'Mode Atlas',version:1,exportedAt:new Date().toISOString(),origin:location.origin,data};
-  }
-  function announce(m){
-    ['profileStatus','studyProfileStatus','wordBankCloudStatus','identityStatus'].map(id=>document.getElementById(id)).filter(Boolean).forEach(el=>el.textContent=m);
-    console.log(m);
-  }
-  function exp(){
-    const blob=new Blob([JSON.stringify(collect(),null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download='mode-atlas-save-'+new Date().toISOString().slice(0,10)+'.json';
-    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-    announce('Full save exported.');
-  }
-  async function copy(){
-    const txt=JSON.stringify(collect(),null,2);
-    try{await navigator.clipboard.writeText(txt);announce('Full save copied.');}
-    catch{exp();}
-  }
-  function imp(file){
-    if(!file)return;
-    const r=new FileReader();
-    r.onload=()=>{
-      try{
-        const parsed=JSON.parse(String(r.result||'{}'));
-        let data=parsed&&parsed.data&&typeof parsed.data==='object'?parsed.data:parsed;
-        if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('bad');
-        // Support older single-page Kana Trainer exports as well as full Mode Atlas exports.
-        // Old Reading saves used keys like stats/times/srs; the app now stores those as charStats/charTimes/charSrs.
-        const normalizedImportData = { ...data };
-        const mapLegacyKey = (from, to) => {
-          if (data[from] !== undefined && normalizedImportData[to] === undefined) normalizedImportData[to] = data[from];
-        };
-        mapLegacyKey('stats', 'charStats');
-        mapLegacyKey('times', 'charTimes');
-        mapLegacyKey('srs', 'charSrs');
-        mapLegacyKey('scoreHistory', 'scoreHistory');
-        mapLegacyKey('dailyChallengeHistory', 'dailyChallengeHistory');
-        mapLegacyKey('settings', 'settings');
-        mapLegacyKey('highScore', 'highScore');
-        mapLegacyKey('reverseStats', 'reverseCharStats');
-        mapLegacyKey('reverseTimes', 'reverseCharTimes');
-        mapLegacyKey('reverseSrs', 'reverseCharSrs');
-        mapLegacyKey('writingStats', 'reverseCharStats');
-        mapLegacyKey('writingTimes', 'reverseCharTimes');
-        mapLegacyKey('writingSrs', 'reverseCharSrs');
-        mapLegacyKey('reverseScoreHistory', 'reverseScoreHistory');
-        mapLegacyKey('reverseDailyChallengeHistory', 'reverseDailyChallengeHistory');
-        mapLegacyKey('reverseSettings', 'reverseSettings');
-        mapLegacyKey('reverseHighScore', 'reverseHighScore');
-        mapLegacyKey('wordBank', 'kanaWordBank');
-        if (Array.isArray(data.testModeResults) && normalizedImportData.readingTestModeResults === undefined) {
-          normalizedImportData.readingTestModeResults = data.testModeResults.filter(item => (item && (item.mode || 'reading')) === 'reading');
-          normalizedImportData.writingTestModeResults = data.testModeResults.filter(item => item && item.mode === 'writing');
-          normalizedImportData.testModeResults = data.testModeResults;
-        }
-        data = normalizedImportData;
-        try{ window.KanaCloudSync?.beginLocalImport?.(); }catch{}
-        Object.entries(data).forEach(([k,v])=>{
-          if(!k||BLOCK.test(k))return;
-          localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v));
-        });
-        try{
-          if(window.KanaCloudSync){
-            ['reading','writing','wordBank','readingTests','writingTests'].forEach(s=>window.KanaCloudSync.markSectionUpdated?.(s));
-            window.KanaCloudSync.scheduleSync?.(50);
-          }
-        }catch{}
-        announce('Full save imported. Reloading…');
-        setTimeout(()=>location.reload(),650);
-      }catch{alert('Import failed. Please choose a valid Mode Atlas save file.');}
-    };
-    r.readAsText(file);
-  }
-  function buttonClass(container){return container.classList.contains('profile-actions')?'profile-action':'drawer-action'}
-  function normalizeActions(container){
-    if(!container)return null;
-    const cls=buttonClass(container);
-    container.querySelectorAll('a').forEach(a=>{
-      const href=(a.getAttribute('href')||'').toLowerCase();
-      const isAtlas=href==='index.html'||href.endsWith('/index.html')||/mode-atlas\/?$/.test(href);
-      const isKana=href==='kana.html'||href.endsWith('/kana.html');
-      if(!isAtlas&&!isKana)a.remove();
-      else{
-        a.classList.add(cls);
-        a.setAttribute('href',isAtlas?'index.html':'kana.html');
-        a.textContent=isAtlas?'Atlas':'Kana Trainer';
-      }
-    });
-    if(!container.querySelector('a[href="index.html"]')){
-      const a=document.createElement('a');a.className=cls;a.href='index.html';a.textContent='Atlas';container.appendChild(a);
-    }
-    if(!container.querySelector('a[href="kana.html"]')){
-      const a=document.createElement('a');a.className=cls;a.href='kana.html';a.textContent='Kana Trainer';container.appendChild(a);
-    }
-    return container;
-  }
-  function installSave(container){
-    if(!container||container.parentElement?.querySelector('.ma-save-section'))return;
-    const cls=buttonClass(container);
-    const s=document.createElement('div');
-    s.className='ma-save-section';
-    s.innerHTML=`<div class="ma-save-title">Save / Load</div>
-      <div class="ma-save-grid">
-        <button class="${cls} primary" type="button" data-ma-save-export>Export save</button>
-        <button class="${cls}" type="button" data-ma-save-copy>Copy save</button>
-        <button class="${cls}" type="button" data-ma-save-import>Import save</button>
-      </div>
-      <input type="file" accept=".json,application/json" data-ma-save-file style="display:none"/>
-      <div class="ma-save-note">One backup for Kana Trainer, Test Results, Word Bank, preferences, and local progress.</div>`;
-    container.insertAdjacentElement('afterend',s);
-    s.querySelector('[data-ma-save-export]').addEventListener('click',exp);
-    s.querySelector('[data-ma-save-copy]').addEventListener('click',copy);
-    s.querySelector('[data-ma-save-import]').addEventListener('click',()=>s.querySelector('[data-ma-save-file]').click());
-    s.querySelector('[data-ma-save-file]').addEventListener('change',e=>imp(e.target.files&&e.target.files[0]));
-  }
-  function installAll(){
-    const drawers=[...document.querySelectorAll('.profile-drawer,#profileDrawer,.profile-overlay aside')];
-    if(!drawers.length){
-      const c=document.querySelector('.profile-actions,.drawer-actions');
-      if(c){normalizeActions(c);installSave(c);}
-      return;
-    }
-    drawers.forEach(drawer=>{
-      const actionSets=[...drawer.querySelectorAll('.profile-actions,.drawer-actions')];
-      if(!actionSets.length)return;
-      const primary=actionSets.find(c=>c.querySelector('button'))||actionSets[0];
-      actionSets.forEach((c,i)=>{if(c!==primary && !c.querySelector('button')) c.remove();});
-      normalizeActions(primary);
-      installSave(primary);
-    });
-  }
-  window.ModeAtlasSaveLoad={export:exp,copy:copy,importFile:imp,install:installAll};
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',installAll):installAll();
-})();
-</script>
-
-
-
-<script>
-(function ModeAtlasForceProfileSave(){
-  function makeSection(buttonClass){
-    const cls = buttonClass || 'drawer-action';
-    const section = document.createElement('div');
-    section.className = 'ma-save-section';
-    section.innerHTML = `
-      <div class="ma-save-title">Save / Load</div>
-      <div class="ma-save-grid">
-        <button class="${cls} primary" type="button" data-ma-force-export>Export save</button>
-        <button class="${cls}" type="button" data-ma-force-copy>Copy save</button>
-        <button class="${cls}" type="button" data-ma-force-import>Import save</button>
-      </div>
-      <input type="file" accept=".json,application/json" data-ma-force-file style="display:none" />
-      <div class="ma-save-note">One backup for Kana Trainer, Test Results, Word Bank, preferences, and local progress.</div>
-    `;
-    const file = section.querySelector('[data-ma-force-file]');
-    section.querySelector('[data-ma-force-export]').addEventListener('click', () => window.ModeAtlasSaveLoad?.export?.());
-    section.querySelector('[data-ma-force-copy]').addEventListener('click', () => window.ModeAtlasSaveLoad?.copy?.());
-    section.querySelector('[data-ma-force-import]').addEventListener('click', () => file.click());
-    file.addEventListener('change', e => window.ModeAtlasSaveLoad?.importFile?.(e.target.files && e.target.files[0]));
-    return section;
-  }
-  function ensureSave(){
-    document.querySelectorAll('.profile-drawer, #profileDrawer, .profile-overlay aside').forEach(drawer => {
-      if (drawer.querySelector('.ma-save-section')) return;
-      const actions = drawer.querySelector('.profile-actions, .drawer-actions');
-      if (!actions) return;
-      const cls = actions.classList.contains('profile-actions') ? 'profile-action' : 'drawer-action';
-      actions.insertAdjacentElement('afterend', makeSection(cls));
-    });
-  }
-  window.ModeAtlasEnsureProfileSave = ensureSave;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureSave);
-  else ensureSave();
-  window.addEventListener('pageshow', () => setTimeout(ensureSave, 50));
-  document.addEventListener('click', event => {
-    if (event.target.closest('.profile-trigger, #profileOpenBtn, #studyProfileOpen, [data-profile-open]')) {
-      setTimeout(ensureSave, 60);
-    }
-  });
-  setTimeout(ensureSave, 300);
-  setTimeout(ensureSave, 1200);
-})();
-</script>
 
 <style id="ma-kana-profile-clone-style">
 /* Kana profile clone: applied to non-kana pages only */
@@ -4330,7 +4132,7 @@ window.addEventListener("storage", (event) => {
       '<div class="drawer-user"><img class="drawer-avatar" id="profileAvatar" alt=""/><div><div class="drawer-name" id="profileName">Guest</div><div class="drawer-email" id="profileEmail">Not signed in</div></div></div>'+
       '<div class="drawer-status" id="profileStatus">Sign in on Mode Atlas to sync your learning across devices.</div>'+
       '<div class="drawer-actions"><button class="drawer-action primary" id="profileSignInBtn" type="button">Sign in</button><button class="drawer-action" id="profileSignOutBtn" type="button" style="display:none;">Sign out</button><a class="drawer-action" href="index.html">Atlas</a><a class="drawer-action" href="kana.html">Kana Trainer</a></div>'+
-      '<div class="ma-save-section"><div class="ma-save-title">Save / Load</div><div class="ma-save-grid"><button class="drawer-action primary" type="button" data-ma-save-export>Export save</button><button class="drawer-action" type="button" data-ma-save-copy>Copy save</button><button class="drawer-action" type="button" data-ma-save-import>Import save</button></div><input type="file" accept=".json,application/json" data-ma-save-file style="display:none"/><div class="ma-save-note">One backup for Kana Trainer, Test Results, Word Bank, preferences, and local progress.</div></div>'+
+      '<div class="ma-save-section"><div class="ma-save-title">Save / Load</div><div class="ma-save-grid"><button class="drawer-action primary" type="button" data-ma-save-export>Export save</button><button class="drawer-action" type="button" data-ma-save-copy>Copy save</button><button class="drawer-action" type="button" data-ma-save-import>Import save</button></div><input type="file" accept=".json,application/json" data-ma-save-file style="display:none"/><div class="ma-save-note">One backup for your Mode Atlas progress, preferences, and local data.</div></div>'+
       '<div class="ma-settings-panel"><div class="ma-settings-title">Preferences</div><div class="ma-settings-row"><div class="ma-settings-label">Display</div><div class="ma-display-options"><button class="ma-display-option" data-display="auto" type="button">Auto</button><button class="ma-display-option" data-display="compact" type="button">Compact</button><button class="ma-display-option" data-display="mobile" type="button">Mobile</button></div></div></div>';
     document.body.insertBefore(backdrop,document.body.firstChild); document.body.insertBefore(drawer,backdrop.nextSibling);
     bindDrawer(); bindSave(); bindPrefs(); bindCloud();
@@ -4352,5 +4154,134 @@ window.addEventListener("storage", (event) => {
 })();
 </script>
 
+  <script src="assets/mode-atlas-visit-flows.js"></script>
+
+
+  <script src="assets/mode-atlas-save-sync-ui.js"></script>
+<script id="modeAtlasLoadingFailsafe">
+(function(){
+  function done(){ var el=document.getElementById('maLoadingScreen'); if(el){ el.classList.add('done'); setTimeout(function(){ try{el.remove();}catch(e){} }, 450); } }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(done, 900); }); else setTimeout(done, 900);
+  window.addEventListener('load', function(){ setTimeout(done, 400); });
+  setTimeout(done, 2500);
+})();
+</script>
+
+<script id="modeAtlasVerifiedPresetConfusableFix">
+(function(){
+  if(window.__modeAtlasVerifiedPresetConfusableFix) return;
+  window.__modeAtlasVerifiedPresetConfusableFix=true;
+  var page=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+  var isTrainer=page==='default.html'||page==='reverse.html';
+  var settingsKey=page==='reverse.html'?'reverseSettings':'settings';
+  var confKey='modeAtlasConfusableMode';
+  var presetKey='modeAtlasActivePreset';
+  var hiraRows=['h_a','h_ka','h_sa','h_ta','h_na','h_ha','h_ma','h_ya','h_ra','h_wa'];
+  var kataRows=['k_a','k_ka','k_sa','k_ta','k_na','k_ha','k_ma','k_ya','k_ra','k_wa'];
+  var PRESETS={
+    starter:{label:'Starter',desc:'A-row with hints',hint:true,dakuten:false,yoon:false,extendedKatakana:false,hiraganaRows:['h_a'],katakanaRows:[]},
+    intermediate:{label:'Intermediate',desc:'All Hiragana, no hints',hint:false,dakuten:false,yoon:false,extendedKatakana:false,hiraganaRows:hiraRows.slice(),katakanaRows:[]},
+    advanced:{label:'Advanced',desc:'Hiragana + Katakana + Dakuten',hint:false,dakuten:true,yoon:false,extendedKatakana:false,hiraganaRows:hiraRows.slice(),katakanaRows:kataRows.slice()},
+    pro:{label:'Pro',desc:'Everything enabled',hint:false,dakuten:true,yoon:true,extendedKatakana:true,hiraganaRows:hiraRows.slice(),katakanaRows:kataRows.slice()}
+  };
+  function $(s,r){return (r||document).querySelector(s)}
+  function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+  function read(key, fallback){try{var raw=localStorage.getItem(key); return raw?JSON.parse(raw):fallback;}catch(e){return fallback}}
+  function save(obj){try{localStorage.setItem(settingsKey,JSON.stringify(obj));localStorage.setItem('settingsUpdatedAt',String(Date.now()));}catch(e){}}
+  function toast(msg){try{ if(window.ModeAtlas&&window.ModeAtlas.toast){window.ModeAtlas.toast(msg);return;} }catch(e){} }
+  function getCurrent(){var obj=read(settingsKey,{}); try{ if(typeof window.settings==='object'&&window.settings) obj=Object.assign({},obj,window.settings); }catch(e){} return obj||{};}
+  function hardRefreshUi(){
+    try{ if(typeof window.rebuildCharMap==='function') window.rebuildCharMap(); }catch(e){}
+    try{ if(typeof window.buildRows==='function' && window.hiraganaRows && window.katakanaRows){ window.buildRows('rowOptions',window.hiraganaRows,'hiraganaRows','h_'); window.buildRows('katakanaRowOptions',window.katakanaRows,'katakanaRows','k_'); } }catch(e){}
+    try{ if(typeof window.renderHeatmap==='function') window.renderHeatmap(); }catch(e){}
+    try{ if(typeof window.updateTopStats==='function') window.updateTopStats(); }catch(e){}
+    try{ if(typeof window.updateTrialConfigVisibility==='function') window.updateTrialConfigVisibility(); }catch(e){}
+    try{ if(typeof window.saveAll==='function') window.saveAll(); }catch(e){}
+    markActive();
+  }
+  function applyPreset(id){
+    id=String(id||'').toLowerCase(); var p=PRESETS[id]; if(!p) return false;
+    var next=Object.assign({},getCurrent(),{
+      focusWeak:false,srs:true,endless:false,timeTrial:false,dailyChallenge:false,testMode:false,comboKana:false,confusableKana:false,
+      mobileMode:false,statsVisible:true,scoresVisible:true,activeBottomTab:'modifiers',optionsOpen:false
+    },p);
+    try{ if(typeof window.settings==='object'&&window.settings) Object.assign(window.settings,next); }catch(e){}
+    save(next);
+    try{localStorage.setItem(presetKey,id);localStorage.removeItem(confKey);}catch(e){}
+    try{ if(window.KanaCloudSync&&window.KanaCloudSync.markSectionUpdated) window.KanaCloudSync.markSectionUpdated(page==='reverse.html'?'writing':'reading'); }catch(e){}
+    removeNotice(); hardRefreshUi(); setTimeout(install,20); setTimeout(markActive,80);
+    toast(p.label+' preset applied'); return true;
+  }
+  function setConfusable(force){
+    var now=localStorage.getItem(confKey)==='1'; var on=(typeof force==='boolean')?force:!now;
+    var next=Object.assign({},getCurrent(),{
+      hint:false,focusWeak:false,srs:true,endless:false,timeTrial:false,dailyChallenge:false,testMode:false,comboKana:false,confusableKana:on,
+      dakuten:false,yoon:false,extendedKatakana:false,hiraganaRows:hiraRows.slice(),katakanaRows:kataRows.slice(),activeBottomTab:'modifiers',optionsOpen:false
+    });
+    try{ if(typeof window.settings==='object'&&window.settings) Object.assign(window.settings,next); }catch(e){}
+    save(next);
+    if(on){localStorage.setItem(confKey,'1');localStorage.removeItem(presetKey);} else {localStorage.removeItem(confKey);removeNotice();}
+    hardRefreshUi(); if(on) addNotice(); setTimeout(install,20); setTimeout(markActive,80);
+    toast(on?'Confusable Kana drill turned on':'Confusable Kana drill turned off'); return true;
+  }
+  window.ModeAtlas=window.ModeAtlas||{};
+  window.ModeAtlas.applyPracticePreset=applyPreset;
+  window.ModeAtlas.enableConfusableKana=setConfusable;
+  function removeNotice(){ $$('#maConfusableNotice').forEach(function(n){n.remove()}); }
+  function addNotice(){
+    if(!isTrainer || $('#maConfusableNotice') || localStorage.getItem(confKey)!=='1') return;
+    var n=document.createElement('div'); n.id='maConfusableNotice'; n.className='ma-confusable-notice';
+    n.innerHTML='<b>Confusable Kana drill</b><span>シ/ツ · ソ/ン · ぬ/め · れ/わ/ね · ク/ケ/タ · ナ/メ</span><button type="button" data-confusable-off-final>Clear</button>';
+    var target=$('.bottom-shell.ma-modifiers-only')||$('#modifiersContent')||document.body;
+    target.parentNode.insertBefore(n,target);
+  }
+  function installPresetPanel(){
+    var content=$('#modifiersContent'); if(!content) return;
+    $$('#maPresetMenu').forEach(function(x){x.remove()});
+    var panel=$('#maPresetMenuFinal');
+    if(!panel){
+      panel=document.createElement('div'); panel.id='maPresetMenuFinal'; panel.className='ma-preset-menu final-control';
+      panel.innerHTML='<div class="section-title">Practice presets</div><div class="ma-preset-grid">'+Object.keys(PRESETS).map(function(id){var p=PRESETS[id];return '<button type="button" class="ma-preset-btn" data-ma-final-preset="'+id+'"><span>'+p.label+'</span><small>'+p.desc+'</small></button>';}).join('')+'</div>';
+      var stack=$('.options-stack',content)||content; stack.insertBefore(panel,stack.firstChild);
+    }
+  }
+  function installConfusableButton(){
+    var container=$('#modifierOptions'); if(!container) return;
+    $$('.ma-confusable-toggle,[data-confusable-start]',container).forEach(function(x){x.remove()});
+    var btn=$('[data-ma-confusable-final]',container);
+    if(!btn){
+      btn=document.createElement('div'); btn.className='toggle-btn ma-confusable-final'; btn.setAttribute('role','button'); btn.setAttribute('tabindex','0'); btn.setAttribute('data-ma-confusable-final','1'); btn.textContent='Confusable Kana';
+      container.appendChild(btn);
+    }
+  }
+  function markActive(){
+    var active=localStorage.getItem(presetKey)||''; var conf=localStorage.getItem(confKey)==='1';
+    $$('[data-ma-final-preset]').forEach(function(btn){var on=!conf && btn.getAttribute('data-ma-final-preset')===active; btn.classList.toggle('active',on); btn.setAttribute('aria-pressed',on?'true':'false');});
+    $$('[data-ma-confusable-final]').forEach(function(btn){btn.classList.toggle('active',conf);btn.setAttribute('aria-pressed',conf?'true':'false');});
+  }
+  function install(){ if(!isTrainer) return; installPresetPanel(); installConfusableButton(); if(new URLSearchParams(location.search).get('confusable')==='1') localStorage.setItem(confKey,'1'); if(localStorage.getItem(confKey)==='1') addNotice(); markActive(); }
+  document.addEventListener('click',function(e){
+    var p=e.target.closest&&e.target.closest('[data-ma-final-preset]'); if(p){e.preventDefault();e.stopPropagation();applyPreset(p.getAttribute('data-ma-final-preset'));return;}
+    var c=e.target.closest&&e.target.closest('[data-ma-confusable-final]'); if(c){e.preventDefault();e.stopPropagation();setConfusable();return;}
+    if(e.target.closest&&e.target.closest('[data-confusable-off-final]')){e.preventDefault();localStorage.removeItem(confKey);var next=getCurrent();next.confusableKana=false;try{if(typeof window.settings==='object'&&window.settings)window.settings.confusableKana=false}catch(x){}save(next);removeNotice();hardRefreshUi();setTimeout(install,20);}
+  },true);
+  document.addEventListener('keydown',function(e){var c=e.target.closest&&e.target.closest('[data-ma-confusable-final]'); if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();setConfusable();}},true);
+  if(isTrainer){
+    var old=window.buildModifierButtons;
+    if(typeof old==='function' && !old.__maFinalWrapped){
+      var wrapped=function(){var r=old.apply(this,arguments); setTimeout(install,0); return r;}; wrapped.__maFinalWrapped=true; window.buildModifierButtons=wrapped;
+    }
+  }
+  if(page==='kana.html'){
+    $$('a[href*="confusable=1"],[data-ma-confusable-link]').forEach(function(a){a.setAttribute('href','default.html?confusable=1');a.addEventListener('click',function(){localStorage.setItem(confKey,'1');localStorage.removeItem(presetKey)},true)});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install); else install();
+  window.addEventListener('pageshow',function(){setTimeout(install,50)});
+  setTimeout(install,250); setTimeout(install,900); setTimeout(install,1800); setInterval(function(){ if(isTrainer) { installConfusableButton(); markActive(); } },1500);
+})();
+</script>
+
+  <script src="assets/mode-atlas-qol-batch.js"></script>
+  <script src="assets/mode-atlas-about.js"></script>
 </body>
 </html>
