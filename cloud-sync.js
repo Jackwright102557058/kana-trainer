@@ -394,6 +394,7 @@ const authReady = new Promise((resolve) => {
 });
 let hydratedForUserId = null;
 let syncTimeout = null;
+let deferredSessionSyncPending = false;
 let lastStatus = '';
 const uiBindings = new Set();
 const LAST_CLOUD_SYNC_KEY = 'modeAtlasLastCloudSyncAt';
@@ -641,6 +642,32 @@ async function signOutUser() {
   hydratedForUserId = null;
 }
 
+function isPracticeSessionActive() {
+  try {
+    if (window.ModeAtlasPracticeSessionActive === true) return true;
+    if (sessionStorage.getItem("modeAtlasPracticeSessionActive") === "1") return true;
+  } catch {}
+  return false;
+}
+
+function beginPracticeSessionSyncPause() {
+  try {
+    window.ModeAtlasPracticeSessionActive = true;
+    sessionStorage.setItem("modeAtlasPracticeSessionActive", "1");
+  } catch {}
+}
+
+function endPracticeSessionSyncPause(flush = true) {
+  try {
+    window.ModeAtlasPracticeSessionActive = false;
+    sessionStorage.removeItem("modeAtlasPracticeSessionActive");
+  } catch {}
+  if (flush && deferredSessionSyncPending) {
+    deferredSessionSyncPending = false;
+    scheduleSync(350);
+  }
+}
+
 async function syncNow() {
   await authReady;
   if (!CONFIG_READY || !currentUser || !db) return false;
@@ -683,13 +710,22 @@ async function syncNow() {
 
 
 function scheduleSync(delay = 800) {
+  if (isPracticeSessionActive()) {
+    deferredSessionSyncPending = true;
+    return false;
+  }
   clearTimeout(syncTimeout);
   syncTimeout = setTimeout(() => {
+    if (isPracticeSessionActive()) {
+      deferredSessionSyncPending = true;
+      return;
+    }
     syncNow().catch((error) => {
-      console.warn('Cloud save sync failed.', error);
-      setCloudState(false, error?.message || 'Cloud sync failed');
+      console.warn("Cloud save sync failed.", error);
+      setCloudState(false, error?.message || "Cloud sync failed");
     });
   }, delay);
+  return true;
 }
 
 function markSectionUpdated(sectionName) {
@@ -849,6 +885,9 @@ window.KanaCloudSync = {
   signOut: signOutUser,
   scheduleSync,
   syncNow,
+  beginPracticeSessionSyncPause,
+  endPracticeSessionSyncPause,
+  isPracticeSessionActive,
   markSectionUpdated,
   beginLocalImport,
   getUser,

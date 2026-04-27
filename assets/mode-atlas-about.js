@@ -2,9 +2,9 @@
   if (window.__modeAtlasAboutLoaded) return;
   window.__modeAtlasAboutLoaded = true;
 
-  const APP_VERSION = '2.8.0-about';
+  const APP_VERSION = '2.8.2';
   const SAVE_SCHEMA_VERSION = '3';
-  const BUILD_LABEL = 'QOL About Build';
+  const BUILD_LABEL = 'Auth/Profile Polish Build';
   const BUILD_DATE = '2026-04-27';
   const DEVELOPER = 'Jack Wright';
 

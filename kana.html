@@ -1904,8 +1904,8 @@ body::before { pointer-events: none; }
     </div>
     <div class="drawer-status" id="profileStatus">Sign in on Mode Atlas to sync your learning across devices.</div>
     <div class="drawer-actions">
-        <button class="drawer-action primary" id="profileSignInBtn" type="button">Sign in</button>
-        <button class="drawer-action" id="profileSignOutBtn" type="button" style="display:none;">Sign out</button>
+        <button class="drawer-action primary" id="profileSignInBtn" data-profile-sign-in type="button">Sign in</button>
+        <button class="drawer-action" id="profileSignOutBtn" data-profile-sign-out type="button" style="display:none;">Sign out</button>
         <a class="drawer-action" href="index.html">Mode Atlas</a>
     </div>
 </aside>
@@ -3099,5 +3099,7 @@ window.addEventListener('focus', () => setTimeout(renderAll, 100));
 
   <script src="assets/mode-atlas-qol-batch.js"></script>
   <script src="assets/mode-atlas-about.js"></script>
+  <script src="assets/mode-atlas-auth-mobile-fix.js"></script>
+  <script src="assets/mode-atlas-auth-single-button.js"></script>
 </body>
 </html>

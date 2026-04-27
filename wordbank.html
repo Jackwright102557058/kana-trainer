@@ -1672,8 +1672,8 @@ body::before { pointer-events: none; }
     </div>
     <div class="drawer-status" id="profileStatus">Sign in with Google to sync your Word Bank across devices.</div>
     <div class="drawer-actions">
-      <button class="drawer-action primary" id="profileSignInBtn" type="button">Sign in</button>
-      <button class="drawer-action" id="profileSignOutBtn" type="button" style="display:none;">Sign out</button>
+      <button class="drawer-action primary" id="profileSignInBtn" data-profile-sign-in type="button">Sign in</button>
+      <button class="drawer-action" id="profileSignOutBtn" data-profile-sign-out type="button" style="display:none;">Sign out</button>
       <a class="drawer-action" href="index.html">Mode Atlas</a>
       <a class="drawer-action" href="kana.html">Kana Trainer</a>
     </div>
@@ -2656,7 +2656,7 @@ function updateTopProfileDot() {
     drawer.innerHTML='<div class="drawer-head"><div class="drawer-title">Profile</div><button class="drawer-close" id="profileCloseBtn" type="button">Close</button></div>'+
       '<div class="drawer-user"><img class="drawer-avatar" id="profileAvatar" alt=""/><div><div class="drawer-name" id="profileName">Guest</div><div class="drawer-email" id="profileEmail">Not signed in</div></div></div>'+
       '<div class="drawer-status" id="profileStatus">Sign in on Mode Atlas to sync your learning across devices.</div>'+
-      '<div class="drawer-actions"><button class="drawer-action primary" id="profileSignInBtn" type="button">Sign in</button><button class="drawer-action" id="profileSignOutBtn" type="button" style="display:none;">Sign out</button><a class="drawer-action" href="index.html">Atlas</a><a class="drawer-action" href="kana.html">Kana Trainer</a></div>'+
+      '<div class="drawer-actions"><button class="drawer-action primary" id="profileSignInBtn" data-profile-sign-in type="button">Sign in</button><button class="drawer-action" id="profileSignOutBtn" data-profile-sign-out type="button" style="display:none;">Sign out</button><a class="drawer-action" href="index.html">Atlas</a><a class="drawer-action" href="kana.html">Kana Trainer</a></div>'+
       '<div class="ma-save-section"><div class="ma-save-title">Save / Load</div><div class="ma-save-grid"><button class="drawer-action primary" type="button" data-ma-save-export>Export save</button><button class="drawer-action" type="button" data-ma-save-copy>Copy save</button><button class="drawer-action" type="button" data-ma-save-import>Import save</button></div><input type="file" accept=".json,application/json" data-ma-save-file style="display:none"/><div class="ma-save-note">One backup for your Mode Atlas progress, preferences, and local data.</div></div>'+
       '<div class="ma-settings-panel"><div class="ma-settings-title">Preferences</div><div class="ma-settings-row"><div class="ma-settings-label">Display</div><div class="ma-display-options"><button class="ma-display-option" data-display="auto" type="button">Auto</button><button class="ma-display-option" data-display="compact" type="button">Compact</button><button class="ma-display-option" data-display="mobile" type="button">Mobile</button></div></div></div>';
     document.body.insertBefore(backdrop,document.body.firstChild); document.body.insertBefore(drawer,backdrop.nextSibling);
@@ -2808,5 +2808,7 @@ function updateTopProfileDot() {
 
   <script src="assets/mode-atlas-qol-batch.js"></script>
   <script src="assets/mode-atlas-about.js"></script>
+  <script src="assets/mode-atlas-auth-mobile-fix.js"></script>
+  <script src="assets/mode-atlas-auth-single-button.js"></script>
 </body>
 </html>

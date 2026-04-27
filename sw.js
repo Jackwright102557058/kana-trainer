@@ -1,10 +1,12 @@
-const CACHE_NAME = 'mode-atlas-profile-auth-welcome-fix-v1';
+const CACHE_NAME = 'mode-atlas-session-defer-v2-8-2';
 const CORE = [
   './','index.html','kana.html','default.html','reverse.html','test.html','wordbank.html',
   'cloud-sync.js','firebase-config.js','site.webmanifest',
   'assets/mode-atlas-qol.css','assets/mode-atlas-qol.js',
   'assets/mode-atlas-qol-batch.js','assets/mode-atlas-stable-controls.js',
-  'assets/mode-atlas-about.js','assets/mode-atlas-save-sync-ui.js','assets/mode-atlas-visit-flows.js',
+  'assets/mode-atlas-about.js',
+  'assets/mode-atlas-auth-mobile-fix.js','assets/mode-atlas-auth-single-button.js',
+  'assets/mode-atlas-session-sync-defer.js','assets/mode-atlas-save-sync-ui.js','assets/mode-atlas-visit-flows.js',
   'assets/mode-atlas-icon.svg','assets/favicon-32.png','assets/apple-touch-icon.png'
 ];
 self.addEventListener('install', event => {
